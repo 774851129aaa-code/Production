@@ -786,7 +786,7 @@ button{cursor:pointer;}
 
 @media (max-width: 900px) {
     .sidebar { transform: translateX(100%); background: #070b12 !important; backdrop-filter: none !important; }
-    .sidebar.open { transform: translateX(0); }
+    .sidebar.open { transform: translateX(0); background: #070b12 !important; backdrop-filter: none !important; }
     .main { margin-right: 0 !important; width: 100% !important; }
     #close-sidebar-btn { display: grid !important; }
 }
@@ -835,6 +835,9 @@ button{cursor:pointer;}
     <div class="status-box">
         <div class="status-line"><span class="dot"></span> Routix Gateway Online</div>
         <div id="last-checked" style="font-size:11px;color:#4d5c70;margin-top:7px">متصل بالسيرفر مباشرة</div>
+        <button onclick="scrollToTop()" style="width:100%; margin-top:10px; padding:8px; background:rgba(56,189,248,0.1); border:1px solid rgba(56,189,248,0.2); color:#38bdf8; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+            <i class="fa-solid fa-arrow-up"></i> العودة للأعلى
+        </button>
     </div>
 </aside>
 
@@ -1048,6 +1051,13 @@ function closeSidebar() {
     const overlay = document.getElementById('sidebar-overlay');
     sidebar.classList.remove('open');
     overlay.classList.remove('show');
+}
+
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (window.innerWidth <= 900) {
+        closeSidebar();
+    }
 }
 
 function openModal(){ document.getElementById('modal').classList.add('show'); }
