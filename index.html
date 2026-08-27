@@ -1187,7 +1187,6 @@ new Chart(ctx,{
         const transport = isHttps ? https : http;
         const upstreamPort = target.parsed.port ? Number(target.parsed.port) : (isHttps ? 443 : 80);
         
-        // إصلاح دقيق لمسار الـ Upstream بحيث يحافظ على المسار الأساسي ويزيل باراميتر target فقط
         const fullUrl = new URL(req.url, `http://${req.headers.host}`);
         fullUrl.searchParams.delete('target');
         const upstreamPath = fullUrl.pathname + fullUrl.search;
@@ -1214,7 +1213,7 @@ new Chart(ctx,{
             if (!res.headersSent) {
                 res.writeHead(proxyRes.statusCode || 502, safeHeaders);
             }
-            proxyRes.pipe(proxyRes); // تم الإصلاح هنا لضمان تمرير البيانات للـ response الأساسي
+            // تم تصحيح سطر التمرير هنا لضمان إرسال البيانات للـ response وإغلاق الـ Stream بشكل صحيح
             proxyRes.pipe(res);
             proxyRes.once('end', async () => { await safeUnlink(tempFile); tempFile = null; });
             proxyRes.once('error', async error => {
