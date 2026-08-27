@@ -1,97 +1,405 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Third-Party Behavioral Passport (TBP) - Production Dashboard</title>
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>TBP - Third-Party Behavioral Passport</title>
+
+  <link rel="stylesheet" href="/styles.css">
 </head>
+
 <body>
 
 <div class="container">
+
+  <!-- HEADER -->
   <header>
-    <h1>🛡️ TBP Behavioral Security Engine <span style="font-size:12px; color:var(--muted)">Production Layer</span></h1>
+
+    <h1>
+      🛡️ TBP Behavioral Security Engine
+
+      <span style="font-size:12px;color:var(--muted)">
+        Production Layer
+      </span>
+    </h1>
+
     <div>
-      <span id="modeBadge" class="mode-badge mode-learning">LEARNING MODE</span>
-      <button onclick="toggleMode('learning')" style="margin-left: 5px;">Learning</button>
-      <button onclick="toggleMode('protection')">Protection</button>
+
+      <span
+        id="modeBadge"
+        class="mode-badge mode-learning">
+        LEARNING MODE
+      </span>
+
+      <button
+        id="learningBtn"
+        onclick="toggleMode('learning')">
+        Learning
+      </button>
+
+      <button
+        id="protectionBtn"
+        onclick="toggleMode('protection')">
+        Protection
+      </button>
+
     </div>
+
   </header>
 
+
+  <!-- STATS -->
+
   <div class="stats-row">
+
     <div class="stat-box">
+
       <label>Risk Score</label>
-      <div class="val" id="statRisk">0 / 100</div>
+
+      <div
+        class="val"
+        id="statRisk">
+        0 / 100
+      </div>
+
     </div>
+
+
     <div class="stat-box">
+
       <label>Drifts Detected</label>
-      <div class="val" id="statDrifts" style="color:var(--cyan)">0</div>
+
+      <div
+        class="val"
+        id="statDrifts"
+        style="color:var(--cyan)">
+        0
+      </div>
+
     </div>
+
+
     <div class="stat-box">
+
       <label>Alert Gateway</label>
-      <div class="val" style="font-size: 13px; color:var(--green)">Telegram Secure</div>
+
+      <div
+        class="val"
+        style="font-size:13px;color:var(--green)">
+        Telegram Secure
+      </div>
+
     </div>
+
+
     <div class="stat-box">
+
       <label>Privacy Engine</label>
-      <div class="val" style="font-size: 12px; color:var(--green)">Metadata Only</div>
+
+      <div
+        class="val"
+        style="font-size:12px;color:var(--green)">
+        Metadata Only
+      </div>
+
     </div>
+
   </div>
+
+
+  <!-- MAIN GRID -->
 
   <div class="grid">
+
+
+    <!-- LEFT COLUMN -->
+
     <div>
+
+
+      <!-- SECURITY LOGS -->
+
       <div class="card">
-        <div class="card-title">📊 Live Evidence Trail & Security Logs</div>
-        <div class="logs-container" id="logsBox">
-          <div class="log-item log-info">[System] Initializing TBP Agent runtime environment...</div>
+
+        <div class="card-title">
+
+          <span>
+            📊 Live Evidence Trail & Security Logs
+          </span>
+
+          <span
+            id="connectionStatus"
+            style="font-size:11px;color:var(--green)">
+            ● SENSOR ONLINE
+          </span>
+
         </div>
+
+
+        <div
+          class="logs-container"
+          id="logsBox">
+
+          <div class="log-item log-info">
+            [System] Initializing TBP Agent runtime environment...
+          </div>
+
+        </div>
+
       </div>
 
+
+
+      <!-- TESTING SANDBOX -->
+
       <div class="card">
-        <div class="card-title">🧪 Real Behavioral Testing Sandbox</div>
-        <div style="margin-bottom: 12px;">
-          <label>1. اختبار طلب شبكة (Network Request Drift):</label>
-          <div style="display:flex; gap:10px; margin-top:5px;">
-            <button onclick="testRealFetch('https://api.github.com')">طلب دومين خارجي (GitHub API)</button>
-            <button onclick="testRealFetch('https://random-untrusted-tracker-site.org/collect')" style="border-color:var(--red);">طلب دومين مشبوه مجهول</button>
-          </div>
+
+        <div class="card-title">
+          🧪 Real Behavioral Testing Sandbox
         </div>
 
-        <div style="margin-bottom: 12px;">
-          <label>2. اختبار حقن سكربت (Dynamic Script Injection):</label>
-          <div style="margin-top:5px;">
-            <button onclick="testRealScriptInjection()" style="border-color:var(--red);">حقن سكربت خارجي ديناميكياً</button>
+
+        <!-- NETWORK TEST -->
+
+        <div style="margin-bottom:18px">
+
+          <label>
+            1. اختبار طلب شبكة
+            (Network Request Drift)
+          </label>
+
+
+          <div
+            style="
+              display:flex;
+              gap:10px;
+              flex-wrap:wrap;
+              margin-top:7px;
+            ">
+
+            <button
+              onclick="testRealFetch('https://api.github.com')">
+
+              🌐 GitHub API
+
+            </button>
+
+
+            <button
+              onclick="testRealFetch('https://example.com')"
+              style="border-color:var(--red)">
+
+              ⚠️ External Domain
+
+            </button>
+
           </div>
+
         </div>
+
+
+
+        <!-- SCRIPT TEST -->
+
+        <div style="margin-bottom:18px">
+
+          <label>
+            2. اختبار Dynamic Script Injection
+          </label>
+
+          <div style="margin-top:7px">
+
+            <button
+              onclick="testRealScriptInjection()"
+              style="border-color:var(--red)">
+
+              🚨 Simulate Dynamic Script
+
+            </button>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- SENSITIVE FIELD -->
 
         <div>
-          <label>3. اختبار الوصول لحقل حسّاس (Privacy-Preserving DOM Metadata):</label>
-          <input type="password" id="userPassword" placeholder="اكتب كلمة المرور هنا لاختبار رصد Metadata الحقل بدون تسريب قيمته..." />
+
+          <label>
+            3. اختبار الوصول إلى حقل حساس
+          </label>
+
+
+          <input
+            type="password"
+            id="userPassword"
+            autocomplete="off"
+            placeholder="اكتب أي قيمة للاختبار — لن يتم إرسال القيمة"
+          >
+
+
+          <div
+            style="
+              margin-top:7px;
+              font-size:11px;
+              color:var(--muted);
+            ">
+
+            🔒 TBP يراقب Metadata فقط ولا يرسل قيمة الحقل.
+
+          </div>
+
         </div>
+
       </div>
+
     </div>
+
+
+
+    <!-- RIGHT COLUMN -->
 
     <div>
-      <div class="card">
-        <div class="card-title">⚙️ Dynamic Baseline & Policy</div>
-        <p style="font-size: 12px; color: var(--muted); margin-top:0">النطاقات والخدمات المعتمدة في الـ Baseline الحالي:</p>
-        <div id="baselineList" style="margin-bottom: 15px;"></div>
 
-        <div class="card-title" style="margin-top: 15px;">🌐 Observed Domains Map</div>
-        <div id="domainsList" style="font-size: 12px; color: var(--muted); min-height: 40px;">
-          Monitoring active requests...
+
+      <!-- BASELINE -->
+
+      <div class="card">
+
+        <div class="card-title">
+          ⚙️ Dynamic Baseline & Policy
         </div>
+
+
+        <p
+          style="
+            font-size:12px;
+            color:var(--muted);
+            margin-top:0;
+          ">
+
+          النطاقات والخدمات المعتمدة في Baseline الحالي:
+
+        </p>
+
+
+        <div
+          id="baselineList"
+          style="margin-bottom:20px">
+
+          <span class="tag">
+            🟢 Initializing...
+          </span>
+
+        </div>
+
+
+
+        <!-- DOMAINS -->
+
+        <div
+          class="card-title"
+          style="margin-top:15px">
+
+          🌐 Observed Domains Map
+
+        </div>
+
+
+        <div
+          id="domainsList"
+          style="
+            font-size:12px;
+            color:var(--muted);
+            min-height:40px;
+          ">
+
+          Monitoring active requests...
+
+        </div>
+
       </div>
+
+
+
+      <!-- SYSTEM INFORMATION -->
+
+      <div class="card">
+
+        <div class="card-title">
+          🔐 TBP Security Architecture
+        </div>
+
+
+        <div
+          style="
+            font-size:12px;
+            line-height:2;
+            color:var(--muted);
+          ">
+
+          <div>
+            🧠 Behavioral Monitoring
+          </div>
+
+          <div>
+            🌐 Network Drift Detection
+          </div>
+
+          <div>
+            📜 Dynamic Script Monitoring
+          </div>
+
+          <div>
+            🔒 Privacy-Preserving Metadata
+          </div>
+
+          <div>
+            🚨 Real-Time Telegram Alerting
+          </div>
+
+          <div>
+            🛡️ Rate-Limited Security Gateway
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
+
   </div>
+
 </div>
 
-<!-- تضمين TBP Agent الحقيقي مع توجيهه للـ Gateway -->
-<script 
-  src="../agent/tbp-agent.js" 
-  data-gateway="http://localhost:3000/api/v1/telemetry" 
-  data-sitekey="your-secure-random-site-key-here"
+
+
+<!--
+  TBP AGENT
+
+  مهم:
+  لا تستخدم localhost هنا.
+
+  لأن الصفحة والـ Gateway يعملان على
+  نفس خدمة Render، لذلك نستخدم المسار النسبي.
+-->
+
+<script
+  src="/agent/tbp-agent.js"
+  data-gateway="/api/v1/telemetry"
+  data-site-id="tbp-production-demo"
   data-mode="learning">
 </script>
-<script src="dashboard.js"></script>
+
+
+<!-- DASHBOARD -->
+
+<script src="/dashboard.js"></script>
+
+
 </body>
 </html>
