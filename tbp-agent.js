@@ -1,249 +1,769 @@
 /**
- * Third-Party Behavioral Passport (TBP) - Client-Side Security Agent
- * Behavioral Detection & Monitoring Layer (Privacy-Preserving)
+ * TBP
+ * Third-Party Behavioral Passport
+ *
+ * Client-side behavioral security sensor.
+ *
+ * IMPORTANT:
+ * Browser JavaScript is not fully tamper-proof.
+ * The authoritative security policy must remain server-side.
  */
+
 (function () {
   'use strict';
 
-  if (window.__TBP_AGENT_LOADED__) return;
-  window.__TBP_AGENT_LOADED__ = true;
+  if (window.__TBP_AGENT_LOADED__) {
+    return;
+  }
 
-  // جلب الإعدادات الممررة من سمات سكريبت التضمين
-  const scriptTag = document.currentScript || document.querySelector('script[data-gateway]');
-  const config = {
-    gateway: scriptTag ? scriptTag.getAttribute('data-gateway') : 'http://localhost:3000/api/v1/telemetry',
-    siteKey: scriptTag ? scriptTag.getAttribute('data-sitekey') : '',
-    mode: scriptTag ? (scriptTag.getAttribute('data-mode') || 'learning') : 'learning' // learning أو protection
-  };
+  const scriptTag =
+    document.currentScript ||
+    document.querySelector('script[data-gateway]');
 
-  const currentDomain = window.location.hostname || 'localhost';
+  const config = Object.freeze({
 
-  // الـ Baseline الحقيقي (يتم ملؤه تلقائياً في وضع التعلم أو تحميله)
-  let baseline = {
-    domains: new Set([currentDomain]),
-    scripts: new Set(),
-    requestCounts: {}
-  };
+    gateway:
+      scriptTag?.getAttribute('data-gateway') ||
+      '/api/v1/telemetry',
 
-  // محاولة استرجاع الـ Baseline المخزن محلياً للموقع
-  const STORAGE_KEY = `tbp_baseline_${currentDomain}`;
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      baseline.domains = new Set(parsed.domains || [currentDomain]);
-      baseline.scripts = new Set(parsed.scripts || []);
-    }
-  } catch (e) {}
+    siteId:
+      scriptTag?.getAttribute('data-site-id') ||
+      'default-site',
 
-  let state = {
+    mode:
+      scriptTag?.getAttribute('data-mode') === 'learning'
+        ? 'learning'
+        : 'protection'
+  });
+
+  const currentDomain =
+    window.location.hostname || 'localhost';
+
+  const state = {
     riskScore: 0,
     driftsDetected: 0,
-    observedDomains: new Set([currentDomain]),
+
+    observedDomains:
+      new Set([currentDomain]),
+
     logs: []
   };
 
-  function persistBaseline() {
-    if (config.mode === 'learning') {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          domains: [...baseline.domains],
-          scripts: [...baseline.scripts]
-        }));
-      } catch (e) {}
-    }
-  }
+  const baseline = {
+
+    domains:
+      new Set([currentDomain]),
+
+    scripts:
+      new Set(),
+
+    requestCounts:
+      Object.create(null)
+  };
+
+  const alertCache = new Map();
 
   function emitLog(message, type = 'info') {
-    const logEntry = { time: new Date().toLocaleTimeString(), message, type };
-    state.logs.unshift(logEntry);
-    if (state.logs.length > 100) state.logs.pop();
-    window.dispatchEvent(new CustomEvent('TBP_LOG_EVENT', { detail: logEntry }));
-  }
 
-  // 1. نظام حساب المخاطر الحقيقي (Risk Engine)
-  function calculateRisk(factorType, details) {
-    let weight = 0;
-    switch (factorType) {
-      case 'DOMAIN_NOVELTY':
-        weight = 35; // دومين جديد لم يمر به الموقع من قبل
-        break;
-      case 'SCRIPT_NOVELTY':
-        weight = 30; // سكريبت خارجي جديد
-        break;
-      case 'SENSITIVE_DOM_ACCESS':
-        weight = 20; // وصول لحقل حساس
-        break;
-      case 'HIGH_FREQUENCY':
-        weight = 15; // تكرار مفرط للطلبات
-        break;
-      default:
-        weight = 10;
+    const entry = Object.freeze({
+      time:
+        new Date().toLocaleTimeString(),
+
+      message:
+        String(message),
+
+      type
+    });
+
+    state.logs.unshift(entry);
+
+    if (state.logs.length > 100) {
+      state.logs.pop();
     }
 
-    state.riskScore = Math.min(100, state.riskScore + weight);
+    try {
+
+      window.dispatchEvent(
+        new CustomEvent(
+          'TBP_LOG_EVENT',
+          {
+            detail: entry
+          }
+        )
+      );
+
+    } catch (_) {}
+  }
+
+  function calculateRisk(type) {
+
+    const weights = {
+
+      DOMAIN_NOVELTY: 35,
+
+      SCRIPT_NOVELTY: 30,
+
+      SENSITIVE_DOM_ACCESS: 20,
+
+      HIGH_FREQUENCY: 15,
+
+      UNKNOWN: 10
+    };
+
+    state.riskScore =
+      Math.min(
+        100,
+        state.riskScore +
+          (weights[type] || weights.UNKNOWN)
+      );
+
     return state.riskScore;
   }
 
-  // إرسال الـ Metadata عبر البوابة الآمنة (Gateway) إلى تليجرام
-  function dispatchAlert(eventTitle, destination) {
-    if (config.mode !== 'protection') return; // لا تُرسل تنبيهات في وضع التعلم
+  function shouldAlert(
+    event,
+    destination
+  ) {
+
+    const key =
+      `${event}|${destination}`;
+
+    const now = Date.now();
+
+    const previous =
+      alertCache.get(key);
+
+    if (
+      previous &&
+      now - previous < 60_000
+    ) {
+      return false;
+    }
+
+    alertCache.set(
+      key,
+      now
+    );
+
+    return true;
+  }
+
+  function getDomain(url) {
+
+    try {
+
+      return new URL(
+        url,
+        window.location.href
+      ).hostname;
+
+    } catch (_) {
+
+      return null;
+    }
+  }
+
+  function dispatchAlert(
+    eventTitle,
+    destination
+  ) {
+
+    if (
+      config.mode !==
+      'protection'
+    ) {
+      return;
+    }
+
+    if (
+      !shouldAlert(
+        eventTitle,
+        destination
+      )
+    ) {
+      return;
+    }
 
     const payload = {
-      site: currentDomain,
-      event: eventTitle,
-      destination: destination,
-      risk: state.riskScore,
-      mode: config.mode.toUpperCase(),
-      time: new Date().toISOString()
+
+      site:
+        currentDomain,
+
+      siteId:
+        config.siteId,
+
+      event:
+        eventTitle,
+
+      destination:
+        String(
+          destination ||
+          'unknown'
+        ),
+
+      risk:
+        state.riskScore,
+
+      mode:
+        'PROTECTION',
+
+      time:
+        new Date().toISOString()
     };
 
-    // إرسال عبر sendBeacon أو fetch للخلفية
-    if (navigator.sendBeacon) {
-      const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-      navigator.sendBeacon(config.gateway, blob);
-    } else {
-      fetch(config.gateway, {
+    /*
+     * Native fetch is used so the telemetry
+     * request does not trigger our own sensor.
+     */
+
+    nativeFetch(
+      config.gateway,
+      {
         method: 'POST',
+
         headers: {
-          'Content-Type': 'application/json',
-          'x-site-key': config.siteKey
+          'Content-Type':
+            'application/json'
         },
-        body: JSON.stringify(payload),
-        keepalive: true
-      }).catch(() => {});
-    }
-  }
 
-  // 2. مراقبة طلبات الشبكة الحقيقية (Fetch & XHR & Beacon)
-  const _nativeFetch = window.fetch;
-  window.fetch = function (...args) {
-    const urlStr = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
-    if (urlStr) {
-      try {
-        const targetUrl = new URL(urlStr, window.location.href);
-        const domain = targetUrl.hostname;
-        state.observedDomains.add(domain);
+        body:
+          JSON.stringify(payload),
 
-        // فحص التردد (Frequency check)
-        const now = Date.now();
-        baseline.requestCounts[domain] = baseline.requestCounts[domain] || [];
-        baseline.requestCounts[domain] = baseline.requestCounts[domain].filter(t => now - t < 10000);
-        baseline.requestCounts[domain].push(now);
-        const isHighFreq = baseline.requestCounts[domain].length > 8;
+        keepalive:
+          true,
 
-        if (!baseline.domains.has(domain)) {
-          if (config.mode === 'learning') {
-            baseline.domains.add(domain);
-            persistBaseline();
-            emitLog(`[Learning] New safe domain registered: ${domain}`, 'info');
-          } else {
-            const risk = calculateRisk('DOMAIN_NOVELTY', domain);
-            if (isHighFreq) calculateRisk('HIGH_FREQUENCY', domain);
-            state.driftsDetected++;
-            emitLog(`[Drift] Unauthorized network request to: ${domain} (Risk: ${risk})`, 'danger');
-            dispatchAlert('UNAUTHORIZED_NETWORK_REQUEST', domain);
-          }
-        } else if (isHighFreq && config.mode === 'protection') {
-          const risk = calculateRisk('HIGH_FREQUENCY', domain);
-          emitLog(`[Drift] High frequency requests detected for: ${domain}`, 'warn');
-          dispatchAlert('HIGH_FREQUENCY_ANOMALY', domain);
-        }
-      } catch (e) {}
-    }
-    return _nativeFetch.apply(this, args);
-  };
-
-  const _nativeOpen = XMLHttpRequest.prototype.open;
-  XMLHttpRequest.prototype.open = function (method, url) {
-    if (url) {
-      try {
-        const domain = new URL(url, window.location.href).hostname;
-        state.observedDomains.add(domain);
-        if (!baseline.domains.has(domain)) {
-          if (config.mode === 'learning') {
-            baseline.domains.add(domain);
-            persistBaseline();
-          } else {
-            const risk = calculateRisk('DOMAIN_NOVELTY', domain);
-            state.driftsDetected++;
-            emitLog(`[Drift] Unauthorized XHR to: ${domain} (Risk: ${risk})`, 'danger');
-            dispatchAlert('UNAUTHORIZED_XHR', domain);
-          }
-        }
-      } catch (e) {}
-    }
-    return _nativeOpen.apply(this, arguments);
-  };
-
-  // مراقبة sendBeacon
-  const _nativeBeacon = navigator.sendBeacon;
-  if (_nativeBeacon) {
-    navigator.sendBeacon = function (url, data) {
-      if (url) {
-        try {
-          const domain = new URL(url, window.location.href).hostname;
-          if (!baseline.domains.has(domain) && config.mode === 'protection') {
-            const risk = calculateRisk('DOMAIN_NOVELTY', domain);
-            emitLog(`[Drift] Unauthorized sendBeacon to: ${domain}`, 'danger');
-            dispatchAlert('UNAUTHORIZED_SENDBEACON', domain);
-          }
-        } catch (e) {}
+        credentials:
+          'omit'
       }
-      return _nativeBeacon.apply(this, arguments);
-    };
+    ).catch(() => {});
   }
 
-  // 3. مراقبة الوصول البرمجي للحقول الحساسة (Metadata Only - Privacy Preserving)
-  const valDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
-  if (valDescriptor && valDescriptor.get) {
-    Object.defineProperty(HTMLInputElement.prototype, 'value', {
-      configurable: true,
-      get: function () {
-        const isSensitive = this.type === 'password' || 
-                            /card|cvv|secret|token|pass|cc|auth/i.test(this.name || '') || 
-                            /card|cvv|secret|token|pass|cc|auth/i.test(this.id || '');
-        if (isSensitive && config.mode === 'protection') {
-          const risk = calculateRisk('SENSITIVE_DOM_ACCESS');
-          emitLog(`[Security] Sensitive DOM access on field ID: #${this.id || 'unnamed'} (Metadata Only)`, 'warn');
-          dispatchAlert('SENSITIVE_DOM_ACCESS', `Field ID: #${this.id || 'N/A'} (Name: ${this.name || 'N/A'})`);
+  function isGateway(url) {
+
+    const target =
+      getDomain(url);
+
+    const gateway =
+      getDomain(
+        config.gateway
+      );
+
+    return (
+      target &&
+      gateway &&
+      target === gateway
+    );
+  }
+
+  function checkFrequency(domain) {
+
+    const now =
+      Date.now();
+
+    if (
+      !baseline.requestCounts[domain]
+    ) {
+
+      baseline.requestCounts[domain] =
+        [];
+    }
+
+    baseline.requestCounts[domain] =
+      baseline.requestCounts[domain]
+        .filter(
+          timestamp =>
+            now - timestamp < 10_000
+        );
+
+    baseline.requestCounts[domain]
+      .push(now);
+
+    return (
+      baseline.requestCounts[domain]
+        .length > 8
+    );
+  }
+
+  function inspectNetwork(
+    url,
+    source
+  ) {
+
+    const domain =
+      getDomain(url);
+
+    if (!domain) {
+      return;
+    }
+
+    if (isGateway(url)) {
+      return;
+    }
+
+    state.observedDomains.add(
+      domain
+    );
+
+    const highFrequency =
+      checkFrequency(domain);
+
+    if (
+      config.mode ===
+      'learning'
+    ) {
+
+      if (
+        !baseline.domains.has(
+          domain
+        )
+      ) {
+
+        baseline.domains.add(
+          domain
+        );
+
+        emitLog(
+          `[Learning] Registered domain: ${domain}`,
+          'info'
+        );
+      }
+
+      return;
+    }
+
+    if (
+      !baseline.domains.has(
+        domain
+      )
+    ) {
+
+      const risk =
+        calculateRisk(
+          'DOMAIN_NOVELTY'
+        );
+
+      state.driftsDetected++;
+
+      emitLog(
+        `[Drift] Unauthorized ${source} request: ${domain} (Risk: ${risk})`,
+        'danger'
+      );
+
+      dispatchAlert(
+        `UNAUTHORIZED_${source}`,
+        domain
+      );
+
+      return;
+    }
+
+    if (highFrequency) {
+
+      const risk =
+        calculateRisk(
+          'HIGH_FREQUENCY'
+        );
+
+      emitLog(
+        `[Anomaly] High request frequency: ${domain} (Risk: ${risk})`,
+        'warn'
+      );
+
+      dispatchAlert(
+        'HIGH_FREQUENCY_ANOMALY',
+        domain
+      );
+    }
+  }
+
+  /*
+   * Save native APIs before hooking them.
+   */
+
+  const nativeFetch =
+    window.fetch.bind(window);
+
+  const nativeXHROpen =
+    XMLHttpRequest.prototype.open;
+
+  const nativeBeacon =
+    navigator.sendBeacon
+      ? navigator.sendBeacon.bind(
+          navigator
+        )
+      : null;
+
+  /*
+   * FETCH
+   */
+
+  window.fetch =
+    function (...args) {
+
+      try {
+
+        const input =
+          args[0];
+
+        const url =
+          typeof input === 'string'
+            ? input
+            : input?.url;
+
+        if (url) {
+
+          inspectNetwork(
+            url,
+            'FETCH'
+          );
         }
-        return valDescriptor.get.call(this);
-      },
-      set: valDescriptor.set
-    });
+
+      } catch (_) {}
+
+      return nativeFetch(
+        ...args
+      );
+    };
+
+  /*
+   * XHR
+   */
+
+  XMLHttpRequest.prototype.open =
+    function (
+      method,
+      url,
+      ...rest
+    ) {
+
+      try {
+
+        if (url) {
+
+          inspectNetwork(
+            String(url),
+            'XHR'
+          );
+        }
+
+      } catch (_) {}
+
+      return nativeXHROpen.call(
+        this,
+        method,
+        url,
+        ...rest
+      );
+    };
+
+  /*
+   * Beacon
+   */
+
+  if (nativeBeacon) {
+
+    navigator.sendBeacon =
+      function (
+        url,
+        data
+      ) {
+
+        try {
+
+          if (url) {
+
+            inspectNetwork(
+              String(url),
+              'BEACON'
+            );
+          }
+
+        } catch (_) {}
+
+        return nativeBeacon(
+          url,
+          data
+        );
+      };
   }
 
-  // 4. مراقبة الحقن الديناميكي للسكريبتات (Dynamic Script Injection)
-  const observer = new MutationObserver(mutations => {
-    mutations.forEach(m => {
-      m.addedNodes.forEach(node => {
-        if (node.nodeType === 1 && node.tagName === 'SCRIPT') {
-          const src = node.src || 'inline-script';
-          if (!baseline.scripts.has(src)) {
-            if (config.mode === 'learning') {
-              baseline.scripts.add(src);
-              persistBaseline();
-              emitLog(`[Learning] New script source registered: ${src}`, 'info');
-            } else {
-              const risk = calculateRisk('SCRIPT_NOVELTY', src);
+  /*
+   * Sensitive fields
+   *
+   * Never reads or sends actual values.
+   */
+
+  const valueDescriptor =
+    Object.getOwnPropertyDescriptor(
+      HTMLInputElement.prototype,
+      'value'
+    );
+
+  if (
+    valueDescriptor &&
+    valueDescriptor.get &&
+    valueDescriptor.set
+  ) {
+
+    Object.defineProperty(
+      HTMLInputElement.prototype,
+      'value',
+      {
+
+        configurable:
+          true,
+
+        get:
+          function () {
+
+            try {
+
+              const sensitive =
+                this.type ===
+                  'password' ||
+
+                /card|cvv|secret|token|pass|cc|auth/i
+                  .test(
+                    this.name || ''
+                  ) ||
+
+                /card|cvv|secret|token|pass|cc|auth/i
+                  .test(
+                    this.id || ''
+                  );
+
+              /*
+               * Metadata only.
+               *
+               * No input value is captured.
+               */
+
+              if (
+                sensitive &&
+                config.mode ===
+                  'protection'
+              ) {
+
+                emitLog(
+                  `[Security] Sensitive field accessed: #${this.id || 'unnamed'}`,
+                  'info'
+                );
+              }
+
+            } catch (_) {}
+
+            return valueDescriptor.get
+              .call(this);
+          },
+
+        set:
+          function (value) {
+
+            return valueDescriptor.set
+              .call(
+                this,
+                value
+              );
+          }
+      }
+    );
+  }
+
+  /*
+   * Dynamic scripts
+   */
+
+  const observer =
+    new MutationObserver(
+      mutations => {
+
+        for (
+          const mutation
+          of mutations
+        ) {
+
+          for (
+            const node
+            of mutation.addedNodes
+          ) {
+
+            if (
+              node.nodeType !== 1 ||
+              node.tagName !==
+                'SCRIPT'
+            ) {
+              continue;
+            }
+
+            const src =
+              node.src ||
+              'inline-script';
+
+            if (
+              config.mode ===
+              'learning'
+            ) {
+
+              if (
+                !baseline.scripts
+                  .has(src)
+              ) {
+
+                baseline.scripts
+                  .add(src);
+
+                emitLog(
+                  `[Learning] Script registered: ${src}`,
+                  'info'
+                );
+              }
+
+              continue;
+            }
+
+            if (
+              !baseline.scripts
+                .has(src)
+            ) {
+
+              const risk =
+                calculateRisk(
+                  'SCRIPT_NOVELTY'
+                );
+
               state.driftsDetected++;
-              emitLog(`[Drift] Dynamic script injection detected: ${src} (Risk: ${risk})`, 'danger');
-              dispatchAlert('DYNAMIC_SCRIPT_INJECTION', src);
+
+              emitLog(
+                `[Drift] New dynamic script: ${src} (Risk: ${risk})`,
+                'danger'
+              );
+
+              dispatchAlert(
+                'DYNAMIC_SCRIPT_INJECTION',
+                src
+              );
             }
           }
         }
-      });
-    });
-  });
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+      }
+    );
 
-  // تصدير واجهة برمجية خفيفة للاستعلام من الـ Dashboard
-  window.__TBP_STATE__ = {
-    getState: () => state,
-    getBaseline: () => baseline,
-    setMode: (m) => { config.mode = m; emitLog(`Mode switched to: ${m.toUpperCase()}`, 'info'); }
+  if (
+    document.documentElement
+  ) {
+
+    observer.observe(
+      document.documentElement,
+      {
+        childList:
+          true,
+
+        subtree:
+          true
+      }
+    );
+  }
+
+  /*
+   * Read-only dashboard API
+   */
+
+  const publicState = {
+
+    getState() {
+
+      return Object.freeze({
+
+        riskScore:
+          state.riskScore,
+
+        driftsDetected:
+          state.driftsDetected,
+
+        observedDomains:
+          [
+            ...state.observedDomains
+          ],
+
+        logs:
+          [
+            ...state.logs
+          ]
+      });
+    },
+
+    getBaseline() {
+
+      return Object.freeze({
+
+        domains:
+          [
+            ...baseline.domains
+          ],
+
+        scripts:
+          [
+            ...baseline.scripts
+          ]
+      });
+    }
   };
 
-  emitLog(`TBP Agent initialized in [${config.mode.toUpperCase()}] mode.`, 'info');
+  try {
+
+    Object.defineProperty(
+      window,
+      '__TBP_STATE__',
+      {
+
+        value:
+          Object.freeze(
+            publicState
+          ),
+
+        writable:
+          false,
+
+        configurable:
+          false,
+
+        enumerable:
+          false
+      }
+    );
+
+  } catch (_) {}
+
+  emitLog(
+    `TBP Sensor initialized [${config.mode.toUpperCase()}]`,
+    'info'
+  );
+
+  try {
+
+    Object.defineProperty(
+      window,
+      '__TBP_AGENT_LOADED__',
+      {
+
+        value:
+          true,
+
+        writable:
+          false,
+
+        configurable:
+          false,
+
+        enumerable:
+          false
+      }
+    );
+
+  } catch (_) {
+
+    window.__TBP_AGENT_LOADED__ =
+      true;
+  }
+
 })();
