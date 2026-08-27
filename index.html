@@ -689,6 +689,22 @@ button{cursor:pointer;}
 #app{display:none;min-height:100vh;}
 #app.visible{display:flex;}
 
+/* طبقة الخلفية المعتمة لإغلاق القائمة عند النقر خارجها */
+.sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 6, 12, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 99;
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.3s ease;
+}
+.sidebar-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
 .sidebar{width:260px;position:fixed;top:0;bottom:0;right:0;border-left:1px solid var(--border);background:rgba(9,14,22,0.95);backdrop-filter:blur(12px);padding:24px 16px;z-index:100;transition:transform 0.3s ease;}
 .sidebar.closed {transform: translateX(100%);}
 .sidebar-logo{padding:0 10px 25px;border-bottom:1px solid var(--border);}
@@ -787,6 +803,7 @@ button{cursor:pointer;}
 </div>
 
 <div id="app">
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 <aside class="sidebar closed" id="sidebar">
     <div class="sidebar-logo">
         <div class="logo">
@@ -1015,10 +1032,11 @@ function enterDashboard(){
 function toggleSidebar(){ 
     const sidebar = document.getElementById('sidebar');
     const main = document.getElementById('main-content');
+    const overlay = document.getElementById('sidebar-overlay');
     
-    // التبديل بين الفتح والإغلاق بسلاسة
     if (window.innerWidth <= 900) {
         sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
     } else {
         sidebar.classList.toggle('closed');
         main.classList.toggle('expanded');
@@ -1046,6 +1064,14 @@ function switchView(evt, viewId) {
     document.getElementById(viewId).classList.add('active');
     evt.currentTarget.classList.add('active');
     document.getElementById('breadcrumb').innerText = `Security / ${evt.currentTarget.innerText.trim()}`;
+
+    // إغلاق القائمة تلقائياً في الشاشات الصغيرة عند اختيار أي قسم
+    if (window.innerWidth <= 900) {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+    }
 }
 
 async function fetchLiveMetrics() {
