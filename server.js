@@ -111,8 +111,7 @@ app.use(
 |--------------------------------------------------------------------------
 */
 
-const publicDirectory =
-  path.join(__dirname, 'public');
+const publicDirectory = __dirname;
 
 app.use(
   express.static(publicDirectory)
@@ -425,16 +424,6 @@ app.post(
 
     try {
 
-      /*
-       * Authentication
-       *
-       * The browser version of the current Agent
-       * does not expose SITE_API_KEY.
-       *
-       * Therefore this endpoint uses Origin validation
-       * plus server-side rate limiting.
-       */
-
       const origin =
         req.headers.origin;
 
@@ -451,10 +440,6 @@ app.post(
 
       }
 
-
-      /*
-       * Validate payload
-       */
 
       if (
         !validateTelemetry(req.body)
@@ -478,10 +463,6 @@ app.post(
       } = req.body;
 
 
-      /*
-       * Deduplication
-       */
-
       if (
         shouldThrottle(
           site,
@@ -503,10 +484,6 @@ app.post(
       }
 
 
-      /*
-       * Send Telegram alert
-       */
-
       await sendTelegramAlert({
 
         site,
@@ -523,10 +500,6 @@ app.post(
 
       });
 
-
-      /*
-       * Successful response
-       */
 
       return res.status(200).json({
 
