@@ -763,6 +763,13 @@ button{cursor:pointer;}
 
 .view-section {display: none;}
 .view-section.active {display: block;}
+
+/* تعديل لتجاوب الشاشات والصغيرة وافتتاحية الإغلاق */
+@media (max-width: 900px) {
+    .sidebar { transform: translateX(100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-right: 0 !important; width: 100% !important; }
+}
 </style>
 </head>
 <body>
@@ -780,7 +787,7 @@ button{cursor:pointer;}
 </div>
 
 <div id="app">
-<aside class="sidebar" id="sidebar">
+<aside class="sidebar closed" id="sidebar">
     <div class="sidebar-logo">
         <div class="logo">
             <div class="logo-icon"><i class="fa-solid fa-route"></i></div>
@@ -803,7 +810,7 @@ button{cursor:pointer;}
     </div>
 </aside>
 
-<main class="main" id="main-content">
+<main class="main expanded" id="main-content">
 <header class="topbar">
     <div class="topbar-left">
         <button class="icon-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
@@ -1008,8 +1015,14 @@ function enterDashboard(){
 function toggleSidebar(){ 
     const sidebar = document.getElementById('sidebar');
     const main = document.getElementById('main-content');
-    sidebar.classList.toggle('closed');
-    main.classList.toggle('expanded');
+    
+    // التبديل بين الفتح والإغلاق بسلاسة
+    if (window.innerWidth <= 900) {
+        sidebar.classList.toggle('open');
+    } else {
+        sidebar.classList.toggle('closed');
+        main.classList.toggle('expanded');
+    }
 }
 
 function openModal(){ document.getElementById('modal').classList.add('show'); }
