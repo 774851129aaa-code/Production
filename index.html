@@ -11,6 +11,7 @@ const os = require('os');
 const path = require('path');
 const { Transform, pipeline } = require('stream');
 const { promisify } = require('util');
+
 const pipelineAsync = promisify(pipeline);
 const app = express();
 const server = http.createServer(app);
@@ -554,7 +555,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// مسار الـ Metrics لجعل الواجهة تحدث العدادات تلقائياً
 app.get('/_tbp/metrics', (req, res) => {
     totalRequestsCounter++;
     res.status(200).json({
@@ -627,7 +627,6 @@ async function safeUnlink(file) {
     }
 }
 
-// نقطة الدخول الرئيسية: إذا لم يكن هناك ?target= يُعرض الـ Dashboard مع خلفية سايبر شفافة
 app.use(async (req, res) => {
     if (req.path.startsWith('/_tbp/')) {
         return res.status(404).json({ error: 'NOT_FOUND' });
@@ -747,13 +746,6 @@ button{cursor:pointer;}
 .badge.block{color:#f87171;background:rgba(239,68,68,.1);}
 .badge.warn{color:#fbbf24;background:rgba(245,158,11,.1);}
 .badge.allow{color:#4ade80;background:rgba(34,197,94,.1);}
-
-.api-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:16px;}
-.api-card{padding:18px;border:1px solid var(--border);border-radius:12px;background:rgba(12, 19, 29, 0.75);backdrop-filter:blur(10px);}
-.api-header{display:flex;justify-content:space-between;align-items:center;}
-.api-method{font-size:11px;font-weight:900;color:#38bdf8;background:rgba(56,189,248,.08);padding:5px 8px;border-radius:6px;}
-.api-path{font-family:monospace;direction:ltr;text-align:left;margin:13px 0;color:#dbeafe;}
-.api-footer{display:flex;justify-content:space-between;color:#66758b;font-size:11px;}
 
 .modal{position:fixed;inset:0;background:rgba(2,6,12,.78);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
 .modal.show{display:flex;}
@@ -941,9 +933,9 @@ async function fetchLiveMetrics() {
         document.getElementById('blocked').innerText = data.blocked.toLocaleString();
         document.getElementById('suspicious').innerText = data.suspicious.toLocaleString();
         document.getElementById('health').innerText = data.health;
-        document.getElementById('latency').innerText = \`Latency: \${data.latency}\`;
+        document.getElementById('latency').innerText = `Latency: ${data.latency}`;
         document.getElementById('security-score').innerText = data.score;
-        document.getElementById('last-checked').innerText = \`آخر تحديث: \${new Date().toLocaleTimeString()}\`;
+        document.getElementById('last-checked').innerText = `آخر تحديث: ${new Date().toLocaleTimeString()}`;
     } catch (err) {
         console.error(err);
     }
