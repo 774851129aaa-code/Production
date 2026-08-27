@@ -1,123 +1,623 @@
+'use strict';
+
 require('dotenv').config();
+
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 
-const app =express();
+const app = express();
 
-// التحقق من المتغيرات الأساسية
-if (!process.env.TELEGRAM_BOT_TOKEN || !process.env.TELEGRAM_CHAT_ID || !process.env.SITE_API_KEY) {
-  console.error('❌ Error: Missing critical environment variables in .env');
+/*
+|--------------------------------------------------------------------------
+| Configuration
+|--------------------------------------------------------------------------
+*/
+
+const PORT = Number(process.env.PORT) || 3000;
+
+const TELEGRAM_BOT_TOKEN =
+  process.env.TELEGRAM_BOT_TOKEN || '8817540855:AAEzpJxQtLKZmiHcL0RcDlCZnLVehMaaTIU';
+
+const TELEGRAM_CHAT_ID =
+  process.env.TELEGRAM_CHAT_ID || '2025220567';
+
+const SITE_API_KEY =
+  process.env.SITE_API_KEY;
+
+
+/*
+|--------------------------------------------------------------------------
+| Environment validation
+|--------------------------------------------------------------------------
+*/
+
+if (
+  !TELEGRAM_BOT_TOKEN ||
+  !TELEGRAM_CHAT_ID ||
+  !SITE_API_KEY
+) {
+  console.error(
+    '❌ Missing required environment variables.'
+  );
+
+  console.error(
+    'Required: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, SITE_API_KEY'
+  );
+
   process.exit(1);
 }
 
-// إعدادات CORS الآمنة
-const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [];
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS policy'));
+
+/*
+|--------------------------------------------------------------------------
+| CORS
+|--------------------------------------------------------------------------
+*/
+
+const allowedOrigins =
+  (process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map(origin => origin.trim())
+    .filter(Boolean);
+
+app.use(
+  cors({
+    origin(origin, callback) {
+
+      /*
+       * Requests without Origin are allowed.
+       * Useful for health checks and server-side requests.
+       */
+
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      /*
+       * If no origins were configured,
+       * allow the request.
+       */
+
+      if (allowedOrigins.length === 0) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(
+        new Error('CORS origin not allowed')
+      );
     }
+  })
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Body parser
+|--------------------------------------------------------------------------
+*/
+
+app.use(
+  express.json({
+    limit: '10kb'
+  })
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Static frontend
+|--------------------------------------------------------------------------
+*/
+
+const publicDirectory =
+  path.join(__dirname, 'public');
+
+app.use(
+  express.static(publicDirectory)
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Health check
+|--------------------------------------------------------------------------
+*/
+
+app.get(
+  '/health',
+  (req, res) => {
+
+    res.status(200).json({
+      status: 'ok',
+      service: 'TBP Secure Gateway',
+      timestamp: new Date().toISOString()
+    });
+
   }
-}));
+);
 
-app.use(express.json({ limit: '10kb' })); // منع الهجمات عبر تقييد حجم الحزمة
 
-// Rate Limiting لحماية الـ Gateway من الـ Flooding
-const limiter = rateLimit({
-  windowMs: 60 * 1000, // دقيقة واحدة
-  max: 30, // الحد الأقصى 30 طلب لكل IP في الدقيقة
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Rate limit exceeded. Please slow down.' }
-});
-app.use('/api/v1/telemetry', limiter);
+/*
+|--------------------------------------------------------------------------
+| Rate Limiting
+|--------------------------------------------------------------------------
+*/
 
-// نظام Deduplication في الذاكرة لمنع تكرار تنبيهات تليجرام خلال 60 ثانية
-const alertCache = new Map();
+const telemetryLimiter =
+  rateLimit({
 
-function shouldThrottle(site, eventType, destination) {
-  const key = `${site}:${eventType}:${destination}`;
-  const now = Date.now();
-  if (alertCache.has(key)) {
-    const lastSent = alertCache.get(key);
-    if (now - lastSent < 60000) {
-      return true; // يجب عمل Throttle (منع الإرسال)
+    windowMs:
+      60 * 1000,
+
+    max:
+      30,
+
+    standardHeaders:
+      true,
+
+    legacyHeaders:
+      false,
+
+    message: {
+      error:
+        'Rate limit exceeded'
     }
+
+  });
+
+
+app.use(
+  '/api/v1/telemetry',
+  telemetryLimiter
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Alert Deduplication
+|--------------------------------------------------------------------------
+*/
+
+const alertCache =
+  new Map();
+
+
+function shouldThrottle(
+  site,
+  eventType,
+  destination
+) {
+
+  const key =
+    `${site}:${eventType}:${destination}`;
+
+  const now =
+    Date.now();
+
+  const previous =
+    alertCache.get(key);
+
+  if (
+    previous &&
+    now - previous < 60 * 1000
+  ) {
+
+    return true;
+
   }
-  alertCache.set(key, now);
+
+  alertCache.set(
+    key,
+    now
+  );
+
   return false;
 }
 
-// تنظيف دوري للذاكرة المؤقتة كل 10 دقائق
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, timestamp] of alertCache.entries()) {
-    if (now - timestamp > 120000) alertCache.delete(key);
-  }
-}, 600000);
 
-// دالة تنقية النصوص ومنع إدخال HTML/JS خبيث في تليجرام
-function sanitizeMarkdown(str) {
-  if (typeof str !== 'string') return '';
-  return str.replace(/[_*[\]()~`>#+\-=|{}.!]/g, '\\$&');
+/*
+|--------------------------------------------------------------------------
+| Cache cleanup
+|--------------------------------------------------------------------------
+*/
+
+setInterval(
+  () => {
+
+    const now =
+      Date.now();
+
+    for (
+      const [
+        key,
+        timestamp
+      ]
+      of alertCache.entries()
+    ) {
+
+      if (
+        now - timestamp >
+        2 * 60 * 1000
+      ) {
+
+        alertCache.delete(key);
+
+      }
+
+    }
+
+  },
+  10 * 60 * 1000
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Telegram Markdown escaping
+|--------------------------------------------------------------------------
+*/
+
+function escapeTelegramMarkdown(value) {
+
+  if (
+    value === undefined ||
+    value === null
+  ) {
+
+    return '';
+
+  }
+
+  return String(value)
+    .replace(/([_*\[\]()~`>#+\-=|{}.!\\])/g, '\\$1');
+
 }
 
-// مسار استقبال الـ Telemetry وإرسال التنبيه إلى تليجرام
-app.post('/api/v1/telemetry', async (req, res) => {
-  try {
-    const apiKey = req.headers['x-site-key'];
-    if (!apiKey || apiKey !== process.env.SITE_API_KEY) {
-      return res.status(401).json({ error: 'Unauthorized: Invalid Site API Key' });
-    }
 
-    const { site, event, destination, risk, mode, time } = req.body;
+/*
+|--------------------------------------------------------------------------
+| Payload validation
+|--------------------------------------------------------------------------
+*/
 
-    if (!site || !event || typeof risk !== 'number') {
-      return res.status(400).json({ error: 'Invalid payload structure' });
-    }
+function validateTelemetry(body) {
 
-    // تطبيق الـ Deduplication
-    if (shouldThrottle(site, event, destination)) {
-      return res.status(200).json({ status: 'throttled', message: 'Alert suppressed due to deduplication rule.' });
-    }
+  if (
+    !body ||
+    typeof body !== 'object'
+  ) {
 
-    // صياغة رسالة تليجرام الاحترافية والآمنة
-    const telegramMessage = 
-      `🚨 *TBP SECURITY ALERT*\n\n` +
-      `*Site:*\n\`${sanitizeMarkdown(site)}\`\n\n` +
-      `*Event:*\n\`${sanitizeMarkdown(event)}\`\n\n` +
-      `*Source/Destination:*\n\`${sanitizeMarkdown(String(destination || 'N/A'))}\`\n\n` +
-      `*Risk:*\n\`${risk}/100\`\n\n` +
-      `*Mode:*\n\`${sanitizeMarkdown(mode || 'PROTECTION')}\`\n\n` +
-      `*Time:*\n\`${sanitizeMarkdown(time || new Date().toISOString())}\``;
+    return false;
 
-    const tgUrl = `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`;
-    
-    const tgResponse = await fetch(tgUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: process.env.TELEGRAM_CHAT_ID,
-        text: telegramMessage,
-        parse_mode: 'Markdown'
-      })
-    });
-
-    if (!tgResponse.ok) {
-      throw new Error(`Telegram API responded with status ${tgResponse.status}`);
-    }
-
-    return res.status(200).json({ status: 'success', delivered: true });
-  } catch (err) {
-    console.error('Gateway Error:', err.message);
-    return res.status(500).json({ error: 'Internal gateway processing error' });
   }
-});
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🛡️ TBP Secure Gateway running on port ${PORT}`);
-});
+  if (
+    typeof body.site !== 'string' ||
+    body.site.length === 0 ||
+    body.site.length > 253
+  ) {
+
+    return false;
+
+  }
+
+  if (
+    typeof body.event !== 'string' ||
+    body.event.length === 0 ||
+    body.event.length > 200
+  ) {
+
+    return false;
+
+  }
+
+  if (
+    typeof body.risk !== 'number' ||
+    !Number.isFinite(body.risk) ||
+    body.risk < 0 ||
+    body.risk > 100
+  ) {
+
+    return false;
+
+  }
+
+  if (
+    body.destination !== undefined &&
+    typeof body.destination !== 'string'
+  ) {
+
+    return false;
+
+  }
+
+  return true;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Telegram Alert
+|--------------------------------------------------------------------------
+*/
+
+async function sendTelegramAlert(data) {
+
+  const telegramURL =
+    `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+
+  const message =
+`🚨 *TBP SECURITY ALERT*
+
+*Site:*
+\`${escapeTelegramMarkdown(data.site)}\`
+
+*Event:*
+\`${escapeTelegramMarkdown(data.event)}\`
+
+*Destination:*
+\`${escapeTelegramMarkdown(data.destination || 'N/A')}\`
+
+*Risk:*
+\`${data.risk}/100\`
+
+*Mode:*
+\`${escapeTelegramMarkdown(data.mode || 'PROTECTION')}\`
+
+*Time:*
+\`${escapeTelegramMarkdown(data.time || new Date().toISOString())}\`
+`;
+
+  const response =
+    await fetch(
+      telegramURL,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type':
+            'application/json'
+        },
+
+        body:
+          JSON.stringify({
+
+            chat_id:
+              TELEGRAM_CHAT_ID,
+
+            text:
+              message,
+
+            parse_mode:
+              'Markdown'
+          })
+      }
+    );
+
+
+  if (!response.ok) {
+
+    const errorText =
+      await response.text();
+
+    throw new Error(
+      `Telegram API error: ${response.status} ${errorText}`
+    );
+
+  }
+
+
+  return true;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| TBP Telemetry Gateway
+|--------------------------------------------------------------------------
+*/
+
+app.post(
+  '/api/v1/telemetry',
+  async (req, res) => {
+
+    try {
+
+      /*
+       * Authentication
+       *
+       * The browser version of the current Agent
+       * does not expose SITE_API_KEY.
+       *
+       * Therefore this endpoint uses Origin validation
+       * plus server-side rate limiting.
+       */
+
+      const origin =
+        req.headers.origin;
+
+      if (
+        allowedOrigins.length > 0 &&
+        origin &&
+        !allowedOrigins.includes(origin)
+      ) {
+
+        return res.status(403).json({
+          error:
+            'Origin not allowed'
+        });
+
+      }
+
+
+      /*
+       * Validate payload
+       */
+
+      if (
+        !validateTelemetry(req.body)
+      ) {
+
+        return res.status(400).json({
+          error:
+            'Invalid telemetry payload'
+        });
+
+      }
+
+
+      const {
+        site,
+        event,
+        destination,
+        risk,
+        mode,
+        time
+      } = req.body;
+
+
+      /*
+       * Deduplication
+       */
+
+      if (
+        shouldThrottle(
+          site,
+          event,
+          destination || 'N/A'
+        )
+      ) {
+
+        return res.status(200).json({
+
+          status:
+            'throttled',
+
+          delivered:
+            false
+
+        });
+
+      }
+
+
+      /*
+       * Send Telegram alert
+       */
+
+      await sendTelegramAlert({
+
+        site,
+
+        event,
+
+        destination,
+
+        risk,
+
+        mode,
+
+        time
+
+      });
+
+
+      /*
+       * Successful response
+       */
+
+      return res.status(200).json({
+
+        status:
+          'success',
+
+        delivered:
+          true
+
+      });
+
+    }
+
+    catch (error) {
+
+      console.error(
+        'TBP Gateway Error:',
+        error.message
+      );
+
+      return res.status(500).json({
+
+        error:
+          'Internal gateway processing error'
+
+      });
+
+    }
+
+  }
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Frontend fallback
+|--------------------------------------------------------------------------
+*/
+
+app.get(
+  '*',
+  (req, res) => {
+
+    res.sendFile(
+      path.join(
+        publicDirectory,
+        'index.html'
+      )
+    );
+
+  }
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Start Server
+|--------------------------------------------------------------------------
+*/
+
+app.listen(
+  PORT,
+  '0.0.0.0',
+  () => {
+
+    console.log('');
+    console.log(
+      '🛡️ TBP Secure Gateway'
+    );
+
+    console.log(
+      `🚀 Server running on port ${PORT}`
+    );
+
+    console.log(
+      `🌐 Environment: ${process.env.NODE_ENV || 'production'}`
+    );
+
+    console.log(
+      `📡 Telemetry: /api/v1/telemetry`
+    );
+
+    console.log(
+      `❤️ Health: /health`
+    );
+
+    console.log('');
+
+  }
+);
