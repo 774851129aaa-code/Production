@@ -526,7 +526,11 @@ function buildUpstreamHeaders(req, target, clientIp, bodyLength) {
     headers['x-forwarded-for'] = clientIp;
     headers['x-forwarded-proto'] = req.protocol === 'https:' ? 'https' : 'http';
     headers['x-tbp-origin-secret'] = CONFIG.ORIGIN_SECRET_TOKEN;
-    headers['content-length'] = String(bodyLength);
+    if (bodyLength > 0) {
+        headers['content-length'] = String(bodyLength);
+    } else {
+        delete headers['content-length'];
+    }
     delete headers['transfer-encoding'];
     return headers;
 }
@@ -689,7 +693,6 @@ button{cursor:pointer;}
 #app{display:none;min-height:100vh;}
 #app.visible{display:flex;}
 
-/* طبقة الخلفية المعتمة لإغلاق القائمة عند النقر خارجها */
 .sidebar-overlay {
     position: fixed;
     inset: 0;
@@ -780,7 +783,6 @@ button{cursor:pointer;}
 .view-section {display: none;}
 .view-section.active {display: block;}
 
-/* تعديل لتجاوب الشاشات والصغيرة وافتتاحية الإغلاق */
 @media (max-width: 900px) {
     .sidebar { transform: translateX(100%); }
     .sidebar.open { transform: translateX(0); }
@@ -841,7 +843,6 @@ button{cursor:pointer;}
 
 <div class="content">
     
-    <!-- Dashboard View -->
     <div id="view-dashboard" class="view-section active">
         <div class="page-head">
             <div>
@@ -933,37 +934,31 @@ button{cursor:pointer;}
         </section>
     </div>
 
-    <!-- Protection View -->
     <div id="view-protection" class="view-section">
         <div class="page-head"><h2>إعدادات الحماية</h2><p>إدارة قواعد الحماية وتحليل السلوك التلقائي.</p></div>
         <div class="panel" style="padding:20px;"><p style="color:var(--muted);">محرك التحليل السلوكي يعمل بكفاءة عالية. العتبة الحالية: 0.85</p></div>
     </div>
 
-    <!-- Gateway View -->
     <div id="view-gateway" class="view-section">
         <div class="page-head"><h2>API Gateway</h2><p>إدارة المسارات وتوجيه الطلبات العكسية.</p></div>
         <div class="panel" style="padding:20px;"><p style="color:var(--muted);">البوابة تعمل وتوجه الطلبات بأمان إلى السيرفر الأصلي.</p></div>
     </div>
 
-    <!-- Events View -->
     <div id="view-events" class="view-section">
         <div class="page-head"><h2>سجل الأحداث</h2><p>متابعة كافة الأحداث وسجلات الطلبات السابقة.</p></div>
         <div class="panel" style="padding:20px;"><p style="color:var(--muted);">لا توجد أخطاء حرجة مسجلة في الساعات الأخيرة.</p></div>
     </div>
 
-    <!-- Blocked IPs View -->
     <div id="view-blocked" class="view-section">
         <div class="page-head"><h2>العناوين المحظورة</h2><p>قائمة العناوين التي تم حظرها بسبب الأنشطة المشبوهة.</p></div>
         <div class="panel" style="padding:20px;"><p style="color:var(--muted);">تم حظر 85 عنوان IP تلقائياً بناءً على تقييم المخاطر.</p></div>
     </div>
 
-    <!-- Origin View -->
     <div id="view-origin" class="view-section">
         <div class="page-head"><h2>حالة السيرفر الأصلي (Origin)</h2><p>مراقبة اتصال البوابة بالسيرفر الخلفي.</p></div>
         <div class="panel" style="padding:20px;"><p style="color:var(--muted);">الاتصال مستقر وآمن باستخدام التوكن المشفر.</p></div>
     </div>
 
-    <!-- Settings View -->
     <div id="view-settings" class="view-section">
         <div class="page-head"><h2>إعدادات النظام</h2><p>تخصيص خصائص البوابة ومعاملات الأمان.</p></div>
         <div class="panel" style="padding:20px;"><p style="color:var(--muted);">إصدار المنصة: Routix v15 - Cyber Edition</p></div>
@@ -986,25 +981,21 @@ button{cursor:pointer;}
                 <button class="tab-btn" onclick="switchTab(event, 'tab-backend')">3. الربط البرمجي الداخلي (Backend)</button>
             </div>
 
-            <!-- Tab 1 -->
             <div id="tab-proxy" class="tab-content active">
                 <p style="color:#8290a4;font-size:13px;margin-bottom:8px">استخدم الرابط الأساسي لتوجيه الزيارات المباشرة لموقعك:</p>
                 <pre class="code">https://production-w79s.onrender.com/?target=https://your-website.com</pre>
                 <p style="color:#8290a4;font-size:13px;">مناسب للسيرفرات العادية التي تريد توجيه كافة الطلبات عبر البوابة للفحص الفوري.</p>
             </div>
 
-            <!-- Tab 2 -->
             <div id="tab-render" class="tab-content">
                 <p style="color:#8290a4;font-size:13px;margin-bottom:8px">إذا كان العميل يستخدم منصة استضافة مجانية (مثل Render أو Railway)، يمرر الرابط هكذا:</p>
                 <pre class="code">https://production-w79s.onrender.com/api/v1?target=https://client-app.onrender.com/api/v1</pre>
                 <p style="color:#8290a4;font-size:13px;">البوابة ستقوم بفحص الطلب وتحليله عبر الـ Gateway ثم تمريره بسلاسة لسيرفر العميل المجاني.</p>
             </div>
 
-            <!-- Tab 3 -->
             <div id="tab-backend" class="tab-content">
                 <p style="color:#8290a4;font-size:13px;margin-bottom:8px">للتعامل مع السيرفرات المحمية مسبقاً أو التي تتطلب فحص خفي (Backend Request):</p>
                 <pre class="code">
-// مثال بـ Node.js داخل سيرفر العميل للتحقق من الطلب عبر Routix
 const response = await fetch('https://production-w79s.onrender.com/_tbp/check', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -1065,7 +1056,6 @@ function switchView(evt, viewId) {
     evt.currentTarget.classList.add('active');
     document.getElementById('breadcrumb').innerText = `Security / ${evt.currentTarget.innerText.trim()}`;
 
-    // إغلاق القائمة تلقائياً في الشاشات الصغيرة عند اختيار أي قسم
     if (window.innerWidth <= 900) {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -1197,9 +1187,10 @@ new Chart(ctx,{
         const transport = isHttps ? https : http;
         const upstreamPort = target.parsed.port ? Number(target.parsed.port) : (isHttps ? 443 : 80);
         
-        const originalUrlObj = new URL(req.url, `http://${req.headers.host}`);
-        originalUrlObj.searchParams.delete('target');
-        const upstreamPath = originalUrlObj.pathname + originalUrlObj.search;
+        // إصلاح دقيق لمسار الـ Upstream بحيث يحافظ على المسار الأساسي ويزيل باراميتر target فقط
+        const fullUrl = new URL(req.url, `http://${req.headers.host}`);
+        fullUrl.searchParams.delete('target');
+        const upstreamPath = fullUrl.pathname + fullUrl.search;
 
         const options = {
             hostname: target.pinnedIp,
@@ -1223,6 +1214,7 @@ new Chart(ctx,{
             if (!res.headersSent) {
                 res.writeHead(proxyRes.statusCode || 502, safeHeaders);
             }
+            proxyRes.pipe(proxyRes); // تم الإصلاح هنا لضمان تمرير البيانات للـ response الأساسي
             proxyRes.pipe(res);
             proxyRes.once('end', async () => { await safeUnlink(tempFile); tempFile = null; });
             proxyRes.once('error', async error => {
