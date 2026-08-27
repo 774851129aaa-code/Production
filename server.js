@@ -37,7 +37,6 @@ function parseTrustProxy(value) {
 
 const CONFIG = {
     PORT: Number(process.env.PORT || 3000),
-    TARGET_SERVER: process.env.TARGET_SERVER || 'http://127.0.0.1:8080',
     ORIGIN_SECRET_TOKEN: process.env.ORIGIN_SECRET_TOKEN || 'k9X#mP2$vL9_qR5!wZ8*yF3@bN6%dT1',
     MAX_BODY_SIZE: 5 * 1024 * 1024,
     MAX_CONCURRENT_REQUESTS: 500,
@@ -131,21 +130,15 @@ async function sendSecurityAlert(ip, score, pathVal, attackType) {
 }
 
 function normalizeIPv4(ip) {
-    if (!net.isIPv4(ip)) {
-        return null;
-    }
+    if (!net.isIPv4(ip)) return null;
     const parts = ip.split('.').map(Number);
-    if (parts.length !== 4 || parts.some(x => !Number.isInteger(x) || x < 0 || x > 255)) {
-        return null;
-    }
+    if (parts.length !== 4 || parts.some(x => !Number.isInteger(x) || x < 0 || x > 255)) return null;
     return parts;
 }
 
 function ipv4ToBigInt(ip) {
     const parts = normalizeIPv4(ip);
-    if (!parts) {
-        throw new Error('Invalid IPv4.');
-    }
+    if (!parts) throw new Error('Invalid IPv4.');
     return (
         (BigInt(parts[0]) << 24n) |
         (BigInt(parts[1]) << 16n) |
@@ -158,40 +151,25 @@ function expandIPv6(ip) {
     let address = String(ip).toLowerCase();
     if (address.includes('.')) {
         const lastColon = address.lastIndexOf(':');
-        if (lastColon === -1) {
-            throw new Error('Invalid IPv6.');
-        }
+        if (lastColon === -1) throw new Error('Invalid IPv6.');
         const ipv4 = address.slice(lastColon + 1);
-        if (!net.isIPv4(ipv4)) {
-            throw new Error('Invalid embedded IPv4.');
-        }
+        if (!net.isIPv4(ipv4)) throw new Error('Invalid embedded IPv4.');
         const value = ipv4ToBigInt(ipv4);
         const high = Number((value >> 16n) & 0xffffn).toString(16);
         const low = Number(value & 0xffffn).toString(16);
         address = address.slice(0, lastColon + 1) + high + ':' + low;
     }
     const sections = address.split('::');
-    if (sections.length > 2) {
-        throw new Error('Invalid IPv6.');
-    }
+    if (sections.length > 2) throw new Error('Invalid IPv6.');
     const left = sections[0] ? sections[0].split(':').filter(Boolean) : [];
     const right = sections[1] ? sections[1].split(':').filter(Boolean) : [];
     const missing = 8 - left.length - right.length;
-    if (missing < 0) {
-        throw new Error('Invalid IPv6.');
-    }
+    if (missing < 0) throw new Error('Invalid IPv6.');
     const groups = sections.length === 1 ? [...left] : [...left, ...new Array(missing).fill('0'), ...right];
-    if (groups.length !== 8) {
-        throw new Error('Invalid IPv6.');
-    }
+    if (groups.length !== 8) throw new Error('Invalid IPv6.');
     return groups.map(group => {
-        if (!/^[0-9a-f]{1,4}$/i.test(group)) {
-            throw new Error('Invalid IPv6 group.');
-        }
         const value = parseInt(group, 16);
-        if (!Number.isInteger(value) || value < 0 || value > 0xffff) {
-            throw new Error('Invalid IPv6 group.');
-        }
+        if (!Number.isInteger(value) || value < 0 || value > 0xffff) throw new Error('Invalid IPv6 group.');
         return value;
     });
 }
@@ -206,25 +184,17 @@ function ipv6ToBigInt(ip) {
 }
 
 function ipToBigInt(ip) {
-    if (net.isIPv4(ip)) {
-        return { family: 4, value: ipv4ToBigInt(ip) };
-    }
-    if (net.isIPv6(ip)) {
-        return { family: 6, value: ipv6ToBigInt(ip) };
-    }
+    if (net.isIPv4(ip)) return { family: 4, value: ipv4ToBigInt(ip) };
+    if (net.isIPv6(ip)) return { family: 6, value: ipv6ToBigInt(ip) };
     throw new Error(`Invalid IP: ${ip}`);
 }
 
 function getIPv4MappedAddress(ip) {
-    if (!net.isIPv6(ip)) {
-        return null;
-    }
+    if (!net.isIPv6(ip)) return null;
     try {
         const groups = expandIPv6(ip);
         const mapped = groups[0] === 0 && groups[1] === 0 && groups[2] === 0 && groups[3] === 0 && groups[4] === 0 && groups[5] === 0xffff;
-        if (!mapped) {
-            return null;
-        }
+        if (!mapped) return null;
         const high = groups[6];
         const low = groups[7];
         return [high >> 8, high & 0xff, low >> 8, low & 0xff].join('.');
@@ -240,23 +210,13 @@ function isIpInCidr(ip, cidr) {
         let networkInfo = ipToBigInt(network);
         const mappedIp = getIPv4MappedAddress(ip);
         const mappedNetwork = getIPv4MappedAddress(network);
-        if (mappedIp) {
-            ipInfo = ipToBigInt(mappedIp);
-        }
-        if (mappedNetwork) {
-            networkInfo = ipToBigInt(mappedNetwork);
-        }
-        if (ipInfo.family !== networkInfo.family) {
-            return false;
-        }
+        if (mappedIp) ipInfo = ipToBigInt(mappedIp);
+        if (mappedNetwork) networkInfo = ipToBigInt(mappedNetwork);
+        if (ipInfo.family !== networkInfo.family) return false;
         const totalBits = ipInfo.family === 4 ? 32 : 128;
         const bits = bitsString === undefined ? totalBits : Number(bitsString);
-        if (!Number.isInteger(bits) || bits < 0 || bits > totalBits) {
-            return false;
-        }
-        if (bits === 0) {
-            return true;
-        }
+        if (!Number.isInteger(bits) || bits < 0 || bits > totalBits) return false;
+        if (bits === 0) return true;
         const shift = BigInt(totalBits - bits);
         return (ipInfo.value >> shift) === (networkInfo.value >> shift);
     } catch {
@@ -278,61 +238,54 @@ function isRestrictedIp(ip) {
     return BLOCKED_CIDRS.some(cidr => isIpInCidr(candidate, cidr));
 }
 
-let dnsCache = null;
+const dnsCacheMap = new Map();
 
-async function resolveAndPinTarget() {
+async function resolveAndPinTarget(targetUrl) {
     const now = Date.now();
-    if (dnsCache && now - dnsCache.timestamp < CONFIG.DNS_CACHE_TTL) {
-        return dnsCache.value;
+    const cached = dnsCacheMap.get(targetUrl);
+    if (cached && now - cached.timestamp < CONFIG.DNS_CACHE_TTL) {
+        return cached.value;
     }
-    const parsed = new URL(CONFIG.TARGET_SERVER);
+    const parsed = new URL(targetUrl);
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-        throw new Error('TARGET_SERVER must use HTTP or HTTPS.');
+        throw new Error('Target must use HTTP or HTTPS.');
     }
     const hostname = parsed.hostname;
-    if (!hostname) {
-        throw new Error('TARGET_SERVER hostname is missing.');
-    }
+    if (!hostname) throw new Error('Target hostname is missing.');
+
     if (net.isIP(hostname)) {
-        if (isRestrictedIp(hostname)) {
-            throw new Error(`Restricted target IP: ${hostname}`);
-        }
+        if (isRestrictedIp(hostname)) throw new Error(`Restricted target IP: ${hostname}`);
         const result = { parsed, pinnedIp: hostname, family: net.isIPv6(hostname) ? 6 : 4 };
-        dnsCache = { timestamp: now, value: result };
+        dnsCacheMap.set(targetUrl, { timestamp: now, value: result });
         return result;
     }
+
     const [ipv4, ipv6] = await Promise.all([
         dns.resolve4(hostname).catch(() => []),
         dns.resolve6(hostname).catch(() => [])
     ]);
     const addresses = [...ipv4, ...ipv6];
-    if (addresses.length === 0) {
-        throw new Error(`DNS resolution failed: ${hostname}`);
-    }
+    if (addresses.length === 0) throw new Error(`DNS resolution failed: ${hostname}`);
     for (const address of addresses) {
-        if (isRestrictedIp(address)) {
-            throw new Error(`DNS resolved to restricted IP: ${address}`);
-        }
+        if (isRestrictedIp(address)) throw new Error(`DNS resolved to restricted IP: ${address}`);
     }
     const pinnedIp = ipv4[0] || ipv6[0];
     const result = { parsed, pinnedIp, family: net.isIPv6(pinnedIp) ? 6 : 4 };
-    dnsCache = { timestamp: now, value: result };
+    dnsCacheMap.set(targetUrl, { timestamp: now, value: result });
     return result;
 }
 
-// نظام قاعدة بيانات JSON المحلية
 const DB_FILE = path.join(os.tmpdir(), 'tbp_database.json');
 
 function loadJsonDb() {
     try {
         if (fs.existsSync(DB_FILE)) {
-            const data = fs.readFileSync(DB_FILE, 'utf8');
-            return JSON.parse(data);
+            return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
         }
     } catch (error) {
         structuredLog('ERROR', 'Failed to load JSON DB', { error: error.message });
     }
-    return { blocks: {}, profiles: {}, baselines: {}, stats: { total: 1284392, blocked: 8421, suspicious: 1247 } };
+    return { blocks: {}, profiles: {}, baselines: {}, stats: { total: 0, blocked: 0, suspicious: 0 } };
 }
 
 function saveJsonDb(db) {
@@ -392,9 +345,7 @@ class BehavioralEngineJson {
     isBlocked(ip) {
         const db = loadJsonDb();
         const blockUntil = db.blocks[ip];
-        if (blockUntil && Date.now() < blockUntil) {
-            return true;
-        }
+        if (blockUntil && Date.now() < blockUntil) return true;
         if (blockUntil && Date.now() >= blockUntil) {
             delete db.blocks[ip];
             saveJsonDb(db);
@@ -440,7 +391,6 @@ class BehavioralEngineJson {
         const interval = Math.max(0, now - profile.lastRequestTime);
         profile.lastRequestTime = now;
         profile.totalRequests = (profile.totalRequests || 0) + 1;
-        
         db.stats.total = (db.stats.total || 0) + 1;
 
         profile.requestIntervals.push(interval);
@@ -464,7 +414,6 @@ class BehavioralEngineJson {
 
             const sum = profile.requestIntervals.reduce((a, b) => a + b, 0);
             const mean = profile.requestIntervals.length ? sum / profile.requestIntervals.length : 1;
-            
             const varianceSum = profile.requestIntervals.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0);
             const stdDev = profile.requestIntervals.length > 1 ? Math.sqrt(varianceSum / profile.requestIntervals.length) : 0;
 
@@ -662,7 +611,22 @@ async function safeUnlink(file) {
     }
 }
 
+// تعديل المسار ليكون البروكسي ديناميكياً بناءً على الرابط الذي يرسله المستخدم (عبر Query Param مثل ?target=...)
 app.use(async (req, res) => {
+    // تجاهل طلبات الصحة والـ metrics الخاصة بالبروكسي نفسه
+    if (req.path.startsWith('/_tbp/')) {
+        return res.status(404).json({ error: 'NOT_FOUND' });
+    }
+
+    // استخراج الرابط المستهدف من طلب المستخدم (مثال: ?target=https://example.com أو عبر Header)
+    const targetUrl = req.query.target || req.headers['x-target-url'];
+    if (!targetUrl) {
+        return res.status(400).json({ 
+            error: 'MISSING_TARGET', 
+            message: 'Please provide the target URL using ?target=https://your-website.com query parameter.' 
+        });
+    }
+
     if (activeRequests >= CONFIG.MAX_CONCURRENT_REQUESTS) {
         return res.status(503).json({ status: 'SERVER_BUSY' });
     }
@@ -704,7 +668,8 @@ app.use(async (req, res) => {
             return res.status(429).json({ status: 'RATE_LIMITED' });
         }
 
-        const target = await resolveAndPinTarget();
+        // تحليل وفحص الرابط الديناميكي المدخل من المستخدم
+        const target = await resolveAndPinTarget(targetUrl);
 
         tempFile = createTempFile();
         const spool = new BodySpool(CONFIG.MAX_BODY_SIZE, CONFIG.BODY_SAMPLE_SIZE);
@@ -750,7 +715,11 @@ app.use(async (req, res) => {
         const isHttps = target.parsed.protocol === 'https:';
         const transport = isHttps ? https : http;
         const upstreamPort = target.parsed.port ? Number(target.parsed.port) : (isHttps ? 443 : 80);
-        const upstreamPath = req.url || '/';
+        
+        // الحفاظ على المسار الأصلي وباراميترات البحث ما عدا باراميتر الـ target نفسه لكي لا يذهب للسيرفر المستهدف
+        const originalUrlObj = new URL(req.url, `http://${req.headers.host}`);
+        originalUrlObj.searchParams.delete('target');
+        const upstreamPath = originalUrlObj.pathname + originalUrlObj.search;
 
         const options = {
             hostname: target.pinnedIp,
@@ -825,22 +794,9 @@ app.use(async (req, res) => {
     }
 });
 
-async function start() {
-    try {
-        const target = await resolveAndPinTarget();
-        structuredLog('INFO', 'Origin resolved', {
-            hostname: target.parsed.hostname,
-            pinnedIp: target.pinnedIp,
-            family: target.family
-        });
-        server.listen(CONFIG.PORT, () => {
-            structuredLog('INFO', 'TBP v14 started with JSON storage', { port: CONFIG.PORT, target: CONFIG.TARGET_SERVER });
-        });
-    } catch (error) {
-        structuredLog('ERROR', 'Fatal startup error', { error: error.stack || error.message });
-        process.exit(1);
-    }
-}
+server.listen(CONFIG.PORT, () => {
+    structuredLog('INFO', 'Dynamic TBP v14 started', { port: CONFIG.PORT });
+});
 
 async function shutdown(signal) {
     if (isShuttingDown) return;
@@ -868,21 +824,3 @@ process.on('unhandledRejection', reason => {
         error: reason instanceof Error ? reason.stack : String(reason)
     });
 });
-
-app.get('/_tbp/metrics', (req, res) => {
-    try {
-        const db = loadJsonDb();
-        res.json({
-            requests: db.stats.total,
-            blocked: db.stats.blocked,
-            suspicious: db.stats.suspicious,
-            originHealth: "99.98%",
-            latency: "35ms",
-            securityScore: 96
-        });
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch metrics' });
-    }
-});
-
-start();
