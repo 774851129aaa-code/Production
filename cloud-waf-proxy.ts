@@ -1428,7 +1428,7 @@ const PATH_PATTERNS = [
 ];
 
 const RCE_PATTERNS = [
-  /\$[^)]{1,200}/,
+  /\$\([^)]{1,200}\)/,
   /`[^`]{1,200}`/,
   /(?:^|[;&|])\s*(?:curl|wget)\s+/i,
   /(?:^|[;&|])\s*(?:bash|sh|cmd|powershell)\b/i,
@@ -4736,4 +4736,345 @@ const proxy =
         "x-waf-owner-id",
         site?.owner_id ||
           ""
-     
+      );
+
+      proxyReq.setHeader(
+        "x-waf-request-id",
+        requestId ||
+          crypto.randomUUID()
+      );
+
+      proxyReq.setHeader(
+        "x-forwarded-host",
+        req.headers.host ||
+          ""
+      );
+
+      fixRequestBody(
+        proxyReq,
+        req
+      );
+    },
+
+    onError(
+      error,
+      req,
+      res
+    ) {
+
+      const site =
+        (
+          req as Request & {
+            wafSite?: Site;
+          }
+        ).wafSite;
+
+      console.error(
+        "Proxy error:",
+        error
+      );
+
+      if (
+        site
+      ) {
+
+        addAlert({
+
+          site,
+
+          ip:
+            getClientIp(
+              req
+            ),
+
+          path:
+            req.originalUrl,
+
+          risk:
+            0,
+
+          action:
+            "block",
+
+          reasons: [
+            "proxy_error"
+          ]
+        });
+      }
+
+      if (
+        !res.headersSent
+      ) {
+
+        res
+          .status(502)
+          .json({
+            error:
+              "protected_site_unavailable"
+          });
+      }
+    }
+  });
+
+app.use(
+  "/",
+  proxy
+);
+
+/* ============================================================
+   ERROR HANDLER
+   ============================================================ */
+
+app.use(
+  (
+    error: unknown,
+    _req: Request,
+    res: Response,
+    _next: NextFunction
+  ) => {
+
+    console.error(
+      "Unhandled WAF error:",
+      error
+    );
+
+    if (
+      !res.headersSent
+    ) {
+
+      return res
+        .status(500)
+        .json({
+          error:
+            "internal_error"
+        });
+    }
+
+    return res.end();
+  }
+);
+
+/* ============================================================
+   SERVER
+   ============================================================ */
+
+const server =
+  http.createServer(
+    app
+  );
+
+server.requestTimeout =
+  config.REQUEST_TIMEOUT_MS;
+
+server.headersTimeout =
+  Math.min(
+    config.HEADERS_TIMEOUT_MS,
+    config.REQUEST_TIMEOUT_MS
+  );
+
+server.keepAliveTimeout =
+  config.KEEP_ALIVE_TIMEOUT_MS;
+
+server.maxHeadersCount =
+  100;
+
+/* ============================================================
+   SOCKET PROTECTION
+   ============================================================ */
+
+const socketCounts =
+  new Map<
+    string,
+    number
+  >();
+
+const MAX_SOCKETS_PER_IP =
+  config.MAX_CONCURRENT_PER_IP *
+  2;
+
+server.on(
+  "connection",
+  socket => {
+
+    const rawIp =
+      normalizeIp(
+        socket.remoteAddress ||
+          "0.0.0.0"
+      );
+
+    const current =
+      socketCounts.get(
+        rawIp
+      ) || 0;
+
+    if (
+      current >=
+      MAX_SOCKETS_PER_IP
+    ) {
+
+      socket.destroy();
+
+      return;
+    }
+
+    socketCounts.set(
+      rawIp,
+      current + 1
+    );
+
+    socket.setTimeout(
+      config.REQUEST_TIMEOUT_MS
+    );
+
+    socket.on(
+      "close",
+      () => {
+
+        const count =
+          socketCounts.get(
+            rawIp
+          ) || 0;
+
+        if (
+          count <= 1
+        ) {
+
+          socketCounts.delete(
+            rawIp
+          );
+
+        } else {
+
+          socketCounts.set(
+            rawIp,
+            count - 1
+          );
+        }
+      }
+    );
+  }
+);
+
+/* ============================================================
+   START
+   ============================================================ */
+
+server.listen(
+  config.PORT,
+  "0.0.0.0",
+  () => {
+
+    console.log(
+      "=========================================="
+    );
+
+    console.log(
+      " Multi-Site Cloud WAF"
+    );
+
+    console.log(
+      " Dynamic Reverse Proxy Enabled"
+    );
+
+    console.log(
+      " Live Admin Dashboard Enabled"
+    );
+
+    console.log(
+      " L7 Protection Enabled"
+    );
+
+    console.log(
+      ` WAF: http://0.0.0.0:${config.PORT}`
+    );
+
+    console.log(
+      ` Sites: ${db.sites.length}`
+    );
+
+    console.log(
+      ` Database: ${dbFilePath}`
+    );
+
+    console.log(
+      ` Admin: /admin`
+    );
+
+    console.log(
+      ` Site API: /__waf/api/*`
+    );
+
+    console.log(
+      ` Rate default: ${config.RATE_LIMIT_MAX}/${config.RATE_LIMIT_WINDOW}s`
+    );
+
+    console.log(
+      ` Burst default: ${config.BURST_MAX}/${config.BURST_WINDOW_MS}ms`
+    );
+
+    console.log(
+      ` Max concurrent/IP: ${config.MAX_CONCURRENT_PER_IP}`
+    );
+
+    console.log(
+      ` Max global concurrent: ${config.MAX_GLOBAL_CONCURRENT}`
+    );
+
+    console.log(
+      "=========================================="
+    );
+
+    for (
+      const site of db.sites
+    ) {
+
+      console.log(
+        `[SITE] ${site.client_domain} -> ${site.target_url}`
+      );
+    }
+  }
+);
+
+/* ============================================================
+   GRACEFUL SHUTDOWN
+   ============================================================ */
+
+function shutdown(
+  signal: string
+): void {
+
+  console.log(
+    `${signal}: shutting down WAF...`
+  );
+
+  saveDb();
+
+  server.close(
+    () => {
+      process.exit(0);
+    }
+  );
+
+  setTimeout(
+    () => {
+      process.exit(1);
+    },
+    10000
+  ).unref();
+}
+
+process.on(
+  "SIGTERM",
+  () =>
+    shutdown(
+      "SIGTERM"
+    )
+);
+
+process.on(
+  "SIGINT",
+  () =>
+    shutdown(
+      "SIGINT"
+    )
+);
