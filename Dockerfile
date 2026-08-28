@@ -7,9 +7,11 @@ COPY cloud-waf-proxy.ts ./
 FROM node:20-alpine
 WORKDIR /app
 COPY package*.json ./
-# نسخ الحزم المثبتة بالكامل من مرحلة البناء لضمان توفر أدوات التشغيل مثل tsx
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/cloud-waf-proxy.ts ./
+
+# إنشاء مجلد خاص بقاعدة البيانات ومنح صلاحية الكتابة بالكامل للمستخدم node
+RUN mkdir -p /app && chown -R node:node /app
 
 EXPOSE 8080
 USER node
