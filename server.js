@@ -645,8 +645,10 @@ button{cursor:pointer;}
 #app{display:none;min-height:100vh;}
 #app.visible{display:flex;}
 
-.sidebar{width:260px;position:fixed;top:0;bottom:0;right:0;border-left:1px solid var(--border);background:rgba(9,14,22,0.85);backdrop-filter:blur(12px);padding:24px 16px;z-index:100;}
-.sidebar-logo{padding:0 10px 25px;border-bottom:1px solid var(--border);}
+.sidebar{width:260px;position:fixed;top:0;bottom:0;right:0;border-left:1px solid var(--border);background:rgba(9,14,22,0.95);backdrop-filter:blur(12px);padding:24px 16px;z-index:100;transition:transform 0.3s ease;}
+.sidebar-logo{display:flex;justify-content:space-between;align-items:center;padding:0 10px 25px;border-bottom:1px solid var(--border);}
+.close-btn{background:transparent;border:0;color:#8da0b8;font-size:22px;cursor:pointer;display:none;transition:0.2s;}
+.close-btn:hover{color:#ef4444;}
 .nav-title{font-size:11px;color:#526174;margin:25px 10px 10px;font-weight:800;letter-spacing:1px;}
 .nav-item{display:flex;align-items:center;gap:13px;width:100%;padding:12px 14px;margin:4px 0;color:#8c9aaf;border-radius:10px;background:transparent;border:0;text-align:right;font-size:14px;transition:.2s;}
 .nav-item:hover,.nav-item.active{color:#fff;background:rgba(17, 27, 41, 0.8);}
@@ -656,6 +658,13 @@ button{cursor:pointer;}
 .status-box{position:absolute;bottom:20px;right:16px;left:16px;padding:14px;border:1px solid var(--border);border-radius:12px;background:rgba(11, 17, 26, 0.8);}
 .status-line{display:flex;align-items:center;gap:8px;font-size:12px;color:#94a3b8;}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);}
+
+@media (max-width: 768px) {
+    .sidebar { transform: translateX(100%); z-index: 1000; }
+    .sidebar.open { transform: translateX(0); }
+    .close-btn { display: block; }
+    .main { width: 100%; margin-right: 0; }
+}
 
 .main{margin-right:260px;width:calc(100% - 260px);}
 .topbar{height:74px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 30px;background:rgba(7,11,18,0.65);backdrop-filter:blur(15px);position:sticky;top:0;z-index:50;}
@@ -733,6 +742,8 @@ button{cursor:pointer;}
             <div class="logo-icon"><i class="fa-solid fa-route"></i></div>
             Routix
         </div>
+        <!-- زر الإغلاق الجديد مخصص للهواتف -->
+        <button class="close-btn" onclick="toggleSidebar()"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="nav-title">PLATFORM</div>
     <button class="nav-item active"><i class="fa-solid fa-chart-line"></i> لوحة المراقبة</button>
