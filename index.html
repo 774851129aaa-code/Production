@@ -3,23 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Routix Cloud WAF - حماية ومراقبة متقدمة لتطبيقات الويب">
+  <meta name="theme-color" content="#02060b">
+  <meta name="description" content="Routix — Web Application Firewall & Traffic Protection">
   <title>Routix — Cloud WAF</title>
 
   <style>
     :root {
-      --bg: #03060b;
-      --bg2: #07101a;
-      --panel: rgba(9, 17, 28, .78);
-      --panel2: rgba(13, 25, 40, .9);
-      --cyan: #35e7ff;
+      --bg: #02050a;
+      --bg2: #06101a;
+      --panel: rgba(7, 15, 25, .78);
+      --panel-solid: #08131f;
+      --cyan: #36e6ff;
       --blue: #397cff;
-      --green: #42e6a4;
-      --red: #ff5570;
-      --yellow: #ffc857;
+      --green: #43e6a7;
+      --red: #ff526d;
+      --yellow: #ffd166;
       --text: #eefaff;
-      --muted: #8ea3b7;
-      --border: rgba(53, 231, 255, .14);
+      --muted: #8ba0b4;
+      --muted2: #607487;
+      --border: rgba(54, 230, 255, .14);
+      --border-hover: rgba(54, 230, 255, .42);
+      --shadow: 0 20px 70px rgba(0,0,0,.35);
     }
 
     * {
@@ -33,14 +37,18 @@
     }
 
     body {
-      background:
-        radial-gradient(circle at 75% 15%, rgba(57,124,255,.18), transparent 30%),
-        radial-gradient(circle at 15% 65%, rgba(53,231,255,.09), transparent 28%),
-        var(--bg);
-      color: var(--text);
-      font-family: Tahoma, Arial, sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
+      background:
+        radial-gradient(circle at 75% 12%, rgba(57,124,255,.17), transparent 30%),
+        radial-gradient(circle at 15% 55%, rgba(54,230,255,.08), transparent 28%),
+        linear-gradient(180deg, #02050a 0%, #030811 55%, #02050a 100%);
+      color: var(--text);
+      font-family: Tahoma, Arial, sans-serif;
+    }
+
+    body.locked {
+      overflow: hidden;
     }
 
     a {
@@ -52,514 +60,1097 @@
       font-family: inherit;
     }
 
-    /* =========================
-       BACKGROUND
-    ========================= */
+    /* =========================================================
+       CYBER BACKGROUND
+    ========================================================= */
 
-    .grid {
+    .cyber-bg {
       position: fixed;
       inset: 0;
+      z-index: -10;
       pointer-events: none;
-      opacity: .23;
-      background-image:
-        linear-gradient(rgba(53,231,255,.045) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(53,231,255,.045) 1px, transparent 1px);
+      overflow: hidden;
+      background:
+        linear-gradient(rgba(54,230,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(54,230,255,.035) 1px, transparent 1px);
       background-size: 55px 55px;
-      mask-image: linear-gradient(to bottom, black, transparent 90%);
-      z-index: -3;
+      mask-image: linear-gradient(to bottom, black 0%, black 70%, transparent 100%);
+    }
+
+    .cyber-bg::before {
+      content: "";
+      position: absolute;
+      width: 700px;
+      height: 700px;
+      left: 50%;
+      top: 48%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 1px solid rgba(54,230,255,.09);
+      box-shadow:
+        0 0 100px rgba(54,230,255,.04),
+        inset 0 0 100px rgba(57,124,255,.035);
+    }
+
+    .cyber-bg::after {
+      content: "";
+      position: absolute;
+      width: 430px;
+      height: 430px;
+      left: 50%;
+      top: 48%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 1px dashed rgba(54,230,255,.11);
+      animation: rotate 35s linear infinite;
+    }
+
+    .orb {
+      position: fixed;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      pointer-events: none;
+      filter: blur(80px);
+      opacity: .12;
+      z-index: -9;
+    }
+
+    .orb.one {
+      top: -180px;
+      right: -120px;
+      background: #397cff;
+    }
+
+    .orb.two {
+      bottom: -220px;
+      left: -120px;
+      background: #36e6ff;
     }
 
     .scanlines {
       position: fixed;
       inset: 0;
+      z-index: 100;
       pointer-events: none;
-      z-index: 50;
-      opacity: .12;
+      opacity: .075;
       background:
         linear-gradient(
           transparent 50%,
-          rgba(53,231,255,.025) 50%
+          rgba(54,230,255,.04) 50%
         );
       background-size: 100% 6px;
     }
 
-    .background-glow {
+    .particles {
       position: fixed;
-      width: 600px;
-      height: 600px;
+      inset: 0;
+      z-index: -7;
+      pointer-events: none;
+      opacity: .35;
+    }
+
+    .particle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
       border-radius: 50%;
-      border: 1px solid rgba(53,231,255,.08);
+      background: var(--cyan);
+      box-shadow: 0 0 9px var(--cyan);
+      animation: float 8s linear infinite;
+    }
+
+    @keyframes rotate {
+      to {
+        transform: translate(-50%, -50%) rotate(360deg);
+      }
+    }
+
+    @keyframes float {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      20% {
+        opacity: 1;
+      }
+      80% {
+        opacity: .8;
+      }
+      to {
+        transform: translateY(-180px);
+        opacity: 0;
+      }
+    }
+
+    /* =========================================================
+       INTRO SCREEN
+    ========================================================= */
+
+    .intro {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at center, rgba(9,30,48,.72), rgba(2,5,10,.98) 65%),
+        #02050a;
+      transition:
+        opacity .7s ease,
+        visibility .7s ease,
+        transform .7s ease;
+    }
+
+    .intro.hidden {
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(1.04);
+      pointer-events: none;
+    }
+
+    .intro-tech {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      opacity: .42;
+    }
+
+    .intro-tech::before {
+      content: "";
+      position: absolute;
+      width: min(80vw, 850px);
+      height: min(80vw, 850px);
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border:
+        1px solid rgba(54,230,255,.16);
       box-shadow:
-        0 0 100px rgba(53,231,255,.05),
-        inset 0 0 100px rgba(57,124,255,.04);
-      pointer-events: none;
-      z-index: -2;
+        0 0 100px rgba(54,230,255,.08),
+        inset 0 0 100px rgba(54,230,255,.05);
     }
 
-    .background-glow::before,
-    .background-glow::after {
+    .intro-tech::after {
       content: "";
       position: absolute;
+      width: 50%;
+      height: 1px;
+      left: 25%;
+      top: 50%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(54,230,255,.45),
+        transparent
+      );
+      box-shadow:
+        0 0 25px rgba(54,230,255,.3);
+    }
+
+    .intro-grid {
+      position: absolute;
+      inset: -30%;
+      transform: rotate(-14deg);
+      background:
+        linear-gradient(rgba(54,230,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(54,230,255,.035) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    .intro-content {
+      position: relative;
+      z-index: 2;
+      width: min(900px, 90%);
+      text-align: center;
+    }
+
+    .intro-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(54,230,255,.045);
+      color: #a9eaf3;
+      font-size: 11px;
+      letter-spacing: .4px;
+      animation: fadeUp .8s ease both;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
-      border: 1px dashed rgba(53,231,255,.13);
+      background: var(--green);
+      box-shadow: 0 0 14px var(--green);
+      animation: pulse 1.7s infinite;
     }
 
-    .background-glow::before {
-      inset: 70px;
+    .intro-logo {
+      width: 76px;
+      height: 76px;
+      margin: 32px auto 26px;
+      position: relative;
+      transform: rotate(45deg);
+      border: 1px solid var(--cyan);
+      box-shadow:
+        0 0 35px rgba(54,230,255,.16),
+        inset 0 0 25px rgba(54,230,255,.05);
+      animation: logoIn 1s ease both;
     }
 
-    .background-glow::after {
-      inset: 160px;
-      border-style: solid;
+    .intro-logo::before {
+      content: "";
+      position: absolute;
+      inset: 13px;
+      border: 1px solid rgba(54,230,255,.65);
     }
 
-    /* =========================
+    .intro-logo::after {
+      content: "";
+      position: absolute;
+      inset: 24px;
+      background: rgba(54,230,255,.13);
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 22px rgba(54,230,255,.2);
+    }
+
+    .intro h1 {
+      font-size: clamp(64px, 12vw, 130px);
+      line-height: .9;
+      letter-spacing: -7px;
+      margin-bottom: 24px;
+      text-shadow: 0 0 50px rgba(54,230,255,.12);
+      animation: fadeUp .8s .15s ease both;
+    }
+
+    .intro h1 span {
+      color: var(--cyan);
+    }
+
+    .intro p {
+      max-width: 680px;
+      margin: 0 auto;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.9;
+      animation: fadeUp .8s .25s ease both;
+    }
+
+    .enter-btn {
+      margin-top: 34px;
+      min-width: 210px;
+      height: 53px;
+      padding: 0 26px;
+      border: 0;
+      border-radius: 13px;
+      cursor: pointer;
+      color: #021018;
+      font-weight: 900;
+      font-size: 14px;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      box-shadow:
+        0 16px 50px rgba(57,124,255,.22),
+        0 0 35px rgba(54,230,255,.08);
+      transition: .25s;
+      animation: fadeUp .8s .35s ease both;
+    }
+
+    .enter-btn:hover {
+      transform: translateY(-3px);
+      box-shadow:
+        0 20px 60px rgba(57,124,255,.3),
+        0 0 45px rgba(54,230,255,.12);
+    }
+
+    .intro-corner {
+      position: absolute;
+      bottom: 25px;
+      left: 30px;
+      color: #3f586c;
+      font: 10px Consolas, monospace;
+      direction: ltr;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes logoIn {
+      from {
+        opacity: 0;
+        transform: rotate(45deg) scale(.6);
+      }
+      to {
+        opacity: 1;
+        transform: rotate(45deg) scale(1);
+      }
+    }
+
+    @keyframes pulse {
+      50% {
+        opacity: .4;
+        transform: scale(.75);
+      }
+    }
+
+    /* =========================================================
        HEADER
-    ========================= */
+    ========================================================= */
 
     header {
       position: fixed;
-      z-index: 40;
       top: 0;
       left: 0;
       right: 0;
-      height: 78px;
-
+      z-index: 90;
+      height: 76px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-
       padding: 0 6%;
-
-      background: rgba(3,6,11,.7);
-      border-bottom: 1px solid rgba(255,255,255,.06);
+      background: rgba(2,5,10,.72);
+      border-bottom: 1px solid rgba(255,255,255,.055);
       backdrop-filter: blur(18px);
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 13px;
+      gap: 12px;
       font-weight: 900;
       letter-spacing: 1px;
     }
 
-    .brand-name {
-      font-size: 21px;
-    }
-
-    .logo {
+    .brand-logo {
       position: relative;
-      width: 39px;
-      height: 39px;
-      border: 1px solid var(--cyan);
+      width: 34px;
+      height: 34px;
       transform: rotate(45deg);
-      box-shadow: 0 0 25px rgba(53,231,255,.2);
-    }
-
-    .logo::before {
-      content: "";
-      position: absolute;
-      inset: 8px;
-      border: 1px solid rgba(53,231,255,.65);
-    }
-
-    .logo::after {
-      content: "";
-      position: absolute;
-      inset: 14px;
-      background: rgba(53,231,255,.12);
       border: 1px solid var(--cyan);
+      box-shadow: 0 0 22px rgba(54,230,255,.16);
+    }
+
+    .brand-logo::before {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border: 1px solid rgba(54,230,255,.65);
+    }
+
+    .brand-logo::after {
+      content: "";
+      position: absolute;
+      inset: 12px;
+      background: rgba(54,230,255,.13);
+      border: 1px solid var(--cyan);
+    }
+
+    .brand-name {
+      font-size: 20px;
     }
 
     nav {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
     }
 
     nav a {
-      color: #aebfd0;
-      font-size: 13px;
-      padding: 10px 13px;
-      border-radius: 10px;
+      color: #9eb1c2;
+      padding: 9px 12px;
+      border-radius: 9px;
+      font-size: 12px;
       transition: .2s;
     }
 
     nav a:hover {
       color: white;
-      background: rgba(53,231,255,.07);
+      background: rgba(54,230,255,.065);
+    }
+
+    .header-admin {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 9px 13px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--cyan);
+      font-size: 11px;
+      transition: .2s;
+    }
+
+    .header-admin:hover {
+      border-color: var(--border-hover);
+      background: rgba(54,230,255,.06);
     }
 
     .mobile-menu {
       display: none;
+      padding: 8px 11px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
       background: transparent;
       color: white;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      padding: 9px 12px;
       cursor: pointer;
-    }
-
-    /* =========================
-       HERO
-    ========================= */
-
-    .hero {
-      min-height: 100vh;
-      padding: 130px 6% 80px;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
-
-      position: relative;
-      text-align: center;
-    }
-
-    .hero-content {
-      max-width: 900px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .status {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-
-      padding: 8px 14px;
-
-      border: 1px solid var(--border);
-      border-radius: 999px;
-
-      background: rgba(53,231,255,.045);
-
-      color: #a8eefa;
-      font-size: 12px;
-    }
-
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      background: var(--green);
-      border-radius: 50%;
-      box-shadow: 0 0 14px var(--green);
-    }
-
-    .hero h1 {
-      margin: 27px 0 22px;
-
-      font-size: clamp(52px, 9vw, 100px);
-      line-height: .95;
-      letter-spacing: -5px;
-    }
-
-    .cyan {
-      color: var(--cyan);
-      text-shadow: 0 0 40px rgba(53,231,255,.25);
-    }
-
-    .hero p {
-      max-width: 730px;
-      margin: auto;
-
-      color: var(--muted);
       font-size: 18px;
+    }
+
+    /* =========================================================
+       MAIN
+    ========================================================= */
+
+    main {
+      opacity: 1;
+    }
+
+    .section {
+      width: min(1200px, 100%);
+      margin: auto;
+      padding: 105px 6%;
+      scroll-margin-top: 70px;
+    }
+
+    .section-title {
+      max-width: 760px;
+      margin-bottom: 38px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 10px;
+      color: var(--cyan);
+      font: 900 11px Consolas, monospace;
+      letter-spacing: 1.5px;
+      direction: ltr;
+    }
+
+    .section-title h2 {
+      font-size: clamp(30px, 5vw, 43px);
+      line-height: 1.2;
+      margin-bottom: 13px;
+    }
+
+    .section-title p {
+      color: var(--muted);
+      font-size: 14px;
       line-height: 1.9;
     }
 
-    .hero-buttons {
-      margin-top: 34px;
+    /* =========================================================
+       DASHBOARD HERO
+    ========================================================= */
 
+    .dashboard {
+      min-height: 100vh;
+      padding-top: 145px;
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 55px;
+      align-items: center;
+    }
+
+    .dashboard-copy h1 {
+      font-size: clamp(42px, 6vw, 70px);
+      line-height: 1.05;
+      letter-spacing: -3px;
+      margin-bottom: 22px;
+    }
+
+    .dashboard-copy h1 span {
+      color: var(--cyan);
+      text-shadow: 0 0 35px rgba(54,230,255,.2);
+    }
+
+    .dashboard-copy > p {
+      max-width: 680px;
+      color: var(--muted);
+      line-height: 2;
+      font-size: 16px;
+    }
+
+    .dashboard-actions {
       display: flex;
-      justify-content: center;
-      gap: 12px;
       flex-wrap: wrap;
+      gap: 11px;
+      margin-top: 29px;
     }
 
     .btn {
+      min-height: 46px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-
-      min-height: 48px;
-      padding: 0 23px;
-
-      border-radius: 12px;
-
+      gap: 8px;
+      padding: 0 20px;
+      border-radius: 11px;
       border: 1px solid var(--border);
-
-      background: rgba(255,255,255,.035);
-
+      background: rgba(255,255,255,.025);
       color: white;
-
+      font-size: 12px;
       cursor: pointer;
-
       transition: .22s;
     }
 
     .btn:hover {
       transform: translateY(-2px);
-      border-color: rgba(53,231,255,.4);
+      border-color: var(--border-hover);
+      background: rgba(54,230,255,.045);
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--cyan), var(--blue));
-      color: #021018;
       border: 0;
+      color: #021018;
       font-weight: 900;
-      box-shadow: 0 15px 40px rgba(57,124,255,.2);
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      box-shadow: 0 15px 40px rgba(57,124,255,.18);
     }
 
-    /* =========================
-       SECTIONS
-    ========================= */
-
-    .section {
-      max-width: 1200px;
-      margin: auto;
-      padding: 90px 6%;
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #5ceaff, #528dff);
     }
 
-    .section-title {
-      max-width: 720px;
-      margin-bottom: 35px;
+    /* =========================================================
+       SECURITY RADAR
+    ========================================================= */
+
+    .radar-card {
+      position: relative;
+      min-height: 430px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 25px;
+      background:
+        radial-gradient(circle at center, rgba(54,230,255,.08), transparent 43%),
+        rgba(5,11,18,.72);
+      box-shadow: var(--shadow);
     }
 
-    .section-title small {
+    .radar {
+      position: relative;
+      width: 290px;
+      height: 290px;
+      border-radius: 50%;
+      border: 1px solid rgba(54,230,255,.2);
+      background:
+        linear-gradient(rgba(54,230,255,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(54,230,255,.07) 1px, transparent 1px);
+      background-size: 72px 72px;
+      box-shadow:
+        0 0 80px rgba(54,230,255,.06),
+        inset 0 0 60px rgba(54,230,255,.04);
+    }
+
+    .radar::before,
+    .radar::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(54,230,255,.15);
+      inset: 25%;
+    }
+
+    .radar::after {
+      inset: 48%;
+      background: var(--cyan);
+      box-shadow: 0 0 20px var(--cyan);
+    }
+
+    .radar-sweep {
+      position: absolute;
+      width: 50%;
+      height: 1px;
+      left: 50%;
+      top: 50%;
+      transform-origin: left center;
+      background: linear-gradient(90deg, var(--cyan), transparent);
+      box-shadow: 0 0 15px rgba(54,230,255,.5);
+      animation: sweep 3.5s linear infinite;
+    }
+
+    .radar-ring {
+      position: absolute;
+      inset: -1px;
+      border-radius: 50%;
+      border: 1px dashed rgba(54,230,255,.12);
+      animation: rotate 18s linear infinite;
+    }
+
+    .radar-label {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      right: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--muted2);
+      direction: ltr;
+      font-family: Consolas, monospace;
+    }
+
+    .radar-label strong {
+      color: var(--green);
+    }
+
+    @keyframes sweep {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* =========================================================
+       STATS
+    ========================================================= */
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .stat {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(8,16,26,.65);
+    }
+
+    .stat-label {
+      color: var(--muted2);
+      font-size: 10px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font: 900 20px Consolas, monospace;
+      direction: ltr;
+      text-align: right;
+    }
+
+    .stat-value.green {
+      color: var(--green);
+    }
+
+    .stat-value.cyan {
       color: var(--cyan);
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: 1px;
     }
 
-    .section-title h2 {
-      margin: 10px 0;
-      font-size: 38px;
-    }
-
-    .section-title p {
-      color: var(--muted);
-      line-height: 1.8;
-    }
-
-    /* =========================
+    /* =========================================================
        FEATURES
-    ========================= */
+    ========================================================= */
 
     .features {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
+      gap: 14px;
     }
 
     .feature {
-      padding: 25px;
-
-      background:
-        linear-gradient(
-          145deg,
-          rgba(13,25,40,.88),
-          rgba(5,10,17,.82)
-        );
-
+      position: relative;
+      padding: 23px;
+      overflow: hidden;
       border: 1px solid var(--border);
-      border-radius: 18px;
-
+      border-radius: 17px;
+      background:
+        linear-gradient(145deg, rgba(10,22,35,.9), rgba(4,9,16,.8));
       transition: .25s;
+    }
+
+    .feature::after {
+      content: "";
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      right: -55px;
+      bottom: -55px;
+      border-radius: 50%;
+      background: rgba(54,230,255,.07);
+      filter: blur(25px);
     }
 
     .feature:hover {
       transform: translateY(-5px);
-      border-color: rgba(53,231,255,.32);
+      border-color: var(--border-hover);
+      box-shadow: 0 15px 45px rgba(0,0,0,.22);
     }
 
     .feature-icon {
-      width: 44px;
-      height: 44px;
-
+      width: 43px;
+      height: 43px;
       display: grid;
       place-items: center;
-
-      margin-bottom: 17px;
-
-      border: 1px solid rgba(53,231,255,.23);
-      border-radius: 12px;
-
+      margin-bottom: 16px;
+      border-radius: 11px;
+      border: 1px solid rgba(54,230,255,.2);
+      background: rgba(54,230,255,.045);
       color: var(--cyan);
-      font-size: 19px;
+      font: 900 18px Consolas, monospace;
     }
 
     .feature h3 {
       margin-bottom: 9px;
-      font-size: 17px;
+      font-size: 16px;
     }
 
     .feature p {
       color: var(--muted);
-      font-size: 13px;
-      line-height: 1.8;
+      font-size: 12px;
+      line-height: 1.85;
     }
 
-    /* =========================
-       API
-    ========================= */
+    .tag {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 4px 7px;
+      border: 1px solid rgba(54,230,255,.13);
+      border-radius: 6px;
+      color: #70bdca;
+      font: 9px Consolas, monospace;
+      direction: ltr;
+    }
+
+    /* =========================================================
+       API / INTEGRATION
+    ========================================================= */
 
     .integration {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: .85fr 1.15fr;
       gap: 18px;
     }
 
     .steps {
       display: grid;
-      gap: 12px;
+      gap: 11px;
     }
 
     .step {
       display: flex;
-      gap: 14px;
-
+      gap: 13px;
       padding: 18px;
-
-      background: rgba(9,17,28,.76);
-
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 13px;
+      background: rgba(7,15,25,.7);
     }
 
     .step-number {
-      min-width: 33px;
+      flex: 0 0 33px;
       height: 33px;
-
       display: grid;
       place-items: center;
-
-      border-radius: 9px;
-
-      background: rgba(53,231,255,.08);
-
+      border-radius: 8px;
       color: var(--cyan);
-      font-weight: 900;
+      background: rgba(54,230,255,.07);
+      border: 1px solid rgba(54,230,255,.12);
+      font: 900 12px Consolas, monospace;
     }
 
     .step strong {
       display: block;
+      font-size: 13px;
       margin-bottom: 6px;
     }
 
     .step span {
       color: var(--muted);
-      font-size: 13px;
-      line-height: 1.65;
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    .code-card {
+      min-width: 0;
     }
 
     pre {
       height: 100%;
-      margin: 0;
+      min-height: 360px;
       padding: 22px;
-
+      overflow: auto;
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      background: #010409;
+      color: #b9eaf1;
       direction: ltr;
       text-align: left;
+      font: 12px/1.85 Consolas, monospace;
+      box-shadow: inset 0 0 40px rgba(54,230,255,.018);
+    }
 
-      overflow: auto;
-
-      border-radius: 18px;
+    .code-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 11px 14px;
       border: 1px solid var(--border);
+      border-bottom: 0;
+      border-radius: 14px 14px 0 0;
+      background: #050b12;
+      color: var(--muted2);
+      font: 10px Consolas, monospace;
+      direction: ltr;
+    }
 
-      background: #010409;
-
-      color: #bdeaf2;
-
-      font-family: Consolas, monospace;
-      font-size: 13px;
-      line-height: 1.8;
+    .code-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px rgba(54,230,255,.5);
     }
 
     .warning {
-      margin-top: 12px;
-      color: #7f94a7;
-      font-size: 12px;
+      margin-top: 10px;
+      color: #667b8e;
+      font-size: 10px;
       line-height: 1.7;
     }
 
-    /* =========================
-       ADMIN
-    ========================= */
+    /* =========================================================
+       L7 / REQUEST FLOW
+    ========================================================= */
 
-    .admin-card {
-      padding: 35px;
-
-      border-radius: 22px;
-
-      border: 1px solid var(--border);
-
-      background:
-        linear-gradient(
-          135deg,
-          rgba(53,231,255,.07),
-          rgba(57,124,255,.035)
-        );
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      align-items: center;
     }
 
-    /* =========================
+    .flow-node {
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(7,15,25,.7);
+    }
+
+    .flow-node b {
+      color: var(--cyan);
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    .flow-node span {
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.6;
+    }
+
+    .flow-arrow {
+      text-align: center;
+      color: var(--cyan);
+      font: 20px Consolas, monospace;
+    }
+
+    /* =========================================================
+       ADMIN
+    ========================================================= */
+
+    .admin-card {
+      position: relative;
+      overflow: hidden;
+      padding: 38px;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 85% 50%, rgba(57,124,255,.12), transparent 30%),
+        linear-gradient(135deg, rgba(54,230,255,.055), rgba(57,124,255,.035));
+      box-shadow: var(--shadow);
+    }
+
+    .admin-card::before {
+      content: "ADMIN";
+      position: absolute;
+      top: 25px;
+      left: 30px;
+      color: rgba(54,230,255,.06);
+      font: 900 70px Consolas, monospace;
+      pointer-events: none;
+      direction: ltr;
+    }
+
+    .admin-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 16px;
+      color: var(--green);
+      font: 10px Consolas, monospace;
+      direction: ltr;
+    }
+
+    .admin-card h2 {
+      font-size: 31px;
+      margin-bottom: 10px;
+    }
+
+    .admin-card p {
+      max-width: 700px;
+      color: var(--muted);
+      line-height: 1.9;
+      font-size: 13px;
+      margin-bottom: 23px;
+    }
+
+    /* =========================================================
+       SETTINGS
+    ========================================================= */
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 13px;
+    }
+
+    .setting {
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(7,15,25,.65);
+    }
+
+    .setting h3 {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .setting p {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.75;
+    }
+
+    .setting code {
+      display: block;
+      margin-top: 12px;
+      color: #7ed9e5;
+      direction: ltr;
+      text-align: left;
+      font: 10px Consolas, monospace;
+    }
+
+    /* =========================================================
        ABOUT
-    ========================= */
+    ========================================================= */
 
     .about {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 30px;
+      gap: 35px;
       align-items: center;
+    }
+
+    .about-copy p {
+      color: var(--muted);
+      line-height: 2;
+      font-size: 13px;
     }
 
     .terminal {
       padding: 23px;
-
-      background: #010409;
-
       border: 1px solid var(--border);
-      border-radius: 18px;
-
-      font-family: Consolas, monospace;
-      line-height: 2;
-      color: #9ddde8;
+      border-radius: 17px;
+      background: #010409;
+      color: #8ecbd4;
+      font: 11px/2.1 Consolas, monospace;
+      direction: ltr;
+      text-align: left;
+      box-shadow: inset 0 0 50px rgba(54,230,255,.018);
     }
 
     .terminal .green {
       color: var(--green);
     }
 
+    .terminal .cyan {
+      color: var(--cyan);
+    }
+
     .terminal .white {
       color: white;
     }
 
-    /* =========================
+    /* =========================================================
        FOOTER
-    ========================= */
+    ========================================================= */
 
     footer {
       padding: 30px 6%;
-
+      border-top: 1px solid rgba(255,255,255,.05);
+      color: #586c7e;
       text-align: center;
-
-      border-top: 1px solid rgba(255,255,255,.06);
-
-      color: #718294;
-      font-size: 12px;
+      font-size: 10px;
     }
 
-    /* =========================
-       MOBILE
-    ========================= */
+    footer span {
+      color: var(--cyan);
+    }
 
-    @media (max-width: 900px) {
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
 
-      nav {
+    @media (max-width: 1050px) {
+      nav a {
+        padding: 8px;
+      }
+
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+
+      .radar-card {
+        min-height: 350px;
+      }
+
+      .features {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .integration {
+        grid-template-columns: 1fr;
+      }
+
+      .flow {
+        grid-template-columns: 1fr 30px 1fr;
+      }
+
+      .flow-node:nth-of-type(1),
+      .flow-node:nth-of-type(3),
+      .flow-node:nth-of-type(5) {
+        grid-column: span 1;
+      }
+    }
+
+    @media (max-width: 760px) {
+      header {
+        padding: 0 5%;
+      }
+
+      nav,
+      .header-admin {
         display: none;
       }
 
@@ -567,763 +1158,939 @@
         display: block;
       }
 
-      .features {
-        grid-template-columns: 1fr 1fr;
+      nav.mobile-open {
+        display: flex;
+        position: absolute;
+        top: 69px;
+        left: 5%;
+        right: 5%;
+        padding: 8px;
+        flex-direction: column;
+        align-items: stretch;
+        background: rgba(2,5,10,.97);
+        border: 1px solid var(--border);
+        border-radius: 13px;
+        backdrop-filter: blur(20px);
       }
 
-      .integration,
-      .about {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media (max-width: 600px) {
-
-      header {
-        padding: 0 5%;
-      }
-
-      .hero {
-        padding-left: 5%;
-        padding-right: 5%;
-      }
-
-      .hero h1 {
-        font-size: 56px;
-        letter-spacing: -3px;
-      }
-
-      .hero p {
-        font-size: 15px;
-      }
-
-      .features {
-        grid-template-columns: 1fr;
+      nav.mobile-open a {
+        padding: 13px;
       }
 
       .section {
-        padding: 65px 5%;
+        padding: 75px 5%;
       }
 
-      .section-title h2 {
-        font-size: 30px;
+      .dashboard {
+        padding-top: 120px;
       }
 
-      .background-glow {
-        width: 340px;
-        height: 340px;
+      .features,
+      .settings-grid,
+      .stats {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .about {
+        grid-template-columns: 1fr;
+      }
+
+      .flow {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-arrow {
+        transform: rotate(90deg);
+      }
+
+      .intro h1 {
+        letter-spacing: -4px;
+      }
+
+      .intro p {
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .features,
+      .settings-grid,
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-copy h1 {
+        letter-spacing: -2px;
+      }
+
+      .radar {
+        width: 235px;
+        height: 235px;
+      }
+
+      .radar-card {
+        min-height: 310px;
+      }
+
+      .admin-card {
+        padding: 27px;
+      }
+
+      .intro-logo {
+        width: 62px;
+        height: 62px;
+      }
+
+      .intro h1 {
+        font-size: 58px;
+      }
+
+      .intro-corner {
+        display: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
       }
     }
   </style>
 </head>
 
-<body>
+<body class="locked">
 
-<div class="grid"></div>
-<div class="scanlines"></div>
-<div class="background-glow"></div>
+  <!-- =========================================================
+       BACKGROUND
+  ========================================================== -->
 
-<!-- =========================
-     HEADER
-========================= -->
+  <div class="cyber-bg"></div>
+  <div class="orb one"></div>
+  <div class="orb two"></div>
+  <div class="particles" id="particles"></div>
+  <div class="scanlines"></div>
 
-<header>
+  <!-- =========================================================
+       INTRO SCREEN
+  ========================================================== -->
 
-  <a href="#" class="brand">
+  <section class="intro" id="intro">
 
-    <span class="logo"></span>
+    <div class="intro-tech">
+      <div class="intro-grid"></div>
+    </div>
 
-    <span class="brand-name">
-      Routix
-    </span>
+    <div class="intro-content">
 
-  </a>
+      <div class="intro-status">
+        <span class="live-dot"></span>
+        ROUTIX WAF SYSTEM • PROTECTION LAYER READY
+      </div>
 
-  <nav>
+      <div class="intro-logo"></div>
 
-    <a href="#features">
-      المميزات
+      <h1>
+        Routix<span>.</span>
+      </h1>
+
+      <p>
+        Web Application Firewall مصمم لمراقبة وحماية
+        تطبيقات الويب من الترافيك المشبوه، الهجمات
+        على مستوى L7، تجاوز المعدلات، والمصادر عالية الخطورة.
+      </p>
+
+      <button class="enter-btn" onclick="enterPlatform()">
+        دخول إلى المنصة
+        <span>←</span>
+      </button>
+
+    </div>
+
+    <div class="intro-corner">
+      ROUTIX / SECURITY INFRASTRUCTURE / 2026
+    </div>
+
+  </section>
+
+  <!-- =========================================================
+       HEADER
+  ========================================================== -->
+
+  <header>
+
+    <a href="#home" class="brand">
+      <span class="brand-logo"></span>
+      <span class="brand-name">Routix</span>
     </a>
 
-    <a href="#integration">
-      API والربط
-    </a>
+    <nav id="nav">
 
-    <a href="#admin">
+      <a href="#home">الرئيسية</a>
+      <a href="#features">المميزات</a>
+      <a href="#api">API</a>
+      <a href="#integration">طريقة الربط</a>
+      <a href="#admin">لوحة الإدارة</a>
+      <a href="#settings">الإعدادات</a>
+      <a href="#about">من نحن</a>
+
+    </nav>
+
+    <a href="/admin" class="header-admin">
+      <span>▣</span>
       لوحة الإدارة
     </a>
 
-    <a href="#settings">
-      الإعدادات
-    </a>
+    <button class="mobile-menu" onclick="toggleMenu()">
+      ☰
+    </button>
 
-    <a href="#about">
-      من نحن
-    </a>
+  </header>
 
-  </nav>
+  <!-- =========================================================
+       MAIN
+  ========================================================== -->
 
-  <button
-    class="mobile-menu"
-    onclick="toggleMobileMenu()"
-  >
-    ☰
-  </button>
+  <main id="home">
 
-</header>
+    <!-- DASHBOARD / HERO -->
 
-<!-- =========================
-     HERO
-========================= -->
+    <section class="section dashboard">
 
-<section class="hero">
+      <div class="dashboard-copy">
 
-  <div class="hero-content">
+        <span class="eyebrow">
+          ROUTIX / CLOUD WAF
+        </span>
 
-    <div class="status">
+        <h1>
+          حماية موقعك تبدأ<br>
+          من أول <span>Request.</span>
+        </h1>
 
-      <span class="status-dot"></span>
+        <p>
+          Routix يعمل كطبقة حماية أمام تطبيقك،
+          يراقب الترافيك وطلبات HTTP، يحد من
+          المعدلات المرتفعة، يكتشف أنماط الهجمات
+          ويمنحك رؤية مباشرة لما يحدث على مستوى
+          البنية التحتية والتطبيق.
+        </p>
 
-      Routix Cloud WAF • Protection Active
+        <div class="dashboard-actions">
 
-    </div>
+          <a href="/admin" class="btn btn-primary">
+            فتح لوحة الإدارة ←
+          </a>
 
-    <h1>
+          <a href="#features" class="btn">
+            استكشف المميزات
+          </a>
 
-      حماية أذكى.<br>
+        </div>
 
-      <span class="cyan">
-        Routix.
-      </span>
+        <div class="stats">
 
-    </h1>
+          <div class="stat">
+            <div class="stat-label">WAF STATUS</div>
+            <div class="stat-value green">ACTIVE</div>
+          </div>
 
-    <p>
+          <div class="stat">
+            <div class="stat-label">LAYER</div>
+            <div class="stat-value cyan">L7</div>
+          </div>
 
-      طبقة حماية لتطبيقات الويب تراقب الطلبات،
-      تحد من المعدلات العالية، تكشف الأنماط المشبوهة،
-      وتوفر لك مراقبة مباشرة من لوحة الإدارة.
+          <div class="stat">
+            <div class="stat-label">RATE CONTROL</div>
+            <div class="stat-value">ON</div>
+          </div>
 
-    </p>
-
-    <div class="hero-buttons">
-
-      <a
-        href="#features"
-        class="btn btn-primary"
-      >
-        دخول إلى المنصة ←
-      </a>
-
-      <a
-        href="#integration"
-        class="btn"
-      >
-        طريقة الربط
-      </a>
-
-    </div>
-
-  </div>
-
-</section>
-
-<!-- =========================
-     FEATURES
-========================= -->
-
-<section
-  id="features"
-  class="section"
->
-
-  <div class="section-title">
-
-    <small>
-      ROUTIX FEATURES
-    </small>
-
-    <h2>
-      طبقة حماية مبنية حول طلبات موقعك
-    </h2>
-
-    <p>
-      مجموعة من آليات الحماية الموجودة في طبقة الـWAF
-      مع لوحة مراقبة وتنبيهات مباشرة.
-    </p>
-
-  </div>
-
-  <div class="features">
-
-    <article class="feature">
-
-      <div class="feature-icon">
-        ◈
-      </div>
-
-      <h3>
-        Rate Limiting
-      </h3>
-
-      <p>
-        التحكم في عدد الطلبات لكل IP ضمن فترة زمنية
-        مع حماية إضافية ضد الارتفاعات المفاجئة.
-      </p>
-
-    </article>
-
-    <article class="feature">
-
-      <div class="feature-icon">
-        ⚡
-      </div>
-
-      <h3>
-        Burst Protection
-      </h3>
-
-      <p>
-        اكتشاف الارتفاع السريع في الطلبات والتعامل
-        معه قبل أن يسبب ضغطًا غير طبيعي على التطبيق.
-      </p>
-
-    </article>
-
-    <article class="feature">
-
-      <div class="feature-icon">
-        ◉
-      </div>
-
-      <h3>
-        SQL Injection Detection
-      </h3>
-
-      <p>
-        فحص أنماط معروفة مرتبطة بمحاولات
-        SQL Injection داخل الطلبات.
-      </p>
-
-    </article>
-
-    <article class="feature">
-
-      <div class="feature-icon">
-        ⌁
-      </div>
-
-      <h3>
-        XSS Detection
-      </h3>
-
-      <p>
-        اكتشاف مجموعة من الأنماط المعروفة
-        المرتبطة بمحاولات XSS.
-      </p>
-
-    </article>
-
-    <article class="feature">
-
-      <div class="feature-icon">
-        ⌗
-      </div>
-
-      <h3>
-        Risk Scoring
-      </h3>
-
-      <p>
-        حساب نقاط المخاطر لكل IP واستخدامها
-        للمساعدة في تحديد الإجراء المناسب.
-      </p>
-
-    </article>
-
-    <article class="feature">
-
-      <div class="feature-icon">
-        ⊘
-      </div>
-
-      <h3>
-        Blacklist
-      </h3>
-
-      <p>
-        الاحتفاظ بالمصادر التي تجاوزت سياسات الحماية
-        ضمن قائمة حظر مؤقتة.
-      </p>
-
-    </article>
-
-    <article class="feature">
-
-      <div class="feature-icon">
-        ↯
-      </div>
-
-      <h3>
-        Concurrency Control
-      </h3>
-
-      <p>
-        تحديد الاتصالات المتزامنة لكل IP وعلى مستوى
-        الخدمة لتقليل ضغط الاتصالات.
-      </p>
-
-    </article>
-
-    <article class="feature">
-
-      <div class="feature-icon">
-        ◌
-      </div>
-
-      <h3>
-        Live Alerts
-      </h3>
-
-      <p>
-        استقبال التنبيهات مباشرة باستخدام
-        Server-Sent Events بدون تحديث الصفحة.
-      </p>
-
-    </article>
-
-    <article class="feature">
-
-      <div class="feature-icon">
-        ▣
-      </div>
-
-      <h3>
-        Security Headers
-      </h3>
-
-      <p>
-        استخدام Helmet وإعدادات HTTP إضافية
-        لتحسين طبقة أمان التطبيق.
-      </p>
-
-    </article>
-
-  </div>
-
-</section>
-
-<!-- =========================
-     API / INTEGRATION
-========================= -->
-
-<section
-  id="integration"
-  class="section"
->
-
-  <div class="section-title">
-
-    <small>
-      API & INTEGRATION
-    </small>
-
-    <h2>
-      اربط Routix بموقعك
-    </h2>
-
-    <p>
-      اجعل Routix نقطة الدخول العامة للموقع،
-      واجعل التطبيق الأصلي خلف طبقة الحماية.
-    </p>
-
-  </div>
-
-  <div class="integration">
-
-    <div class="steps">
-
-      <div class="step">
-
-        <b class="step-number">
-          1
-        </b>
-
-        <div>
-
-          <strong>
-            شغّل موقعك الأصلي
-          </strong>
-
-          <span>
-            مثال: التطبيق الأصلي يعمل داخليًا
-            على 127.0.0.1:3000.
-          </span>
+          <div class="stat">
+            <div class="stat-label">LIVE EVENTS</div>
+            <div class="stat-value green">READY</div>
+          </div>
 
         </div>
 
       </div>
 
-      <div class="step">
+      <div class="radar-card">
 
-        <b class="step-number">
-          2
-        </b>
+        <div class="radar">
 
-        <div>
+          <div class="radar-ring"></div>
+          <div class="radar-sweep"></div>
 
-          <strong>
-            حدد TARGET_URL
-          </strong>
+        </div>
 
-          <span>
-            ضع عنوان الموقع الأصلي داخل
-            متغير البيئة TARGET_URL.
-          </span>
-
+        <div class="radar-label">
+          <span>TRAFFIC_MONITOR</span>
+          <strong>● PROTECTED</strong>
         </div>
 
       </div>
 
-      <div class="step">
+    </section>
 
-        <b class="step-number">
-          3
-        </b>
+    <!-- FEATURES -->
 
-        <div>
-
-          <strong>
-            وجّه الدومين إلى Routix
-          </strong>
-
-          <span>
-            الدومين العام يجب أن يصل إلى
-            WAF وليس مباشرة إلى التطبيق الأصلي.
-          </span>
-
-        </div>
-
-      </div>
-
-      <div class="step">
-
-        <b class="step-number">
-          4
-        </b>
-
-        <div>
-
-          <strong>
-            استخدم API Key
-          </strong>
-
-          <span>
-            واجهة حالة الـWAF تستخدم
-            x-waf-api-key.
-          </span>
-
-        </div>
-
-      </div>
-
-    </div>
-
-    <div>
-
-<pre># .env
-
-PORT=8080
-
-TARGET_URL=http://127.0.0.1:3000
-
-WAF_API_KEY=ضع_مفتاحاً_عشوائياً_طويلاً
-
-ADMIN_USER=admin
-
-ADMIN_PASSWORD=ضع_كلمة_مرور_قوية_وطويلة
-
-TRUST_PROXY=false
-
-DATA_FILE=waf-db.json
-
-RATE_LIMIT_WINDOW=60
-RATE_LIMIT_MAX=120
-
-BURST_WINDOW_MS=1000
-BURST_MAX=15
-
-GLOBAL_RATE_WINDOW_MS=1000
-GLOBAL_RATE_MAX=2000
-
-MAX_CONCURRENT_PER_IP=30
-MAX_GLOBAL_CONCURRENT=1000</pre>
-
-      <div class="warning">
-
-        ⚠️ لا تضع WAF_API_KEY أو ADMIN_PASSWORD
-        داخل JavaScript الخاص بالواجهة.
-        هذه البيانات يجب أن تبقى في بيئة السيرفر.
-
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-<!-- =========================
-     ADMIN
-========================= -->
-
-<section
-  id="admin"
-  class="section"
->
-
-  <div class="admin-card">
-
-    <div class="section-title">
-
-      <small>
-        LIVE ADMIN
-      </small>
-
-      <h2>
-        لوحة الإدارة المباشرة
-      </h2>
-
-      <p>
-        سيرفر Routix الذي أرسلته يحتوي بالفعل
-        على لوحة الإدارة في المسار /admin،
-        بالإضافة إلى الإحصائيات والتنبيهات المباشرة.
-      </p>
-
-    </div>
-
-    <a
-      href="/admin"
-      class="btn btn-primary"
-    >
-      فتح لوحة الإدارة ←
-    </a>
-
-  </div>
-
-</section>
-
-<!-- =========================
-     SETTINGS
-========================= -->
-
-<section
-  id="settings"
-  class="section"
->
-
-  <div class="section-title">
-
-    <small>
-      SETTINGS
-    </small>
-
-    <h2>
-      إعدادات الحماية
-    </h2>
-
-    <p>
-      إعدادات Routix التشغيلية يتم التحكم بها
-      من متغيرات البيئة الموجودة على السيرفر.
-    </p>
-
-  </div>
-
-  <div class="features">
-
-    <article class="feature">
-
-      <div class="feature-icon">
-        ⚙
-      </div>
-
-      <h3>
-        Traffic Control
-      </h3>
-
-      <p>
-        RATE_LIMIT_MAX و BURST_MAX و
-        GLOBAL_RATE_MAX للتحكم في الترافيك.
-      </p>
-
-    </article>
-
-    <article class="feature">
-
-      <div class="feature-icon">
-        ◇
-      </div>
-
-      <h3>
-        Risk Engine
-      </h3>
-
-      <p>
-        RISK_BLOCK_THRESHOLD و
-        RISK_HONEYPOT_THRESHOLD و RISK_TTL.
-      </p>
-
-    </article>
-
-    <article class="feature">
-
-      <div class="feature-icon">
-        ◷
-      </div>
-
-      <h3>
-        Timeouts
-      </h3>
-
-      <p>
-        REQUEST_TIMEOUT_MS و HEADERS_TIMEOUT_MS
-        و PROXY_TIMEOUT_MS.
-      </p>
-
-    </article>
-
-  </div>
-
-</section>
-
-<!-- =========================
-     ABOUT
-========================= -->
-
-<section
-  id="about"
-  class="section"
->
-
-  <div class="about">
-
-    <div>
+    <section id="features" class="section">
 
       <div class="section-title">
 
-        <small>
-          ABOUT ROUTIX
-        </small>
+        <span class="eyebrow">
+          SECURITY ENGINE
+        </span>
 
         <h2>
-          مطورون شغوفون بالأمن والبنية التحتية
+          حماية متعددة الطبقات للترافيك
         </h2>
 
         <p>
-          Routix مشروع تقني طوره مطورون شغوفون
-          بالأمن السيبراني والبنية التحتية وتطوير
-          الأنظمة. نؤمن أن أدوات الحماية يجب أن تكون
-          عملية، واضحة، وقابلة للمراقبة.
-
-          <br><br>
-
-          هدفنا بناء طبقة حماية سهلة الدمج مع المواقع
-          والتطبيقات، وتمنح المطور رؤية أفضل لما يحدث
-          على مستوى الطلبات والترافيك.
+          Routix يجمع بين التحكم بالترافيك،
+          تحليل الطلبات، تقييم المخاطر وآليات
+          الحماية المختلفة داخل طبقة واحدة.
         </p>
 
       </div>
 
-      <a
-        href="#features"
-        class="btn btn-primary"
-      >
-        استكشف Routix
-      </a>
+      <div class="features">
 
-    </div>
+        <article class="feature">
+          <div class="feature-icon">◈</div>
+          <h3>Rate Limiting</h3>
+          <p>
+            تحديد عدد الطلبات المسموح بها لكل IP
+            خلال نافذة زمنية وتقليل إساءة استخدام
+            الموارد.
+          </p>
+          <span class="tag">TRAFFIC_CONTROL</span>
+        </article>
 
-    <div class="terminal">
+        <article class="feature">
+          <div class="feature-icon">⚡</div>
+          <h3>Burst Protection</h3>
+          <p>
+            التعامل مع الارتفاعات المفاجئة والسريعة
+            في الطلبات قبل انتقال الضغط إلى التطبيق
+            الأصلي.
+          </p>
+          <span class="tag">BURST_DETECTION</span>
+        </article>
 
-      <div>
-        <span class="white">$</span>
-        routix start
+        <article class="feature">
+          <div class="feature-icon">L7</div>
+          <h3>Layer 7 Protection</h3>
+          <p>
+            فحص طلبات HTTP على مستوى التطبيق
+            وتحليل المسارات والرؤوس والبيانات
+            وفق قواعد الحماية.
+          </p>
+          <span class="tag">HTTP_INSPECTION</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">SQL</div>
+          <h3>SQLi Detection</h3>
+          <p>
+            كشف أنماط شائعة مرتبطة بمحاولات
+            SQL Injection داخل الطلبات.
+          </p>
+          <span class="tag">ATTACK_DETECTION</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">X</div>
+          <h3>XSS Detection</h3>
+          <p>
+            فحص الأنماط المعروفة المرتبطة بمحاولات
+            Cross-Site Scripting.
+          </p>
+          <span class="tag">WEB_SECURITY</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">R</div>
+          <h3>Risk Scoring</h3>
+          <p>
+            بناء درجة خطورة للمصادر والطلبات
+            للمساعدة في اتخاذ قرار الحظر أو
+            التقييد أو المراقبة.
+          </p>
+          <span class="tag">RISK_ENGINE</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">H</div>
+          <h3>Honeypot</h3>
+          <p>
+            مسارات طُعم يمكن استخدامها لرصد
+            المصادر التي تتفاعل مع نقاط لا يفترض
+            أن يستخدمها المستخدم الطبيعي.
+          </p>
+          <span class="tag">THREAT_INTELLIGENCE</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">⊘</div>
+          <h3>Blacklist</h3>
+          <p>
+            التعامل مع المصادر التي تتجاوز سياسات
+            الحماية وإبقاؤها ضمن قائمة الحظر
+            حسب منطق النظام.
+          </p>
+          <span class="tag">IP_CONTROL</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">↯</div>
+          <h3>Concurrency Control</h3>
+          <p>
+            التحكم في عدد الاتصالات المتزامنة
+            لكل IP وعلى مستوى الخدمة لتقليل
+            الضغط غير الطبيعي.
+          </p>
+          <span class="tag">CONNECTION_LIMIT</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">◌</div>
+          <h3>Live Alerts</h3>
+          <p>
+            مراقبة الأحداث والتنبيهات بشكل مباشر
+            من خلال قناة الأحداث الخاصة بالـWAF
+            دون الحاجة لتحديث الصفحة.
+          </p>
+          <span class="tag">REAL_TIME</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">▣</div>
+          <h3>Security Headers</h3>
+          <p>
+            تحسين طبقة HTTP الأمنية باستخدام
+            إعدادات Security Headers المناسبة
+            للسيرفر.
+          </p>
+          <span class="tag">HTTP_SECURITY</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">↗</div>
+          <h3>Reverse Proxy</h3>
+          <p>
+            تمرير الطلبات الطبيعية إلى TARGET_URL
+            مع إبقاء التطبيق الأصلي خلف طبقة
+            Routix.
+          </p>
+          <span class="tag">PROXY_LAYER</span>
+        </article>
+
       </div>
 
-      <div class="green">
-        ✓ WAF protection enabled
+    </section>
+
+    <!-- L7 FLOW -->
+
+    <section id="api" class="section">
+
+      <div class="section-title">
+
+        <span class="eyebrow">
+          REQUEST PIPELINE
+        </span>
+
+        <h2>
+          كيف يمر الطلب داخل Routix؟
+        </h2>
+
+        <p>
+          الفكرة الأساسية هي أن Routix يصبح نقطة
+          الدخول العامة، بينما يبقى التطبيق الأصلي
+          خلفه.
+        </p>
+
       </div>
 
-      <div class="green">
-        ✓ Rate limiting enabled
+      <div class="flow">
+
+        <div class="flow-node">
+          <b>CLIENT</b>
+          <span>
+            المستخدم يرسل HTTP Request
+          </span>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+          <b>ROUTIX</b>
+          <span>
+            استقبال وفحص الطلب
+          </span>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+          <b>WAF ENGINE</b>
+          <span>
+            Rate / L7 / Risk / Rules
+          </span>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+          <b>DECISION</b>
+          <span>
+            Allow / Block / Limit
+          </span>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+          <b>TARGET</b>
+          <span>
+            تمرير الطلب الطبيعي للتطبيق
+          </span>
+        </div>
+
       </div>
 
-      <div class="green">
-        ✓ Risk engine enabled
+    </section>
+
+    <!-- API & INTEGRATION -->
+
+    <section id="integration" class="section">
+
+      <div class="section-title">
+
+        <span class="eyebrow">
+          API & INTEGRATION
+        </span>
+
+        <h2>
+          اربط Routix بموقع العميل
+        </h2>
+
+        <p>
+          لا تحتاج إلى وضع كود الحماية داخل موقع
+          العميل. اجعل Routix أمام التطبيق،
+          وحدد TARGET_URL للتطبيق الأصلي.
+        </p>
+
       </div>
 
-      <div class="green">
-        ✓ Live admin events enabled
+      <div class="integration">
+
+        <div class="steps">
+
+          <div class="step">
+            <b class="step-number">01</b>
+            <div>
+              <strong>شغّل التطبيق الأصلي</strong>
+              <span>
+                مثال: التطبيق يعمل داخليًا على
+                127.0.0.1:3000.
+              </span>
+            </div>
+          </div>
+
+          <div class="step">
+            <b class="step-number">02</b>
+            <div>
+              <strong>حدد TARGET_URL</strong>
+              <span>
+                Routix يستخدم TARGET_URL لمعرفة
+                التطبيق الذي سيتم تمرير الطلبات
+                الطبيعية إليه.
+              </span>
+            </div>
+          </div>
+
+          <div class="step">
+            <b class="step-number">03</b>
+            <div>
+              <strong>وجّه الدومين إلى Routix</strong>
+              <span>
+                الدومين العام يصل إلى Routix بدلًا
+                من الوصول المباشر إلى التطبيق.
+              </span>
+            </div>
+          </div>
+
+          <div class="step">
+            <b class="step-number">04</b>
+            <div>
+              <strong>اترك أسرار السيرفر في البيئة</strong>
+              <span>
+                WAF_API_KEY وبيانات الإدارة لا توضع
+                داخل JavaScript الخاص بالواجهة.
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="code-card">
+
+          <div class="code-title">
+            <span class="code-dot"></span>
+            .env
+          </div>
+
+<pre># Routix
+
+PORT=8080
+
+# Original application
+TARGET_URL=http://127.0.0.1:3000
+
+# Security
+WAF_API_KEY=ضع_مفتاحاً_عشوائياً_طويلاً
+
+# Admin
+ADMIN_USER=admin
+ADMIN_PASSWORD=ضع_كلمة_مرور_قوية_وطويلة
+
+# Proxy
+TRUST_PROXY=false
+
+# Storage
+DATA_FILE=waf-db.json
+
+# Rate Limiting
+RATE_LIMIT_WINDOW=60
+RATE_LIMIT_MAX=120
+
+# Burst Protection
+BURST_WINDOW_MS=1000
+BURST_MAX=15
+
+# Global Traffic
+GLOBAL_RATE_WINDOW_MS=1000
+GLOBAL_RATE_MAX=2000
+
+# Concurrent Connections
+MAX_CONCURRENT_PER_IP=30
+MAX_GLOBAL_CONCURRENT=1000</pre>
+
+          <div class="warning">
+            ملاحظة: أسماء المتغيرات هنا مبنية على إعدادات Routix
+            التي ذكرتها. إذا كان السيرفر الفعلي يستخدم أسماء
+            مختلفة، استخدم أسماء متغيرات السيرفر الحقيقية.
+          </div>
+
+        </div>
+
       </div>
 
-      <div>
-        <span class="white">→</span>
-        listening on :8080
+    </section>
+
+    <!-- ADMIN -->
+
+    <section id="admin" class="section">
+
+      <div class="admin-card">
+
+        <div class="admin-status">
+          <span class="live-dot"></span>
+          ROUTIX ADMIN / LIVE MONITORING
+        </div>
+
+        <h2>
+          لوحة الإدارة جاهزة.
+        </h2>
+
+        <p>
+          الوصول إلى لوحة الإدارة الحالية يتم من خلال
+          المسار <b>/admin</b>. من هناك يمكن إدارة ومراقبة
+          حالة الـWAF والأحداث والإحصائيات وفق الوظائف
+          الموجودة في السيرفر.
+        </p>
+
+        <a href="/admin" class="btn btn-primary">
+          فتح لوحة الإدارة ←
+        </a>
+
       </div>
 
-    </div>
+    </section>
 
-  </div>
+    <!-- SETTINGS -->
 
-</section>
+    <section id="settings" class="section">
 
-<footer>
+      <div class="section-title">
 
-  © 2026 Routix — Cloud WAF & Application Protection
+        <span class="eyebrow">
+          WAF CONFIGURATION
+        </span>
 
-</footer>
+        <h2>
+          الإعدادات التشغيلية
+        </h2>
 
-<script>
+        <p>
+          يتم التحكم في السلوك التشغيلي للـWAF
+          من خلال متغيرات البيئة الموجودة على السيرفر.
+        </p>
 
-  function toggleMobileMenu() {
+      </div>
 
-    const nav = document.querySelector("nav");
+      <div class="settings-grid">
 
-    if (!nav) return;
+        <article class="setting">
+          <h3>Traffic Control</h3>
+          <p>
+            التحكم في معدل الطلبات والحدود العامة
+            وحدود الـBurst.
+          </p>
+          <code>
+            RATE_LIMIT_MAX<br>
+            BURST_MAX<br>
+            GLOBAL_RATE_MAX
+          </code>
+        </article>
 
-    if (nav.style.display === "flex") {
+        <article class="setting">
+          <h3>Risk Engine</h3>
+          <p>
+            إعدادات تقييم المخاطر والإجراءات الناتجة
+            عن ارتفاع مستوى الخطورة.
+          </p>
+          <code>
+            RISK_BLOCK_THRESHOLD<br>
+            RISK_HONEYPOT_THRESHOLD<br>
+            RISK_TTL
+          </code>
+        </article>
 
-      nav.style.display = "";
+        <article class="setting">
+          <h3>Concurrency</h3>
+          <p>
+            تحديد عدد الاتصالات المتزامنة لكل IP
+            وعلى مستوى الخدمة.
+          </p>
+          <code>
+            MAX_CONCURRENT_PER_IP<br>
+            MAX_GLOBAL_CONCURRENT
+          </code>
+        </article>
 
-      return;
+        <article class="setting">
+          <h3>Proxy</h3>
+          <p>
+            إعدادات الاتصال بين Routix والتطبيق
+            الأصلي الموجود خلف الـWAF.
+          </p>
+          <code>
+            TARGET_URL<br>
+            TRUST_PROXY<br>
+            PROXY_TIMEOUT_MS
+          </code>
+        </article>
 
+        <article class="setting">
+          <h3>Request Limits</h3>
+          <p>
+            التحكم في المهلات الخاصة بالطلبات
+            والرؤوس والاتصال مع التطبيق.
+          </p>
+          <code>
+            REQUEST_TIMEOUT_MS<br>
+            HEADERS_TIMEOUT_MS<br>
+            PROXY_TIMEOUT_MS
+          </code>
+        </article>
+
+        <article class="setting">
+          <h3>Security</h3>
+          <p>
+            مفاتيح API وبيانات الإدارة يجب أن تبقى
+            في بيئة السيرفر فقط.
+          </p>
+          <code>
+            WAF_API_KEY<br>
+            ADMIN_USER<br>
+            ADMIN_PASSWORD
+          </code>
+        </article>
+
+      </div>
+
+    </section>
+
+    <!-- ABOUT -->
+
+    <section id="about" class="section">
+
+      <div class="about">
+
+        <div class="about-copy">
+
+          <span class="eyebrow">
+            ABOUT ROUTIX
+          </span>
+
+          <div class="section-title">
+
+            <h2>
+              نبني الحماية بعقلية
+              البنية التحتية.
+            </h2>
+
+            <p>
+              Routix مشروع تقني طوره مطورون شغوفون
+              بالأمن السيبراني، البنية التحتية وتطوير
+              الأنظمة.
+              <br><br>
+              نؤمن أن طبقة الحماية الجيدة يجب أن تكون
+              عملية، واضحة وقابلة للمراقبة، وأن تمنح
+              المطور رؤية أفضل لما يحدث على مستوى
+              الترافيك والطلبات بدل أن تكون مجرد طبقة
+              غير مرئية أمام التطبيق.
+              <br><br>
+              هدف Routix هو توفير طبقة WAF قابلة للدمج
+              مع المواقع والتطبيقات، مع أدوات للتحكم
+              بالترافيك ومراقبة الأحداث الأمنية.
+            </p>
+
+          </div>
+
+          <a href="#features" class="btn btn-primary">
+            استكشف Routix ←
+          </a>
+
+        </div>
+
+        <div class="terminal">
+
+          <div>
+            <span class="white">$</span>
+            routix start
+          </div>
+
+          <div class="green">
+            ✓ WAF protection enabled
+          </div>
+
+          <div class="green">
+            ✓ L7 inspection enabled
+          </div>
+
+          <div class="green">
+            ✓ Rate limiting enabled
+          </div>
+
+          <div class="green">
+            ✓ Risk engine enabled
+          </div>
+
+          <div class="green">
+            ✓ Honeypot monitoring enabled
+          </div>
+
+          <div class="green">
+            ✓ Blacklist engine enabled
+          </div>
+
+          <div class="green">
+            ✓ Live admin events enabled
+          </div>
+
+          <div>
+            <span class="cyan">→</span>
+            proxying to TARGET_URL
+          </div>
+
+          <div>
+            <span class="cyan">→</span>
+            listening on :8080
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- =========================================================
+       FOOTER
+  ========================================================== -->
+
+  <footer>
+    © 2026 <span>Routix</span> — Cloud WAF & Application Protection
+  </footer>
+
+  <script>
+    /* =========================================================
+       INTRO
+    ========================================================== */
+
+    function enterPlatform() {
+      const intro = document.getElementById("intro");
+
+      intro.classList.add("hidden");
+      document.body.classList.remove("locked");
+
+      setTimeout(() => {
+        intro.style.display = "none";
+      }, 750);
     }
 
-    nav.style.display = "flex";
+    /* =========================================================
+       MOBILE MENU
+    ========================================================== */
 
-    nav.style.position = "absolute";
+    function toggleMenu() {
+      const nav = document.getElementById("nav");
+      nav.classList.toggle("mobile-open");
+    }
 
-    nav.style.top = "78px";
+    document.querySelectorAll("#nav a").forEach(link => {
+      link.addEventListener("click", () => {
+        document.getElementById("nav").classList.remove("mobile-open");
+      });
+    });
 
-    nav.style.left = "5%";
+    /* =========================================================
+       CYBER PARTICLES
+    ========================================================== */
 
-    nav.style.right = "5%";
+    const particles = document.getElementById("particles");
 
-    nav.style.flexDirection = "column";
+    for (let i = 0; i < 32; i++) {
+      const p = document.createElement("span");
 
-    nav.style.alignItems = "stretch";
+      p.className = "particle";
 
-    nav.style.padding = "10px";
+      p.style.left = Math.random() * 100 + "%";
+      p.style.top = (40 + Math.random() * 60) + "%";
+      p.style.animationDelay = (Math.random() * 8) + "s";
+      p.style.animationDuration = (5 + Math.random() * 7) + "s";
 
-    nav.style.background = "rgba(3,6,11,.97)";
+      particles.appendChild(p);
+    }
 
-    nav.style.border = "1px solid rgba(53,231,255,.14)";
+    /* =========================================================
+       ESCAPE = CLOSE MOBILE MENU
+    ========================================================== */
 
-    nav.style.borderRadius = "14px";
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") {
+        document.getElementById("nav").classList.remove("mobile-open");
+      }
+    });
 
-  }
-
-</script>
+  </script>
 
 </body>
 </html>
