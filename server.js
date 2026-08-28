@@ -1,1099 +1,3271 @@
-'use strict';
+// cloud-waf-proxy.ts
+//
+// Single-Site Cloud WAF Reverse Proxy
+// Strong L7 Protection + Live Admin Dashboard
+//
+// Internet
+//    |
+//    v
+// WAF :8080
+//    |
+//    v
+// TARGET_URL
+//
+// IMPORTANT:
+// 1. لا تعرض TARGET_URL مباشرة للإنترنت.
+// 2. اجعل الموقع يستقبل الترافيك من الـWAF فقط.
+// 3. هذه الحماية ضد HTTP/L7 floods وSlowloris والطلبات الزائدة.
+// 4. هجوم شبكي ضخم جدًا يحتاج CDN / DDoS provider.
+//
+// Install:
+//
+// npm i express helmet zod http-proxy-middleware
+// npm i -D typescript tsx @types/node @types/express
+//
+// Environment:
+//
+// PORT=8080
+// TARGET_URL=http://127.0.0.1:3000
+// WAF_API_KEY=ضع-مفتاح-طويل-وعشوائي-هنا
+//
+// ADMIN_USER=admin
+// ADMIN_PASSWORD=ضع-كلمة-مرور-قوية-هنا
+//
+// TRUST_PROXY=false
+// DATA_FILE=waf-db.json
+//
+// RATE_LIMIT_WINDOW=60
+// RATE_LIMIT_MAX=120
+//
+// BURST_WINDOW_MS=1000
+// BURST_MAX=15
+//
+// GLOBAL_RATE_WINDOW_MS=1000
+// GLOBAL_RATE_MAX=2000
+//
+// MAX_CONCURRENT_PER_IP=30
+// MAX_GLOBAL_CONCURRENT=1000
+//
+// VIOLATION_LIMIT=5
+// VIOLATION_WINDOW_MS=60000
+//
+// AUTO_BLACKLIST_SECONDS=86400
+//
+// RISK_BLOCK_THRESHOLD=100
+// RISK_HONEYPOT_THRESHOLD=70
+// RISK_TTL=21600
+// BLACKLIST_TTL=86400
+//
+// MAX_BODY_SIZE=256kb
+//
+// REQUEST_TIMEOUT_MS=15000
+// HEADERS_TIMEOUT_MS=10000
+// KEEP_ALIVE_TIMEOUT_MS=5000
+// PROXY_TIMEOUT_MS=15000
+//
+// Run:
+//
+// npx tsx cloud-waf-proxy.ts
 
-const express = require('express');
-const http = require('http');
-const https = require('https');
-const crypto = require('crypto');
-const dns = require('dns').promises;
-const net = require('net');
-const os = require('os');
-const { Transform, pipeline } = require('stream');
-const { promisify } = require('util');
-const pipelineAsync = promisify(pipeline);
-const app = express();
-const server = http.createServer(app);
+import crypto from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
+import http from "node:http";
 
-let activeRequests = 0;
-let isShuttingDown = false;
-let totalRequestsCounter = 1420;
-let blockedRequestsCounter = 85;
-let suspiciousRequestsCounter = 34;
+import express, {
+  type Request,
+  type Response,
+  type NextFunction
+} from "express";
 
-server.requestTimeout = 30_000;
-server.headersTimeout = 10_000;
-server.keepAliveTimeout = 5_000;
+import helmet from "helmet";
+import { z } from "zod";
 
-function parseTrustProxy(value) {
-    if (!value || value === 'false' || value === '0') {
-        return false;
+import {
+  createProxyMiddleware,
+  fixRequestBody
+} from "http-proxy-middleware";
+
+/* ============================================================
+   CONFIG
+   ============================================================ */
+
+const ConfigSchema = z.object({
+  PORT: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(8080),
+
+  TARGET_URL: z.string().url(),
+
+  WAF_API_KEY: z.string().min(20),
+
+  ADMIN_USER: z.string().min(3),
+
+  ADMIN_PASSWORD: z.string().min(12),
+
+  DATA_FILE: z.string().default("waf-db.json"),
+
+  TRUST_PROXY: z.coerce
+    .boolean()
+    .default(false),
+
+  RATE_LIMIT_WINDOW: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(60),
+
+  RATE_LIMIT_MAX: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(120),
+
+  BURST_WINDOW_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(1000),
+
+  BURST_MAX: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(15),
+
+  GLOBAL_RATE_WINDOW_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(1000),
+
+  GLOBAL_RATE_MAX: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(2000),
+
+  MAX_CONCURRENT_PER_IP: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(30),
+
+  MAX_GLOBAL_CONCURRENT: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(1000),
+
+  VIOLATION_LIMIT: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(5),
+
+  VIOLATION_WINDOW_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(60000),
+
+  AUTO_BLACKLIST_SECONDS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(86400),
+
+  RISK_BLOCK_THRESHOLD: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(100),
+
+  RISK_HONEYPOT_THRESHOLD: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(70),
+
+  RISK_TTL: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(21600),
+
+  BLACKLIST_TTL: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(86400),
+
+  MAX_BODY_SIZE: z.string().default("256kb"),
+
+  REQUEST_TIMEOUT_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(15000),
+
+  HEADERS_TIMEOUT_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(10000),
+
+  KEEP_ALIVE_TIMEOUT_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(5000),
+
+  PROXY_TIMEOUT_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(15000)
+});
+
+const config = ConfigSchema.parse({
+  PORT: process.env.PORT,
+
+  TARGET_URL:
+    process.env.TARGET_URL,
+
+  WAF_API_KEY:
+    process.env.WAF_API_KEY,
+
+  ADMIN_USER:
+    process.env.ADMIN_USER,
+
+  ADMIN_PASSWORD:
+    process.env.ADMIN_PASSWORD,
+
+  DATA_FILE:
+    process.env.DATA_FILE,
+
+  TRUST_PROXY:
+    process.env.TRUST_PROXY,
+
+  RATE_LIMIT_WINDOW:
+    process.env.RATE_LIMIT_WINDOW,
+
+  RATE_LIMIT_MAX:
+    process.env.RATE_LIMIT_MAX,
+
+  BURST_WINDOW_MS:
+    process.env.BURST_WINDOW_MS,
+
+  BURST_MAX:
+    process.env.BURST_MAX,
+
+  GLOBAL_RATE_WINDOW_MS:
+    process.env.GLOBAL_RATE_WINDOW_MS,
+
+  GLOBAL_RATE_MAX:
+    process.env.GLOBAL_RATE_MAX,
+
+  MAX_CONCURRENT_PER_IP:
+    process.env.MAX_CONCURRENT_PER_IP,
+
+  MAX_GLOBAL_CONCURRENT:
+    process.env.MAX_GLOBAL_CONCURRENT,
+
+  VIOLATION_LIMIT:
+    process.env.VIOLATION_LIMIT,
+
+  VIOLATION_WINDOW_MS:
+    process.env.VIOLATION_WINDOW_MS,
+
+  AUTO_BLACKLIST_SECONDS:
+    process.env.AUTO_BLACKLIST_SECONDS,
+
+  RISK_BLOCK_THRESHOLD:
+    process.env.RISK_BLOCK_THRESHOLD,
+
+  RISK_HONEYPOT_THRESHOLD:
+    process.env.RISK_HONEYPOT_THRESHOLD,
+
+  RISK_TTL:
+    process.env.RISK_TTL,
+
+  BLACKLIST_TTL:
+    process.env.BLACKLIST_TTL,
+
+  MAX_BODY_SIZE:
+    process.env.MAX_BODY_SIZE,
+
+  REQUEST_TIMEOUT_MS:
+    process.env.REQUEST_TIMEOUT_MS,
+
+  HEADERS_TIMEOUT_MS:
+    process.env.HEADERS_TIMEOUT_MS,
+
+  KEEP_ALIVE_TIMEOUT_MS:
+    process.env.KEEP_ALIVE_TIMEOUT_MS,
+
+  PROXY_TIMEOUT_MS:
+    process.env.PROXY_TIMEOUT_MS
+});
+
+/* ============================================================
+   DATABASE
+   ============================================================ */
+
+interface DbSchema {
+  blacklists: Record<
+    string,
+    {
+      reason: string;
+      createdAt: string;
+      expiresAt: number;
     }
-    if (value === 'true' || value === '1') {
-        throw new Error('TRUST_PROXY must contain explicit trusted IP/CIDR values.');
+  >;
+
+  risks: Record<
+    string,
+    {
+      score: number;
+      expiresAt: number;
     }
-    return value
-        .split(',')
-        .map(v => v.trim())
-        .filter(Boolean);
+  >;
 }
 
-const CONFIG = {
-    PORT: Number(process.env.PORT || 3000),
-    ORIGIN_SECRET_TOKEN: process.env.ORIGIN_SECRET_TOKEN || 'k9X#mP2$vL9_qR5!wZ8*yF3@bN6%dT1',
-    MAX_BODY_SIZE: 5 * 1024 * 1024,
-    MAX_CONCURRENT_REQUESTS: 500,
-    RATE_LIMIT_WINDOW: 60,
-    RATE_LIMIT_MAX: 150,
-    BLOCK_DURATION: 15 * 60 * 1000,
-    LEARNING_PHASE_REQUESTS: 100,
-    CONFIDENCE_THRESHOLD: 0.85,
-    DNS_CACHE_TTL: 30_000,
-    BODY_SAMPLE_SIZE: 8192,
-    UPSTREAM_TIMEOUT: 20_000,
-    MAX_MEMORY_ENTRIES: 10_000
-};
+const dbFilePath = path.resolve(
+  process.cwd(),
+  config.DATA_FILE
+);
 
-app.set('trust proxy', parseTrustProxy(process.env.TRUST_PROXY));
-
-if (!Number.isInteger(CONFIG.PORT) || CONFIG.PORT < 1 || CONFIG.PORT > 65535) {
-    throw new Error('Invalid PORT.');
-}
-if (!CONFIG.ORIGIN_SECRET_TOKEN) {
-    throw new Error('ORIGIN_SECRET_TOKEN is required.');
-}
-if (CONFIG.ORIGIN_SECRET_TOKEN.length < 32) {
-    throw new Error('ORIGIN_SECRET_TOKEN must be at least 32 characters.');
+function emptyDb(): DbSchema {
+  return {
+    blacklists: {},
+    risks: {}
+  };
 }
 
-function structuredLog(level, message, meta = {}) {
-    console.log(JSON.stringify({ timestamp: new Date().toISOString(), level, message, ...meta }));
-}
+function loadDb(): DbSchema {
+  try {
+    if (
+      !fs.existsSync(
+        dbFilePath
+      )
+    ) {
+      return emptyDb();
+    }
 
-function getIpLocation(ip) {
-    return new Promise((resolve) => {
-        if (ip === '127.0.0.1' || ip === '::1' || ip.startsWith('192.168.') || ip.startsWith('10.')) {
-            return resolve('شبكة محلية (Localhost)');
-        }
+    const parsed =
+      JSON.parse(
+        fs.readFileSync(
+          dbFilePath,
+          "utf8"
+        )
+      );
 
-        https.get(`https://ipapi.co/${ip}/json/`, (res) => {
-            let data = '';
-            res.on('data', chunk => data += chunk);
-            res.on('end', () => {
-                try {
-                    const info = JSON.parse(data);
-                    if (info.error) {
-                        return resolve('غير معروف');
-                    }
-                    resolve(`${info.city || 'غير معروف'}, ${info.country_name || 'غير معروف'}`);
-                } catch {
-                    resolve('غير معروف');
-                }
-            });
-        }).on('error', () => resolve('غير معروف'));
-    });
-}
+    return {
+      blacklists:
+        parsed.blacklists || {},
 
-async function sendSecurityAlert(ip, score, pathVal, attackType) {
-    const token = '8817540855:AAEzpJxQtLKZmiHcL0RcDlCZnLVehMaaTIU';
-    const chatId = '2025220567';
-    
-    const location = await getIpLocation(ip);
-
-    const message = `🚨 *تم رصد وحظر هجوم أمني!*\n\n` +
-                    `🌐 *الـ IP:* \`${ip}\`\n` +
-                    `📍 *الموقع:* ${location}\n` +
-                    `⚔️ *نوع الهجوم:* ${attackType}\n` +
-                    `📊 *درجة الخطورة:* \`${score}\`\n` +
-                    `📂 *المسار المستهدف:* \`${pathVal}\``;
-
-    const data = JSON.stringify({
-        chat_id: chatId,
-        text: message,
-        parse_mode: 'Markdown'
-    });
-
-    const options = {
-        hostname: 'api.telegram.org',
-        port: 443,
-        path: `/bot${token}/sendMessage`,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(data)
-        }
+      risks:
+        parsed.risks || {}
     };
+  } catch (error) {
+    console.error(
+      "Database load error:",
+      error
+    );
 
-    const req = https.request(options);
-    req.on('error', (error) => {
-        structuredLog('ERROR', 'Telegram alert failed', { error: error.message });
-    });
-    req.write(data);
-    req.end();
+    return emptyDb();
+  }
 }
 
-function normalizeIPv4(ip) {
-    if (!net.isIPv4(ip)) return null;
-    const parts = ip.split('.').map(Number);
-    if (parts.length !== 4 || parts.some(x => !Number.isInteger(x) || x < 0 || x > 255)) return null;
-    return parts;
+let db = loadDb();
+
+let dbDirty = false;
+
+function saveDb(): void {
+  try {
+    const now =
+      Date.now();
+
+    for (
+      const [
+        key,
+        value
+      ] of Object.entries(
+        db.blacklists
+      )
+    ) {
+      if (
+        value.expiresAt <
+        now
+      ) {
+        delete db.blacklists[
+          key
+        ];
+      }
+    }
+
+    for (
+      const [
+        key,
+        value
+      ] of Object.entries(
+        db.risks
+      )
+    ) {
+      if (
+        value.expiresAt <
+        now
+      ) {
+        delete db.risks[
+          key
+        ];
+      }
+    }
+
+    fs.writeFileSync(
+      dbFilePath,
+      JSON.stringify(
+        db,
+        null,
+        2
+      ),
+      "utf8"
+    );
+
+    dbDirty = false;
+  } catch (error) {
+    console.error(
+      "Database save error:",
+      error
+    );
+  }
 }
 
-function ipv4ToBigInt(ip) {
-    const parts = normalizeIPv4(ip);
-    if (!parts) throw new Error('Invalid IPv4.');
-    return (
-        (BigInt(parts[0]) << 24n) |
-        (BigInt(parts[1]) << 16n) |
-        (BigInt(parts[2]) << 8n) |
-        BigInt(parts[3])
+setInterval(
+  () => {
+    if (dbDirty) {
+      saveDb();
+    }
+  },
+  5000
+);
+
+/* ============================================================
+   MEMORY RATE LIMITERS
+   ============================================================ */
+
+interface Counter {
+  count: number;
+  expiresAt: number;
+}
+
+const requestCounters =
+  new Map<
+    string,
+    Counter
+  >();
+
+const burstCounters =
+  new Map<
+    string,
+    Counter
+  >();
+
+const globalCounters =
+  new Map<
+    string,
+    Counter
+  >();
+
+const violations =
+  new Map<
+    string,
+    Counter
+  >();
+
+const concurrentByIp =
+  new Map<
+    string,
+    number
+  >();
+
+let globalConcurrent = 0;
+
+/* ============================================================
+   LIVE ADMIN ALERTS
+   ============================================================ */
+
+interface WafAlert {
+  id: string;
+  time: string;
+  ip: string;
+  path: string;
+  risk: number;
+  action: Action;
+  reasons: string[];
+}
+
+const alerts: WafAlert[] = [];
+
+const alertClients =
+  new Set<Response>();
+
+const MAX_ALERTS = 200;
+
+function addAlert(data: {
+  ip: string;
+  path: string;
+  risk: number;
+  action: Action;
+  reasons: string[];
+}): void {
+  const alert: WafAlert = {
+    id:
+      crypto.randomUUID(),
+
+    time:
+      new Date().toISOString(),
+
+    ip: data.ip,
+
+    path:
+      truncate(
+        data.path,
+        500
+      ),
+
+    risk: data.risk,
+
+    action: data.action,
+
+    reasons:
+      data.reasons.slice(
+        0,
+        20
+      )
+  };
+
+  alerts.unshift(alert);
+
+  if (
+    alerts.length >
+    MAX_ALERTS
+  ) {
+    alerts.length =
+      MAX_ALERTS;
+  }
+
+  const payload =
+    `data: ${JSON.stringify(
+      alert
+    )}\n\n`;
+
+  for (
+    const client of alertClients
+  ) {
+    try {
+      client.write(
+        payload
+      );
+    } catch {
+      alertClients.delete(
+        client
+      );
+    }
+  }
+}
+
+/* ============================================================
+   MEMORY CLEANUP
+   ============================================================ */
+
+function cleanupMemory(): void {
+  const now =
+    Date.now();
+
+  for (
+    const [
+      key,
+      value
+    ] of requestCounters
+  ) {
+    if (
+      value.expiresAt <
+      now
+    ) {
+      requestCounters.delete(
+        key
+      );
+    }
+  }
+
+  for (
+    const [
+      key,
+      value
+    ] of burstCounters
+  ) {
+    if (
+      value.expiresAt <
+      now
+    ) {
+      burstCounters.delete(
+        key
+      );
+    }
+  }
+
+  for (
+    const [
+      key,
+      value
+    ] of globalCounters
+  ) {
+    if (
+      value.expiresAt <
+      now
+    ) {
+      globalCounters.delete(
+        key
+      );
+    }
+  }
+
+  for (
+    const [
+      key,
+      value
+    ] of violations
+  ) {
+    if (
+      value.expiresAt <
+      now
+    ) {
+      violations.delete(
+        key
+      );
+    }
+  }
+}
+
+setInterval(
+  cleanupMemory,
+  10000
+);
+
+/* ============================================================
+   TYPES
+   ============================================================ */
+
+type Action =
+  | "allow"
+  | "block"
+  | "honeypot";
+
+interface Decision {
+  action: Action;
+  riskScore: number;
+  reasons: string[];
+  requestId: string;
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+
+function normalizeIp(
+  ip: string
+): string {
+  if (
+    ip.startsWith(
+      "::ffff:"
+    )
+  ) {
+    return ip.slice(7);
+  }
+
+  if (
+    ip === "::1"
+  ) {
+    return "127.0.0.1";
+  }
+
+  return ip;
+}
+
+function getClientIp(
+  req: Request
+): string {
+  return normalizeIp(
+    req.ip ||
+      "0.0.0.0"
+  );
+}
+
+function truncate(
+  value: string,
+  max = 4096
+): string {
+  return value.length >
+    max
+    ? value.slice(
+        0,
+        max
+      )
+    : value;
+}
+
+function safeJson(
+  value: unknown
+): string {
+  try {
+    return JSON.stringify(
+      value
+    );
+  } catch {
+    return "";
+  }
+}
+
+function secureCompare(
+  a: string,
+  b: string
+): boolean {
+  const aBuf =
+    Buffer.from(a);
+
+  const bBuf =
+    Buffer.from(b);
+
+  if (
+    aBuf.length !==
+    bBuf.length
+  ) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(
+    aBuf,
+    bBuf
+  );
+}
+
+/* ============================================================
+   BLACKLIST
+   ============================================================ */
+
+function isBlacklisted(
+  ip: string
+): boolean {
+  const entry =
+    db.blacklists[ip];
+
+  if (!entry) {
+    return false;
+  }
+
+  if (
+    entry.expiresAt <
+    Date.now()
+  ) {
+    delete db.blacklists[
+      ip
+    ];
+
+    dbDirty = true;
+
+    return false;
+  }
+
+  return true;
+}
+
+function blacklist(
+  ip: string,
+  reason: string
+): void {
+  db.blacklists[ip] = {
+    reason,
+
+    createdAt:
+      new Date().toISOString(),
+
+    expiresAt:
+      Date.now() +
+      Math.max(
+        config.BLACKLIST_TTL,
+        config.AUTO_BLACKLIST_SECONDS
+      ) *
+        1000
+  };
+
+  dbDirty = true;
+}
+
+/* ============================================================
+   RISK
+   ============================================================ */
+
+function getRisk(
+  ip: string
+): number {
+  const entry =
+    db.risks[ip];
+
+  if (
+    !entry ||
+    entry.expiresAt <
+      Date.now()
+  ) {
+    return 0;
+  }
+
+  return entry.score;
+}
+
+function addRisk(
+  ip: string,
+  points: number
+): number {
+  const now =
+    Date.now();
+
+  let entry =
+    db.risks[ip];
+
+  if (
+    !entry ||
+    entry.expiresAt <
+      now
+  ) {
+    entry = {
+      score: 0,
+
+      expiresAt:
+        now +
+        config.RISK_TTL *
+          1000
+    };
+  }
+
+  entry.score +=
+    points;
+
+  db.risks[ip] =
+    entry;
+
+  dbDirty = true;
+
+  return entry.score;
+}
+
+/* ============================================================
+   COUNTERS
+   ============================================================ */
+
+function incrementCounter(
+  map: Map<
+    string,
+    Counter
+  >,
+  key: string,
+  windowMs: number
+): number {
+  const now =
+    Date.now();
+
+  let entry =
+    map.get(key);
+
+  if (
+    !entry ||
+    entry.expiresAt <
+      now
+  ) {
+    entry = {
+      count: 0,
+
+      expiresAt:
+        now + windowMs
+    };
+  }
+
+  entry.count++;
+
+  map.set(
+    key,
+    entry
+  );
+
+  return entry.count;
+}
+
+/* ============================================================
+   VIOLATIONS
+   ============================================================ */
+
+function registerViolation(
+  ip: string
+): number {
+  return incrementCounter(
+    violations,
+    ip,
+    config.VIOLATION_WINDOW_MS
+  );
+}
+
+/* ============================================================
+   RATE LIMIT
+   ============================================================ */
+
+function checkRateLimit(
+  ip: string
+): {
+  allowed: boolean;
+  remaining: number;
+} {
+  const count =
+    incrementCounter(
+      requestCounters,
+      ip,
+      config.RATE_LIMIT_WINDOW *
+        1000
+    );
+
+  return {
+    allowed:
+      count <=
+      config.RATE_LIMIT_MAX,
+
+    remaining:
+      Math.max(
+        0,
+        config.RATE_LIMIT_MAX -
+          count
+      )
+  };
+}
+
+/* ============================================================
+   BURST
+   ============================================================ */
+
+function checkBurst(
+  ip: string
+): boolean {
+  const count =
+    incrementCounter(
+      burstCounters,
+      ip,
+      config.BURST_WINDOW_MS
+    );
+
+  return (
+    count <=
+    config.BURST_MAX
+  );
+}
+
+/* ============================================================
+   GLOBAL FLOOD
+   ============================================================ */
+
+function checkGlobalRate(): boolean {
+  const count =
+    incrementCounter(
+      globalCounters,
+      "global",
+      config.GLOBAL_RATE_WINDOW_MS
+    );
+
+  return (
+    count <=
+    config.GLOBAL_RATE_MAX
+  );
+}
+
+/* ============================================================
+   CONCURRENCY
+   ============================================================ */
+
+function acquireConcurrency(
+  ip: string
+): boolean {
+  if (
+    globalConcurrent >=
+    config.MAX_GLOBAL_CONCURRENT
+  ) {
+    return false;
+  }
+
+  const current =
+    concurrentByIp.get(
+      ip
+    ) || 0;
+
+  if (
+    current >=
+    config.MAX_CONCURRENT_PER_IP
+  ) {
+    return false;
+  }
+
+  concurrentByIp.set(
+    ip,
+    current + 1
+  );
+
+  globalConcurrent++;
+
+  return true;
+}
+
+function releaseConcurrency(
+  ip: string
+): void {
+  const current =
+    concurrentByIp.get(
+      ip
+    ) || 0;
+
+  if (
+    current <= 1
+  ) {
+    concurrentByIp.delete(
+      ip
+    );
+  } else {
+    concurrentByIp.set(
+      ip,
+      current - 1
+    );
+  }
+
+  globalConcurrent =
+    Math.max(
+      0,
+      globalConcurrent - 1
     );
 }
 
-function expandIPv6(ip) {
-    let address = String(ip).toLowerCase();
-    if (address.includes('.')) {
-        const lastColon = address.lastIndexOf(':');
-        if (lastColon === -1) throw new Error('Invalid IPv6.');
-        const ipv4 = address.slice(lastColon + 1);
-        if (!net.isIPv4(ipv4)) throw new Error('Invalid embedded IPv4.');
-        const value = ipv4ToBigInt(ipv4);
-        const high = Number((value >> 16n) & 0xffffn).toString(16);
-        const low = Number(value & 0xffffn).toString(16);
-        address = address.slice(0, lastColon + 1) + high + ':' + low;
-    }
-    const sections = address.split('::');
-    if (sections.length > 2) throw new Error('Invalid IPv6.');
-    const left = sections[0] ? sections[0].split(':').filter(Boolean) : [];
-    const right = sections[1] ? sections[1].split(':').filter(Boolean) : [];
-    const missing = 8 - left.length - right.length;
-    if (missing < 0) throw new Error('Invalid IPv6.');
-    const groups = sections.length === 1 ? [...left] : [...left, ...new Array(missing).fill('0'), ...right];
-    if (groups.length !== 8) throw new Error('Invalid IPv6.');
-    return groups.map(group => {
-        const value = parseInt(group, 16);
-        if (!Number.isInteger(value) || value < 0 || value > 0xffff) throw new Error('Invalid IPv6 group.');
-        return value;
-    });
-}
+/* ============================================================
+   DETECTION RULES
+   ============================================================ */
 
-function ipv6ToBigInt(ip) {
-    const groups = expandIPv6(ip);
-    let result = 0n;
-    for (const group of groups) {
-        result = (result << 16n) | BigInt(group);
-    }
-    return result;
-}
-
-function ipToBigInt(ip) {
-    if (net.isIPv4(ip)) return { family: 4, value: ipv4ToBigInt(ip) };
-    if (net.isIPv6(ip)) return { family: 6, value: ipv6ToBigInt(ip) };
-    throw new Error(`Invalid IP: ${ip}`);
-}
-
-function getIPv4MappedAddress(ip) {
-    if (!net.isIPv6(ip)) return null;
-    try {
-        const groups = expandIPv6(ip);
-        const mapped = groups[0] === 0 && groups[1] === 0 && groups[2] === 0 && groups[3] === 0 && groups[4] === 0 && groups[5] === 0xffff;
-        if (!mapped) return null;
-        const high = groups[6];
-        const low = groups[7];
-        return [high >> 8, high & 0xff, low >> 8, low & 0xff].join('.');
-    } catch {
-        return null;
-    }
-}
-
-function isIpInCidr(ip, cidr) {
-    try {
-        const [network, bitsString] = cidr.split('/');
-        let ipInfo = ipToBigInt(ip);
-        let networkInfo = ipToBigInt(network);
-        const mappedIp = getIPv4MappedAddress(ip);
-        const mappedNetwork = getIPv4MappedAddress(network);
-        if (mappedIp) ipInfo = ipToBigInt(mappedIp);
-        if (mappedNetwork) networkInfo = ipToBigInt(mappedNetwork);
-        if (ipInfo.family !== networkInfo.family) return false;
-        const totalBits = ipInfo.family === 4 ? 32 : 128;
-        const bits = bitsString === undefined ? totalBits : Number(bitsString);
-        if (!Number.isInteger(bits) || bits < 0 || bits > totalBits) return false;
-        if (bits === 0) return true;
-        const shift = BigInt(totalBits - bits);
-        return (ipInfo.value >> shift) === (networkInfo.value >> shift);
-    } catch {
-        return false;
-    }
-}
-
-const BLOCKED_CIDRS = [
-    '0.0.0.0/8', '10.0.0.0/8', '100.64.0.0/10', '127.0.0.0/8',
-    '169.254.0.0/16', '172.16.0.0/12', '192.0.0.0/24', '192.0.2.0/24',
-    '192.168.0.0/16', '198.18.0.0/15', '198.51.100.0/24', '203.0.113.0/24',
-    '224.0.0.0/4', '240.0.0.0/4', '::/128', '::1/128', 'fc00::/7',
-    'fe80::/10', 'ff00::/8', '2001:db8::/32'
+const SQL_PATTERNS = [
+  /\bunion\s+(?:all\s+)?select\b/i,
+  /\bselect\b.{0,100}\bfrom\b/i,
+  /\binsert\s+into\b/i,
+  /\bupdate\b.{0,100}\bset\b/i,
+  /\bdelete\s+from\b/i,
+  /\bdrop\s+(?:table|database)\b/i,
+  /\bor\s+1\s*=\s*1\b/i,
+  /\band\s+1\s*=\s*1\b/i,
+  /(?:--|\/\*|\*\/)/
 ];
 
-function isRestrictedIp(ip) {
-    const mapped = getIPv4MappedAddress(ip);
-    const candidate = mapped || ip;
-    return BLOCKED_CIDRS.some(cidr => isIpInCidr(candidate, cidr));
+const XSS_PATTERNS = [
+  /<\s*script\b/i,
+  /javascript\s*:/i,
+  /on(?:error|load|click|mouseover)\s*=/i,
+  /<\s*(?:iframe|object|embed)\b/i,
+  /document\s*\.\s*(?:cookie|location)/i
+];
+
+const PATH_PATTERNS = [
+  /\.\.[/\\]/,
+  /%2e%2e(?:%2f|%5c)/i,
+  /\.\.%2f/i,
+  /\.\.%5c/i
+];
+
+const RCE_PATTERNS = [
+  /\$\([^)]{1,200}\)/,
+  /`[^`]{1,200}`/,
+  /(?:^|[;&|])\s*(?:curl|wget)\s+/i,
+  /(?:^|[;&|])\s*(?:bash|sh|cmd|powershell)\b/i,
+  /\b(?:eval|exec|system|popen)\s*\(/i
+];
+
+/* ============================================================
+   INSPECTION
+   ============================================================ */
+
+function inspectString(
+  value: string,
+  location: string
+): {
+  score: number;
+  reasons: string[];
+} {
+  const input =
+    truncate(value);
+
+  let score = 0;
+
+  const reasons: string[] =
+    [];
+
+  if (
+    SQL_PATTERNS.some(
+      pattern =>
+        pattern.test(input)
+    )
+  ) {
+    score += 35;
+
+    reasons.push(
+      `sql_injection:${location}`
+    );
+  }
+
+  if (
+    XSS_PATTERNS.some(
+      pattern =>
+        pattern.test(input)
+    )
+  ) {
+    score += 30;
+
+    reasons.push(
+      `xss:${location}`
+    );
+  }
+
+  if (
+    PATH_PATTERNS.some(
+      pattern =>
+        pattern.test(input)
+    )
+  ) {
+    score += 25;
+
+    reasons.push(
+      `path_traversal:${location}`
+    );
+  }
+
+  if (
+    RCE_PATTERNS.some(
+      pattern =>
+        pattern.test(input)
+    )
+  ) {
+    score += 50;
+
+    reasons.push(
+      `rce:${location}`
+    );
+  }
+
+  return {
+    score,
+    reasons
+  };
 }
 
-const dnsCacheMap = new Map();
+function inspectRequest(
+  req: Request
+): {
+  score: number;
+  reasons: string[];
+} {
+  let score = 0;
 
-async function resolveAndPinTarget(targetUrl) {
-    const now = Date.now();
-    const cached = dnsCacheMap.get(targetUrl);
-    if (cached && now - cached.timestamp < CONFIG.DNS_CACHE_TTL) {
-        return cached.value;
-    }
-    const parsed = new URL(targetUrl);
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-        throw new Error('Target must use HTTP or HTTPS.');
-    }
-    const hostname = parsed.hostname;
-    if (!hostname) throw new Error('Target hostname is missing.');
+  const reasons: string[] =
+    [];
 
-    if (net.isIP(hostname)) {
-        if (isRestrictedIp(hostname)) throw new Error(`Restricted target IP: ${hostname}`);
-        const result = { parsed, pinnedIp: hostname, family: net.isIPv6(hostname) ? 6 : 4 };
-        dnsCacheMap.set(targetUrl, { timestamp: now, value: result });
-        return result;
-    }
+  const values = [
+    {
+      value:
+        req.originalUrl,
 
-    const [ipv4, ipv6] = await Promise.all([
-        dns.resolve4(hostname).catch(() => []),
-        dns.resolve6(hostname).catch(() => [])
-    ]);
-    const addresses = [...ipv4, ...ipv6];
-    if (addresses.length === 0) throw new Error(`DNS resolution failed: ${hostname}`);
-    for (const address of addresses) {
-        if (isRestrictedIp(address)) throw new Error(`DNS resolved to restricted IP: ${address}`);
+      location:
+        "url"
+    },
+
+    {
+      value:
+        req.headers[
+          "user-agent"
+        ],
+
+      location:
+        "user-agent"
+    },
+
+    {
+      value:
+        req.headers[
+          "referer"
+        ],
+
+      location:
+        "referer"
+    },
+
+    {
+      value:
+        req.headers[
+          "origin"
+        ],
+
+      location:
+        "origin"
     }
-    const pinnedIp = ipv4[0] || ipv6[0];
-    const result = { parsed, pinnedIp, family: net.isIPv6(pinnedIp) ? 6 : 4 };
-    dnsCacheMap.set(targetUrl, { timestamp: now, value: result });
-    return result;
+  ];
+
+  for (
+    const item of values
+  ) {
+    if (
+      typeof item.value ===
+      "string"
+    ) {
+      const result =
+        inspectString(
+          item.value,
+          item.location
+        );
+
+      score +=
+        result.score;
+
+      reasons.push(
+        ...result.reasons
+      );
+    }
+  }
+
+  if (
+    req.body !==
+    undefined
+  ) {
+    const serialized =
+      safeJson(
+        req.body
+      );
+
+    if (serialized) {
+      const result =
+        inspectString(
+          serialized,
+          "body"
+        );
+
+      score +=
+        result.score;
+
+      reasons.push(
+        ...result.reasons
+      );
+    }
+  }
+
+  return {
+    score,
+
+    reasons: [
+      ...new Set(
+        reasons
+      )
+    ]
+  };
 }
 
-const memoryBlocks = new Map();
-const memoryProfiles = new Map();
-const memoryBaselines = new Map();
-const memoryRateLimits = new Map();
+/* ============================================================
+   WAF DECISION
+   ============================================================ */
 
-function memoryRateLimit(ip) {
-    const now = Date.now();
-    let record = memoryRateLimits.get(ip);
-    if (!record || now >= record.reset) {
-        if (memoryRateLimits.size >= CONFIG.MAX_MEMORY_ENTRIES) {
-            const firstKey = memoryRateLimits.keys().next().value;
-            if (firstKey) memoryRateLimits.delete(firstKey);
-        }
-        record = { count: 0, reset: now + CONFIG.RATE_LIMIT_WINDOW * 1000 };
-        memoryRateLimits.set(ip, record);
-    }
-    record.count++;
-    return (record.count > CONFIG.RATE_LIMIT_MAX);
-}
+async function evaluate(
+  req: Request
+): Promise<Decision> {
+  const requestId =
+    crypto.randomUUID();
 
-function normalizeRoutePath(input) {
-    return String(input || '/')
-        .replace(/\/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(?=\/|$)/g, '/:id')
-        .replace(/\/\d+(?=\/|$)/g, '/:id');
-}
+  const ip =
+    getClientIp(req);
 
-function calculateEntropy(buffer) {
-    if (!buffer || buffer.length === 0) return 0;
-    const frequencies = new Array(256).fill(0);
-    for (const byte of buffer) frequencies[byte]++;
-    let entropy = 0;
-    for (const frequency of frequencies) {
-        if (frequency === 0) continue;
-        const probability = frequency / buffer.length;
-        entropy -= probability * Math.log2(probability);
-    }
-    return entropy;
-}
+  /* ----------------------------------------------------------
+     BLACKLIST
+     ---------------------------------------------------------- */
 
-class BehavioralEngineMemory {
-    profileKey(req) {
-        const material = [
-            req.clientIp,
-            req.headers['user-agent'] || '',
-            req.headers['accept-language'] || ''
-        ].join('|');
-        return crypto.createHash('sha256').update(material).digest('hex').slice(0, 32);
-    }
+  if (
+    isBlacklisted(ip)
+  ) {
+    return {
+      action: "block",
 
-    isBlocked(ip) {
-        const blockUntil = memoryBlocks.get(ip);
-        if (blockUntil && Date.now() < blockUntil) return true;
-        if (blockUntil && Date.now() >= blockUntil) {
-            memoryBlocks.delete(ip);
-        }
-        return false;
-    }
+      riskScore:
+        config.RISK_BLOCK_THRESHOLD,
 
-    blockIp(ip) {
-        memoryBlocks.set(ip, Date.now() + CONFIG.BLOCK_DURATION);
-    }
+      reasons: [
+        "global_blacklist"
+      ],
 
-    rateLimit(ip) {
-        return memoryRateLimit(ip);
-    }
+      requestId
+    };
+  }
 
-    evaluate(req, sample, totalLength, sensitive) {
-        const key = this.profileKey(req);
-        const normalized = normalizeRoutePath(req.path);
-        const route = `${req.method} ${normalized}`;
-        const now = Date.now();
+  /* ----------------------------------------------------------
+     GLOBAL FLOOD
+     ---------------------------------------------------------- */
 
-        let profile = memoryProfiles.get(key) || {
-            lastRequestTime: now,
-            requestIntervals: [],
-            lastEndpoint: false,
-            endpointsVisited: {},
-            transitionMatrix: {},
-            totalRequests: 0,
-            stage: 'QUARANTINE'
-        };
+  if (
+    !checkGlobalRate()
+  ) {
+    const score =
+      addRisk(
+        ip,
+        20
+      );
 
-        let baseline = memoryBaselines.get(key) || {
-            established: false,
-            baselineTransitions: {},
-            baselineMeanInterval: 0,
-            baselineStdDev: 0,
-            confidenceScore: 0
-        };
+    registerViolation(
+      ip
+    );
 
-        const interval = Math.max(0, now - profile.lastRequestTime);
-        profile.lastRequestTime = now;
-        profile.totalRequests = (profile.totalRequests || 0) + 1;
+    const action =
+      score >=
+      config.RISK_HONEYPOT_THRESHOLD
+        ? "honeypot"
+        : "block";
 
-        profile.requestIntervals.push(interval);
-        if (profile.requestIntervals.length > 50) profile.requestIntervals.shift();
-
-        if (!baseline.established) {
-            if (profile.endpointsVisited[normalized]) {
-                profile.endpointsVisited[normalized]++;
-            } else if (Object.keys(profile.endpointsVisited).length < 50) {
-                profile.endpointsVisited[normalized] = 1;
-            }
-
-            if (profile.lastEndpoint) {
-                if (!profile.transitionMatrix[profile.lastEndpoint]) {
-                    profile.transitionMatrix[profile.lastEndpoint] = {};
-                }
-                const transition = `${profile.lastEndpoint} => ${route}`;
-                profile.transitionMatrix[profile.lastEndpoint][transition] = (profile.transitionMatrix[profile.lastEndpoint][transition] || 0) + 1;
-            }
-            profile.lastEndpoint = route;
-
-            const sum = profile.requestIntervals.reduce((a, b) => a + b, 0);
-            const mean = profile.requestIntervals.length ? sum / profile.requestIntervals.length : 1;
-            const varianceSum = profile.requestIntervals.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0);
-            const stdDev = profile.requestIntervals.length > 1 ? Math.sqrt(varianceSum / profile.requestIntervals.length) : 0;
-
-            const coefficient = mean > 0 ? stdDev / mean : 1;
-            const timingFactor = Math.max(0, 1 - Math.min(1, coefficient / 2));
-            const diversityFactor = Math.min(1, Object.keys(profile.endpointsVisited).length / 10);
-            const confidence = (timingFactor * 0.5) + (diversityFactor * 0.5);
-
-            if (profile.totalRequests >= CONFIG.LEARNING_PHASE_REQUESTS && confidence >= CONFIG.CONFIDENCE_THRESHOLD) {
-                baseline.established = true;
-                baseline.baselineTransitions = profile.transitionMatrix;
-                baseline.baselineMeanInterval = mean;
-                baseline.baselineStdDev = stdDev;
-                baseline.confidenceScore = confidence;
-                memoryBaselines.set(key, baseline);
-                profile.stage = 'PROTECTING';
-            } else {
-                profile.stage = 'QUARANTINE';
-            }
-
-            memoryProfiles.set(key, profile);
-            return { totalRiskScore: 0, vector: { stage: profile.stage, confidence } };
-        }
-
-        let velocity = 0;
-        if (baseline.baselineStdDev > 0.1) {
-            const z = Math.abs((interval - baseline.baselineMeanInterval) / baseline.baselineStdDev);
-            if (z > 4.0 && interval < 10) velocity = 30;
-        }
-
-        let sequence = 0;
-        if (profile.lastEndpoint && baseline.baselineTransitions[profile.lastEndpoint]) {
-            const transition = `${profile.lastEndpoint} => ${route}`;
-            if (!baseline.baselineTransitions[profile.lastEndpoint][transition]) {
-                sequence = 35;
-            }
-        }
-        profile.lastEndpoint = route;
-
-        let content = 0;
-        const entropy = calculateEntropy(sample);
-        if (entropy > 7.6 && sensitive && totalLength > 1024) {
-            content = 15;
-        }
-
-        const risk = velocity + sequence + content;
-        if (risk >= 60) {
-            profile.stage = 'ESCALATED';
-        } else if (risk >= 40) {
-            profile.stage = 'HIGH_RISK';
-        } else if (risk >= 20) {
-            profile.stage = 'SUSPICIOUS';
-        } else {
-            profile.stage = 'PROTECTING';
-        }
-
-        memoryProfiles.set(key, profile);
-
-        return {
-            totalRiskScore: risk,
-            vector: { stage: profile.stage, velocity, sequence, content }
-        };
-    }
-}
-
-const behavioral = new BehavioralEngineMemory();
-
-function getClientIp(req) {
-    return req.ip || req.socket.remoteAddress || '0.0.0.0';
-}
-
-const HOP_BY_HOP_HEADERS = new Set([
-    'connection', 'keep-alive', 'proxy-authenticate', 'proxy-authorization',
-    'te', 'trailer', 'transfer-encoding', 'upgrade', 'host'
-]);
-
-function getConnectionHeaderTokens(headers) {
-    const value = headers.connection;
-    if (!value) return new Set();
-    const values = Array.isArray(value) ? value : [value];
-    const tokens = new Set();
-    for (const item of values) {
-        String(item).split(',').map(x => x.trim().toLowerCase()).filter(Boolean).forEach(x => tokens.add(x));
-    }
-    return tokens;
-}
-
-function isUnsafeForwardHeader(name, connectionTokens) {
-    const lower = name.toLowerCase();
-    return HOP_BY_HOP_HEADERS.has(lower) || connectionTokens.has(lower) || lower.startsWith('proxy-') ||
-        lower.startsWith('x-forwarded-') || lower === 'x-tbp-origin-secret';
-}
-
-function buildUpstreamHeaders(req, target, clientIp, bodyLength) {
-    const headers = {};
-    const connectionTokens = getConnectionHeaderTokens(req.headers);
-    for (const [key, value] of Object.entries(req.headers)) {
-        if (isUnsafeForwardHeader(key, connectionTokens)) continue;
-        headers[key] = value;
-    }
-    headers.host = target.parsed.host;
-    headers['x-forwarded-for'] = clientIp;
-    headers['x-forwarded-proto'] = req.protocol === 'https:' ? 'https' : 'http';
-    headers['x-tbp-origin-secret'] = CONFIG.ORIGIN_SECRET_TOKEN;
-    headers['content-length'] = String(bodyLength);
-    delete headers['transfer-encoding'];
-    return headers;
-}
-
-function sanitizeResponseHeaders(input) {
-    const output = {};
-    const connectionTokens = getConnectionHeaderTokens(input || {});
-    for (const [key, value] of Object.entries(input || {})) {
-        const lower = key.toLowerCase();
-        if (HOP_BY_HOP_HEADERS.has(lower) || connectionTokens.has(lower) || lower.startsWith('proxy-')) continue;
-        output[key] = value;
-    }
-    return output;
-}
-
-app.disable('x-powered-by');
-app.use((req, res, next) => {
-    if (isShuttingDown) {
-        res.setHeader('Connection', 'close');
-        return res.status(503).json({ status: 'SERVER_SHUTTING_DOWN' });
-    }
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'DENY');
-    res.setHeader('Referrer-Policy', 'no-referrer');
-    res.setHeader('Content-Security-Policy', "default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data:;");
-    next();
-});
-
-app.get('/_tbp/metrics', (req, res) => {
-    totalRequestsCounter++;
-    res.status(200).json({
-        requests: totalRequestsCounter,
-        blocked: blockedRequestsCounter,
-        suspicious: suspiciousRequestsCounter,
-        health: 'Healthy',
-        latency: '24ms',
-        score: 94
+    addAlert({
+      ip,
+      path:
+        req.originalUrl,
+      risk: score,
+      action,
+      reasons: [
+        "global_rate_limit"
+      ]
     });
-});
 
-app.get('/_tbp/health', (req, res) => {
-    res.status(200).json({
-        status: isShuttingDown ? 'SHUTTING_DOWN' : 'OK',
-        storage: 'MEMORY_IN_PROCESS',
-        activeRequests,
-        uptime: Math.floor(process.uptime())
+    return {
+      action,
+
+      riskScore:
+        score,
+
+      reasons: [
+        "global_rate_limit"
+      ],
+
+      requestId
+    };
+  }
+
+  /* ----------------------------------------------------------
+     BURST
+     ---------------------------------------------------------- */
+
+  if (
+    !checkBurst(ip)
+  ) {
+    const score =
+      addRisk(
+        ip,
+        20
+      );
+
+    const count =
+      registerViolation(
+        ip
+      );
+
+    if (
+      count >=
+      config.VIOLATION_LIMIT
+    ) {
+      blacklist(
+        ip,
+        "repeated_burst_violation"
+      );
+
+      addAlert({
+        ip,
+        path:
+          req.originalUrl,
+        risk: score,
+        action:
+          "block",
+        reasons: [
+          "repeated_burst_violation"
+        ]
+      });
+
+      return {
+        action:
+          "block",
+
+        riskScore:
+          Math.max(
+            score,
+            config.RISK_BLOCK_THRESHOLD
+          ),
+
+        reasons: [
+          "repeated_burst_violation"
+        ],
+
+        requestId
+      };
+    }
+
+    addAlert({
+      ip,
+      path:
+        req.originalUrl,
+      risk: score,
+      action:
+        "honeypot",
+      reasons: [
+        "burst_rate_limit"
+      ]
     });
-});
 
-class BodySpool extends Transform {
-    constructor(maxBytes, sampleBytes) {
-        super();
-        this.maxBytes = maxBytes;
-        this.sampleLimit = sampleBytes;
-        this.totalBytes = 0;
-        this.sampleParts = [];
-        this.sampledBytes = 0;
+    return {
+      action:
+        "honeypot",
+
+      riskScore:
+        score,
+
+      reasons: [
+        "burst_rate_limit"
+      ],
+
+      requestId
+    };
+  }
+
+  /* ----------------------------------------------------------
+     NORMAL RATE LIMIT
+     ---------------------------------------------------------- */
+
+  const rate =
+    checkRateLimit(
+      ip
+    );
+
+  if (
+    !rate.allowed
+  ) {
+    const score =
+      addRisk(
+        ip,
+        30
+      );
+
+    const count =
+      registerViolation(
+        ip
+      );
+
+    if (
+      count >=
+      config.VIOLATION_LIMIT
+    ) {
+      blacklist(
+        ip,
+        "repeated_rate_limit_violation"
+      );
+
+      addAlert({
+        ip,
+        path:
+          req.originalUrl,
+        risk: score,
+        action:
+          "block",
+        reasons: [
+          "rate_limit_violation"
+        ]
+      });
+
+      return {
+        action:
+          "block",
+
+        riskScore:
+          Math.max(
+            score,
+            config.RISK_BLOCK_THRESHOLD
+          ),
+
+        reasons: [
+          "rate_limit_violation"
+        ],
+
+        requestId
+      };
     }
 
-    _transform(chunk, encoding, callback) {
-        try {
-            if (!Buffer.isBuffer(chunk)) chunk = Buffer.from(chunk, encoding);
-            this.totalBytes += chunk.length;
-            if (this.totalBytes > this.maxBytes) {
-                const error = new Error('PAYLOAD_TOO_LARGE');
-                error.code = 'PAYLOAD_TOO_LARGE';
-                return callback(error);
-            }
-            if (this.sampledBytes < this.sampleLimit) {
-                const remaining = this.sampleLimit - this.sampledBytes;
-                const amount = Math.min(remaining, chunk.length);
-                this.sampleParts.push(Buffer.from(chunk.subarray(0, amount)));
-                this.sampledBytes += amount;
-            }
-            callback(null, chunk);
-        } catch (error) {
-            callback(error);
-        }
+    addAlert({
+      ip,
+      path:
+        req.originalUrl,
+      risk: score,
+      action:
+        "honeypot",
+      reasons: [
+        "rate_limit_violation"
+      ]
+    });
+
+    return {
+      action:
+        "honeypot",
+
+      riskScore:
+        score,
+
+      reasons: [
+        "rate_limit_violation"
+      ],
+
+      requestId
+    };
+  }
+
+  /* ----------------------------------------------------------
+     CONCURRENCY
+     ---------------------------------------------------------- */
+
+  if (
+    !acquireConcurrency(ip)
+  ) {
+    const score =
+      addRisk(
+        ip,
+        25
+      );
+
+    const count =
+      registerViolation(
+        ip
+      );
+
+    if (
+      count >=
+      config.VIOLATION_LIMIT
+    ) {
+      blacklist(
+        ip,
+        "connection_flood"
+      );
+
+      addAlert({
+        ip,
+        path:
+          req.originalUrl,
+        risk: score,
+        action:
+          "block",
+        reasons: [
+          "connection_flood"
+        ]
+      });
+
+      return {
+        action:
+          "block",
+
+        riskScore:
+          Math.max(
+            score,
+            config.RISK_BLOCK_THRESHOLD
+          ),
+
+        reasons: [
+          "connection_flood"
+        ],
+
+        requestId
+      };
     }
 
-    getSample() {
-        return Buffer.concat(this.sampleParts);
-    }
+    addAlert({
+      ip,
+      path:
+        req.originalUrl,
+      risk: score,
+      action:
+        "honeypot",
+      reasons: [
+        "too_many_concurrent_requests"
+      ]
+    });
+
+    return {
+      action:
+        "honeypot",
+
+      riskScore:
+        score,
+
+      reasons: [
+        "too_many_concurrent_requests"
+      ],
+
+      requestId
+    };
+  }
+
+  /* ----------------------------------------------------------
+     INSPECTION
+     ---------------------------------------------------------- */
+
+  const inspection =
+    inspectRequest(
+      req
+    );
+
+  const risk =
+    inspection.score >
+    0
+      ? addRisk(
+          ip,
+          inspection.score
+        )
+      : getRisk(ip);
+
+  if (
+    risk >=
+    config.RISK_BLOCK_THRESHOLD
+  ) {
+    blacklist(
+      ip,
+      inspection.reasons.join(
+        ","
+      ) ||
+        "risk_threshold"
+    );
+
+    addAlert({
+      ip,
+      path:
+        req.originalUrl,
+      risk,
+      action:
+        "block",
+      reasons:
+        inspection.reasons.length
+          ? inspection.reasons
+          : [
+              "risk_threshold"
+            ]
+    });
+
+    return {
+      action:
+        "block",
+
+      riskScore:
+        risk,
+
+      reasons:
+        inspection.reasons.length
+          ? inspection.reasons
+          : [
+              "risk_threshold"
+            ],
+
+      requestId
+    };
+  }
+
+  if (
+    risk >=
+    config.RISK_HONEYPOT_THRESHOLD
+  ) {
+    addAlert({
+      ip,
+      path:
+        req.originalUrl,
+      risk,
+      action:
+        "honeypot",
+      reasons:
+        inspection.reasons
+    });
+
+    return {
+      action:
+        "honeypot",
+
+      riskScore:
+        risk,
+
+      reasons:
+        inspection.reasons,
+
+      requestId
+    };
+  }
+
+  return {
+    action:
+      "allow",
+
+    riskScore:
+      risk,
+
+    reasons:
+      inspection.reasons,
+
+    requestId
+  };
 }
 
-app.use(async (req, res) => {
-    if (req.path.startsWith('/_tbp/')) {
-        return res.status(404).json({ error: 'NOT_FOUND' });
+/* ============================================================
+   EXPRESS
+   ============================================================ */
+
+const app =
+  express();
+
+app.disable(
+  "x-powered-by"
+);
+
+if (
+  config.TRUST_PROXY
+) {
+  app.set(
+    "trust proxy",
+    true
+  );
+}
+
+/* ============================================================
+   SECURITY HEADERS
+   ============================================================ */
+
+app.use(
+  helmet({
+    contentSecurityPolicy:
+      false
+  })
+);
+
+/* ============================================================
+   BODY LIMITS
+   ============================================================ */
+
+app.use(
+  express.json({
+    limit:
+      config.MAX_BODY_SIZE,
+
+    strict:
+      true
+  })
+);
+
+app.use(
+  express.urlencoded({
+    extended:
+      false,
+
+    limit:
+      config.MAX_BODY_SIZE
+  })
+);
+
+/* ============================================================
+   ADMIN AUTH
+   ============================================================ */
+
+function adminAuth(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const authorization =
+    req.headers.authorization;
+
+  if (
+    !authorization
+  ) {
+    res.setHeader(
+      "WWW-Authenticate",
+      'Basic realm="WAF Admin"'
+    );
+
+    return res
+      .status(401)
+      .send(
+        "Authentication required"
+      );
+  }
+
+  const parts =
+    authorization.split(
+      " "
+    );
+
+  if (
+    parts.length !== 2 ||
+    parts[0] !== "Basic"
+  ) {
+    return res
+      .status(401)
+      .send(
+        "Unauthorized"
+      );
+  }
+
+  let decoded = "";
+
+  try {
+    decoded =
+      Buffer.from(
+        parts[1],
+        "base64"
+      ).toString(
+        "utf8"
+      );
+  } catch {
+    return res
+      .status(401)
+      .send(
+        "Unauthorized"
+      );
+  }
+
+  const separator =
+    decoded.indexOf(
+      ":"
+    );
+
+  if (
+    separator === -1
+  ) {
+    return res
+      .status(401)
+      .send(
+        "Unauthorized"
+      );
+  }
+
+  const user =
+    decoded.slice(
+      0,
+      separator
+    );
+
+  const password =
+    decoded.slice(
+      separator + 1
+    );
+
+  if (
+    !secureCompare(
+      user,
+      config.ADMIN_USER
+    ) ||
+    !secureCompare(
+      password,
+      config.ADMIN_PASSWORD
+    )
+  ) {
+    res.setHeader(
+      "WWW-Authenticate",
+      'Basic realm="WAF Admin"'
+    );
+
+    return res
+      .status(401)
+      .send(
+        "Unauthorized"
+      );
+  }
+
+  return next();
+}
+
+/* ============================================================
+   ADMIN API
+   ============================================================ */
+
+app.get(
+  "/__waf/admin/alerts",
+  adminAuth,
+  (_req, res) => {
+    return res.json({
+      alerts
+    });
+  }
+);
+
+app.get(
+  "/__waf/admin/stats",
+  adminAuth,
+  (_req, res) => {
+    let blacklisted = 0;
+
+    const now =
+      Date.now();
+
+    for (
+      const entry of
+      Object.values(
+        db.blacklists
+      )
+    ) {
+      if (
+        entry.expiresAt >
+        now
+      ) {
+        blacklisted++;
+      }
     }
 
-    const targetUrl = req.query.target;
-    if (!targetUrl) {
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        return res.status(200).send(`<!DOCTYPE html>
+    return res.json({
+      globalConcurrent,
+
+      activeClients:
+        concurrentByIp.size,
+
+      blacklisted,
+
+      alerts:
+        alerts.length,
+
+      target:
+        config.TARGET_URL,
+
+      uptime:
+        Math.floor(
+          process.uptime()
+        )
+    });
+  }
+);
+
+app.get(
+  "/__waf/admin/events",
+  adminAuth,
+  (req, res) => {
+    res.setHeader(
+      "Content-Type",
+      "text/event-stream"
+    );
+
+    res.setHeader(
+      "Cache-Control",
+      "no-cache, no-transform"
+    );
+
+    res.setHeader(
+      "Connection",
+      "keep-alive"
+    );
+
+    res.setHeader(
+      "X-Accel-Buffering",
+      "no"
+    );
+
+    res.flushHeaders();
+
+    alertClients.add(
+      res
+    );
+
+    res.write(
+      `data: ${JSON.stringify({
+        type:
+          "connected"
+      })}\n\n`
+    );
+
+    const heartbeat =
+      setInterval(
+        () => {
+          try {
+            res.write(
+              ": heartbeat\n\n"
+            );
+          } catch {
+            clearInterval(
+              heartbeat
+            );
+
+            alertClients.delete(
+              res
+            );
+          }
+        },
+        15000
+      );
+
+    req.on(
+      "close",
+      () => {
+        clearInterval(
+          heartbeat
+        );
+
+        alertClients.delete(
+          res
+        );
+      }
+    );
+  }
+);
+
+/* ============================================================
+   ADMIN DASHBOARD
+   ============================================================ */
+
+app.get(
+  "/admin",
+  adminAuth,
+  (_req, res) => {
+    res.type(
+      "html"
+    ).send(`
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Routix — Behavioral Security Platform</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1"
+/>
+
+<title>WAF Admin</title>
+
 <style>
-:root{
-    --bg:#070b12;
-    --panel:rgba(13, 19, 29, 0.75);
-    --panel2:rgba(17, 25, 37, 0.85);
-    --border:rgba(29, 41, 56, 0.7);
-    --text:#f8fafc;
-    --muted:#7f8da3;
-    --blue:#38bdf8;
-    --blue2:#2563eb;
-    --green:#22c55e;
-    --yellow:#f59e0b;
-    --red:#ef4444;
-    --purple:#8b5cf6;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{
-    font-family:Tajawal,sans-serif;
-    background: linear-gradient(rgba(7, 11, 18, 0.85), rgba(7, 11, 18, 0.92)), 
-                radial-gradient(circle at 50% 50%, rgba(37,99,235,.15), transparent 70%),
-                repeating-linear-gradient(45deg, rgba(56, 189, 248, 0.02) 0, rgba(56, 189, 248, 0.02) 1px, transparent 0, transparent 50px);
-    background-color: var(--bg);
-    color:var(--text);
-    overflow-x:hidden;
-    min-height: 100vh;
-}
-button,input{font-family:inherit;}
-button{cursor:pointer;}
 
-#splash{position:fixed;inset:0;z-index:9999;background:linear-gradient(rgba(5,8,14,.90),rgba(5,8,14,.98)),radial-gradient(circle at center,rgba(18,59,91,0.4),transparent 60%);display:flex;align-items:center;justify-content:center;transition:.7s ease;}
-#splash.hidden{opacity:0;visibility:hidden;pointer-events:none;}
-.splash-box{width:min(900px,92%);text-align:center;}
-.logo{display:inline-flex;align-items:center;gap:12px;font-size:28px;font-weight:900;color:#fff;}
-.logo-icon{width:48px;height:48px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(135deg,#0284c7,#2563eb);box-shadow:0 0 35px rgba(37,99,235,.35);}
-.splash-box h1{font-size:clamp(38px,6vw,72px);margin-top:35px;line-height:1.05;font-weight:900;}
-.gradient{background:linear-gradient(90deg,#38bdf8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.splash-box p{max-width:680px;margin:25px auto;color:var(--muted);font-size:18px;line-height:1.8;}
-.launch{border:0;color:#fff;padding:15px 28px;border-radius:12px;font-weight:800;background:linear-gradient(135deg,#0284c7,#2563eb);box-shadow:0 15px 45px rgba(37,99,235,.25);transition:.25s;}
-.launch:hover{transform:translateY(-3px);}
-
-#app{display:none;min-height:100vh;}
-#app.visible{display:flex;}
-
-.sidebar{width:260px;position:fixed;top:0;bottom:0;right:0;border-left:1px solid var(--border);background:rgba(9,14,22,0.95);backdrop-filter:blur(12px);padding:24px 16px;z-index:100;transition:transform 0.3s ease;}
-.sidebar-logo{display:flex;justify-content:space-between;align-items:center;padding:0 10px 25px;border-bottom:1px solid var(--border);}
-.close-btn{background:transparent;border:0;color:#8da0b8;font-size:22px;cursor:pointer;display:none;transition:0.2s;}
-.close-btn:hover{color:#ef4444;}
-.nav-title{font-size:11px;color:#526174;margin:25px 10px 10px;font-weight:800;letter-spacing:1px;}
-.nav-item{display:flex;align-items:center;gap:13px;width:100%;padding:12px 14px;margin:4px 0;color:#8c9aaf;border-radius:10px;background:transparent;border:0;text-align:right;font-size:14px;transition:.2s;}
-.nav-item:hover,.nav-item.active{color:#fff;background:rgba(17, 27, 41, 0.8);}
-.nav-item.active{box-shadow:inset -3px 0 var(--blue);}
-.nav-item i{width:20px;text-align:center;}
-
-.status-box{position:absolute;bottom:20px;right:16px;left:16px;padding:14px;border:1px solid var(--border);border-radius:12px;background:rgba(11, 17, 26, 0.8);}
-.status-line{display:flex;align-items:center;gap:8px;font-size:12px;color:#94a3b8;}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green);}
-
-@media (max-width: 768px) {
-    .sidebar { transform: translateX(100%); z-index: 1000; }
-    .sidebar.open { transform: translateX(0); }
-    .close-btn { display: block; }
-    .main { width: 100%; margin-right: 0; }
+* {
+  box-sizing: border-box;
 }
 
-.main{margin-right:260px;width:calc(100% - 260px);}
-.topbar{height:74px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 30px;background:rgba(7,11,18,0.65);backdrop-filter:blur(15px);position:sticky;top:0;z-index:50;}
-.topbar-left{display:flex;align-items:center;gap:12px;}
-.environment{border:1px solid rgba(34,197,94,.2);background:rgba(34,197,94,.06);color:#4ade80;padding:7px 11px;border-radius:8px;font-size:12px;}
-.icon-btn{width:38px;height:38px;border:1px solid var(--border);background:rgba(13, 20, 30, 0.8);color:#8da0b8;border-radius:9px;}
+body {
+  margin: 0;
+  background: #080c11;
+  color: #e8eef5;
+  font-family:
+    Arial,
+    Tahoma,
+    sans-serif;
+}
 
-.content{padding:30px;max-width:1600px;margin:auto;}
-.page-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:25px;}
-.page-head h2{font-size:27px;font-weight:900;}
-.page-head p{color:var(--muted);margin-top:6px;}
+header {
+  padding: 20px;
+  background: #10161d;
+  border-bottom:
+    1px solid #222c36;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;}
-.metric{border:1px solid var(--border);background:linear-gradient(145deg,rgba(13, 20, 30, 0.75),rgba(10, 16, 24, 0.75));backdrop-filter:blur(10px);border-radius:14px;padding:20px;position:relative;overflow:hidden;}
-.metric-top{display:flex;justify-content:space-between;color:#8290a4;font-size:13px;}
-.metric-icon{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:rgba(17, 28, 41, 0.8);color:var(--blue);}
-.metric-value{font-size:29px;font-weight:900;margin:17px 0 7px;}
-.metric-change{font-size:12px;color:#64748b;}
-.green{color:var(--green)!important;}
-.red{color:var(--red)!important;}
-.yellow{color:var(--yellow)!important;}
+.logo {
+  font-size: 23px;
+  font-weight: 700;
+}
 
-.dashboard-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-top:16px;}
-.panel{background:rgba(12, 19, 29, 0.75);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
-.panel-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
-.panel-head h3{font-size:15px;}
-.panel-head span{color:#607086;font-size:12px;}
-.chart-box{height:310px;padding:20px;}
+.status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #9eabb8;
+  font-size: 13px;
+}
 
-.score-panel{padding:25px;}
-.score-ring{width:180px;height:180px;border-radius:50%;margin:15px auto 25px;display:grid;place-items:center;background:radial-gradient(circle,rgba(12, 19, 29, 0.9) 62%,transparent 63%),conic-gradient(var(--green) 0deg 302deg,rgba(23, 35, 51, 0.8) 302deg 360deg);}
-.score-number{font-size:42px;font-weight:900;}
-.score-label{text-align:center;color:#4ade80;font-weight:800;}
-.score-item{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(22, 32, 44, 0.6);font-size:13px;}
-.score-item:last-child{border:0;}
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow:
+    0 0 10px #34d399;
+}
 
-.events{margin-top:16px;}
-.event{display:grid;grid-template-columns:45px 1fr auto;gap:14px;align-items:center;padding:15px 20px;border-bottom:1px solid rgba(20, 30, 42, 0.6);}
-.event:last-child{border:0;}
-.event-icon{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:rgba(17, 27, 40, 0.8);}
-.event-title{font-size:13px;font-weight:700;}
-.event-meta{font-size:11px;color:#64748b;margin-top:4px;}
-.badge{padding:5px 8px;border-radius:6px;font-size:10px;font-weight:800;}
-.badge.block{color:#f87171;background:rgba(239,68,68,.1);}
-.badge.warn{color:#fbbf24;background:rgba(245,158,11,.1);}
-.badge.allow{color:#4ade80;background:rgba(34,197,94,.1);}
+.container {
+  max-width: 1300px;
+  margin: auto;
+  padding: 20px;
+}
 
-.modal{position:fixed;inset:0;background:rgba(2,6,12,.78);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:500;padding:20px;}
-.modal.show{display:flex;}
-.modal-box{width:min(800px,100%);background:rgba(13, 20, 30, 0.95);border:1px solid var(--border);border-radius:16px;box-shadow:0 30px 100px rgba(0,0,0,.5);}
-.modal-head{padding:20px;display:flex;justify-content:space-between;border-bottom:1px solid var(--border);}
-.modal-body{padding:20px;}
-.code{direction:ltr;text-align:left;background:rgba(6, 10, 16, 0.9);border:1px solid #172333;border-radius:10px;padding:18px;overflow:auto;color:#7dd3fc;font-family:monospace;font-size:13px;line-height:1.7;}
-.copy{margin-top:12px;padding:10px 16px;border:0;border-radius:8px;color:white;background:#2563eb;font-weight:800;}
+.stats {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(190px, 1fr)
+    );
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: #10161d;
+  border:
+    1px solid #222c36;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.card-title {
+  color: #8e9aa7;
+  font-size: 14px;
+}
+
+.number {
+  margin-top: 8px;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.panel {
+  background: #10161d;
+  border:
+    1px solid #222c36;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 18px;
+  border-bottom:
+    1px solid #222c36;
+  font-weight: 700;
+}
+
+.alert {
+  padding: 17px;
+  border-bottom:
+    1px solid #1e2730;
+}
+
+.alert:last-child {
+  border-bottom: 0;
+}
+
+.alert.block {
+  background:
+    rgba(220, 38, 38, .10);
+}
+
+.alert.honeypot {
+  background:
+    rgba(245, 158, 11, .08);
+}
+
+.badge {
+  display: inline-block;
+  padding:
+    5px 9px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.badge.block {
+  background:
+    rgba(220,38,38,.18);
+  color: #ff8f8f;
+}
+
+.badge.honeypot {
+  background:
+    rgba(245,158,11,.18);
+  color: #ffc96b;
+}
+
+.meta {
+  margin-top: 8px;
+  color: #95a2af;
+  font-size: 13px;
+  word-break: break-word;
+}
+
+.reason {
+  margin-top: 10px;
+  color: #ff9d9d;
+  font-family:
+    monospace;
+  font-size: 12px;
+}
+
+.empty {
+  padding: 45px;
+  text-align: center;
+  color: #788592;
+}
+
+@media (
+  max-width: 600px
+) {
+  .container {
+    padding: 12px;
+  }
+
+  header {
+    padding: 15px;
+  }
+
+  .logo {
+    font-size: 19px;
+  }
+}
+
 </style>
+
 </head>
+
 <body>
 
-<div id="splash">
-    <div class="splash-box">
-        <div class="logo">
-            <div class="logo-icon"><i class="fa-solid fa-route"></i></div>
-            Routix
-        </div>
-        <h1>Security that<br><span class="gradient">understands behavior.</span></h1>
-        <p>منصة أمنية متقدمة لمراقبة وحماية تطبيقات API والبنية الخلفية من السلوكيات غير الطبيعية والطلبات المشبوهة.</p>
-        <button class="launch" onclick="enterDashboard()">الدخول إلى منصة Routix <i class="fa-solid fa-arrow-left"></i></button>
-    </div>
+<header>
+
+<div class="logo">
+  🛡️ WAF Admin
 </div>
 
-<div id="app">
-<aside class="sidebar" id="sidebar">
-    <div class="sidebar-logo">
-        <div class="logo">
-            <div class="logo-icon"><i class="fa-solid fa-route"></i></div>
-            Routix
-        </div>
-        <button class="close-btn" onclick="toggleSidebar()"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div class="nav-title">PLATFORM</div>
-    <button class="nav-item active"><i class="fa-solid fa-chart-line"></i> لوحة المراقبة</button>
-    <button class="nav-item"><i class="fa-solid fa-shield-halved"></i> الحماية</button>
-    <button class="nav-item"><i class="fa-solid fa-network-wired"></i> API Gateway</button>
-    <button class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i> الأحداث</button>
-    <button class="nav-item"><i class="fa-solid fa-ban"></i> العناوين المحظورة</button>
-    <div class="nav-title">SYSTEM</div>
-    <button class="nav-item"><i class="fa-solid fa-server"></i> Origin</button>
-    <button class="nav-item" onclick="openModal()"><i class="fa-solid fa-code"></i> التكامل</button>
-    <button class="nav-item"><i class="fa-solid fa-gear"></i> الإعدادات</button>
-    <div class="status-box">
-        <div class="status-line"><span class="dot"></span> Routix Gateway Online</div>
-        <div id="last-checked" style="font-size:11px;color:#4d5c70;margin-top:7px">متصل بالسيرفر مباشرة</div>
-    </div>
-</aside>
+<div class="status">
+  <span class="dot"></span>
+  حماية مباشرة
+</div>
 
-<main class="main">
-<header class="topbar">
-    <div class="topbar-left">
-        <button class="icon-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
-        <span style="color:#718096;font-size:13px">Security / Dashboard</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:12px">
-        <span class="environment"><i class="fa-solid fa-circle"></i> Production</span>
-        <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
-    </div>
 </header>
 
-<div class="content">
-    <div class="page-head">
-        <div>
-            <h2>مركز العمليات الأمنية</h2>
-            <p>نظرة مباشرة على حالة Routix وحركة الـ API.</p>
-        </div>
-        <button class="launch" onclick="openModal()"><i class="fa-solid fa-code"></i> ربط Gateway</button>
-    </div>
+<div class="container">
 
-    <section class="metrics">
-        <div class="metric">
-            <div class="metric-top">إجمالي الطلبات<div class="metric-icon"><i class="fa-solid fa-arrow-right-arrow-left"></i></div></div>
-            <div class="metric-value" id="requests">---</div>
-            <div class="metric-change"><span class="green">+8.4%</span> مقارنة بالساعة السابقة</div>
-        </div>
-        <div class="metric">
-            <div class="metric-top">الطلبات المحظورة<div class="metric-icon"><i class="fa-solid fa-ban"></i></div></div>
-            <div class="metric-value red" id="blocked">---</div>
-            <div class="metric-change"><span class="red">+3.1%</span> تهديدات تم منعها</div>
-        </div>
-        <div class="metric">
-            <div class="metric-top">سلوك مشبوه<div class="metric-icon"><i class="fa-solid fa-triangle-exclamation"></i></div></div>
-            <div class="metric-value yellow" id="suspicious">---</div>
-            <div class="metric-change">يحتاج إلى مراقبة</div>
-        </div>
-        <div class="metric">
-            <div class="metric-top">Origin Health<div class="metric-icon"><i class="fa-solid fa-server"></i></div></div>
-            <div class="metric-value green" id="health">---</div>
-            <div class="metric-change" id="latency">Latency: ---</div>
-        </div>
-    </section>
+<div class="stats">
 
-    <section class="dashboard-grid">
-        <div class="panel">
-            <div class="panel-head">
-                <h3>حركة الطلبات</h3>
-                <span>آخر 24 ساعة</span>
-            </div>
-            <div class="chart-box">
-                <canvas id="trafficChart"></canvas>
-            </div>
-        </div>
-        <div class="panel score-panel">
-            <div class="panel-head" style="padding:0 0 10px;border:0">
-                <h3>Routix Security Score</h3>
-            </div>
-            <div class="score-ring">
-                <div class="score-number" id="security-score">94</div>
-            </div>
-            <div class="score-label">Excellent Protection</div>
-            <div style="margin-top:25px">
-                <div class="score-item"><span>Rate Protection</span><strong class="green">98%</strong></div>
-                <div class="score-item"><span>Behavior Analysis</span><strong class="green">94%</strong></div>
-                <div class="score-item"><span>Origin Security</span><strong class="green">97%</strong></div>
-                <div class="score-item"><span>API Protection</span><strong class="green">91%</strong></div>
-            </div>
-        </div>
-    </section>
+<div class="card">
 
-    <section class="panel events">
-        <div class="panel-head">
-            <h3>آخر الأحداث الأمنية</h3>
-            <span>Live <i class="fa-solid fa-circle" style="font-size:6px;color:#22c55e"></i></span>
-        </div>
-        <div class="event">
-            <div class="event-icon red"><i class="fa-solid fa-shield-virus"></i></div>
-            <div>
-                <div class="event-title">سلوك API غير طبيعي تم اكتشافه</div>
-                <div class="event-meta">185.XX.XX.41 · POST /api/auth · Risk Score 87</div>
-            </div>
-            <span class="badge block">BLOCKED</span>
-        </div>
-        <div class="event">
-            <div class="event-icon yellow"><i class="fa-solid fa-triangle-exclamation"></i></div>
-            <div>
-                <div class="event-title">تسلسل Endpoints غير معتاد</div>
-                <div class="event-meta">91.XX.XX.17 · GET /admin · Risk Score 52</div>
-            </div>
-            <span class="badge warn">SUSPICIOUS</span>
-        </div>
-        <div class="event">
-            <div class="event-icon green"><i class="fa-solid fa-check"></i></div>
-            <div>
-                <div class="event-title">Request تم التحقق منه</div>
-                <div class="event-meta">10.0.XX.12 · GET /api/profile · Risk Score 4</div>
-            </div>
-            <span class="badge allow">ALLOWED</span>
-        </div>
-    </section>
-</div>
-</main>
+<div class="card-title">
+  العملاء النشطون
 </div>
 
-<div class="modal" id="modal">
-    <div class="modal-box">
-        <div class="modal-head">
-            <strong><i class="fa-solid fa-terminal"></i> ربط Routix Gateway</strong>
-            <!-- زر الإغلاق بعلامة x -->
-            <button class="icon-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div class="modal-body">
-            <p style="color:#8290a4;margin-bottom:15px">استخدم الرابط هكذا لتوجيه الحماية:</p>
-            <pre class="code">https://production-w79s.onrender.com/?target=https://your-website.com</pre>
-            <button class="copy" onclick="closeModal()"><i class="fa-solid fa-check"></i> فهمت</button>
-        </div>
-    </div>
+<div
+  class="number"
+  id="clients"
+>
+  0
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-title">
+  الاتصالات الحالية
+</div>
+
+<div
+  class="number"
+  id="connections"
+>
+  0
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-title">
+  IPs المحظورة
+</div>
+
+<div
+  class="number"
+  id="blacklisted"
+>
+  0
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-title">
+  التنبيهات المسجلة
+</div>
+
+<div
+  class="number"
+  id="alertCount"
+>
+  0
+</div>
+
+</div>
+
+</div>
+
+<div class="panel">
+
+<div class="panel-header">
+  🚨 التنبيهات المباشرة
+</div>
+
+<div id="alerts">
+
+<div class="empty">
+  لا توجد تنبيهات حتى الآن
+</div>
+
+</div>
+
+</div>
+
 </div>
 
 <script>
-function enterDashboard(){
-    document.getElementById('splash').classList.add('hidden');
-    document.getElementById('app').classList.add('visible');
-    fetchLiveMetrics();
-    setInterval(fetchLiveMetrics, 3000);
-}
-function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
-function openModal(){ document.getElementById('modal').classList.add('show'); }
 
-// دالة إغلاق النافذة عند الضغط على زر X
-function closeModal(){ 
-    document.getElementById('modal').classList.remove('show'); 
+const alertsElement =
+  document.getElementById(
+    "alerts"
+  );
+
+const clientsElement =
+  document.getElementById(
+    "clients"
+  );
+
+const connectionsElement =
+  document.getElementById(
+    "connections"
+  );
+
+const blacklistedElement =
+  document.getElementById(
+    "blacklisted"
+  );
+
+const alertCountElement =
+  document.getElementById(
+    "alertCount"
+  );
+
+function escapeHtml(
+  value
+) {
+  return String(value)
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
 }
 
-async function fetchLiveMetrics() {
-    try {
-        const response = await fetch('/_tbp/metrics');
-        if (!response.ok) return;
-        const data = await response.json();
-        document.getElementById('requests').innerText = data.requests.toLocaleString();
-        document.getElementById('blocked').innerText = data.blocked.toLocaleString();
-        document.getElementById('suspicious').innerText = data.suspicious.toLocaleString();
-        document.getElementById('health').innerText = data.health;
-        document.getElementById('latency').innerText = \`Latency: \${data.latency}\`;
-        document.getElementById('security-score').innerText = data.score;
-        document.getElementById('last-checked').innerText = \`آخر تحديث: \${new Date().toLocaleTimeString()}\`;
-    } catch (err) {
-        console.error(err);
+function renderAlert(
+  alert
+) {
+  const element =
+    document.createElement(
+      "div"
+    );
+
+  element.className =
+    "alert " +
+    (
+      alert.action ===
+      "block"
+        ? "block"
+        : "honeypot"
+    );
+
+  const reasons =
+    Array.isArray(
+      alert.reasons
+    )
+      ? alert.reasons.join(
+          ", "
+        )
+      : "";
+
+  element.innerHTML = \`
+    <span class="badge \${escapeHtml(
+      alert.action
+    )}">
+      \${escapeHtml(
+        alert.action.toUpperCase()
+      )}
+    </span>
+
+    <div class="meta">
+      IP:
+      <strong>
+        \${escapeHtml(
+          alert.ip
+        )}
+      </strong>
+    </div>
+
+    <div class="meta">
+      Risk:
+      <strong>
+        \${escapeHtml(
+          alert.risk
+        )}
+      </strong>
+    </div>
+
+    <div class="meta">
+      Path:
+      \${escapeHtml(
+        alert.path
+      )}
+    </div>
+
+    <div class="meta">
+      Time:
+      \${escapeHtml(
+        alert.time
+      )}
+    </div>
+
+    <div class="reason">
+      \${escapeHtml(
+        reasons
+      )}
+    </div>
+  \`;
+
+  return element;
+}
+
+function addAlert(
+  alert
+) {
+  if (
+    alertsElement.querySelector(
+      ".empty"
+    )
+  ) {
+    alertsElement.innerHTML =
+      "";
+  }
+
+  const element =
+    renderAlert(
+      alert
+    );
+
+  alertsElement.prepend(
+    element
+  );
+
+  while (
+    alertsElement.children
+      .length > 200
+  ) {
+    alertsElement.lastElementChild
+      ?.remove();
+  }
+}
+
+async function loadAlerts() {
+  try {
+    const response =
+      await fetch(
+        "/__waf/admin/alerts",
+        {
+          credentials:
+            "same-origin"
+        }
+      );
+
+    if (
+      !response.ok
+    ) {
+      return;
     }
+
+    const data =
+      await response.json();
+
+    alertsElement.innerHTML =
+      "";
+
+    if (
+      !data.alerts ||
+      !data.alerts.length
+    ) {
+      alertsElement.innerHTML =
+        '<div class="empty">لا توجد تنبيهات حتى الآن</div>';
+
+      alertCountElement.textContent =
+        "0";
+
+      return;
+    }
+
+    for (
+      const alert of
+      data.alerts
+    ) {
+      addAlert(
+        alert
+      );
+    }
+
+    alertCountElement.textContent =
+      data.alerts.length;
+
+  } catch {
+    // Ignore dashboard polling errors.
+  }
 }
 
-const ctx = document.getElementById('trafficChart');
-new Chart(ctx,{
-    type:'line',
-    data:{
-        labels:['00:00','02:00','04:00','06:00','08:00','10:00','12:00','14:00','16:00','18:00','20:00','22:00'],
-        datasets:[
-            {label:'Requests',data:[22,31,26,42,55,63,72,68,91,82,104,118],tension:.4,borderWidth:2,fill:true,backgroundColor:'rgba(56,189,248,.05)',borderColor:'#38bdf8'},
-            {label:'Blocked',data:[2,4,3,5,7,8,6,10,9,13,11,15],tension:.4,borderWidth:2,fill:false,borderColor:'#ef4444'}
-        ]
-    },
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#7f8da3',font:{family:'Tajawal'}}}},scales:{x:{grid:{color:'rgba(22,32,44,0.5)'},ticks:{color:'#627086'}},y:{grid:{color:'rgba(22,32,44,0.5)'},ticks:{color:'#627086'}}}}
-});
+async function loadStats() {
+  try {
+    const response =
+      await fetch(
+        "/__waf/admin/stats",
+        {
+          credentials:
+            "same-origin"
+        }
+      );
+
+    if (
+      !response.ok
+    ) {
+      return;
+    }
+
+    const data =
+      await response.json();
+
+    clientsElement.textContent =
+      data.activeClients ?? 0;
+
+    connectionsElement.textContent =
+      data.globalConcurrent ?? 0;
+
+    blacklistedElement.textContent =
+      data.blacklisted ?? 0;
+
+    alertCountElement.textContent =
+      data.alerts ?? 0;
+
+  } catch {
+    // Ignore dashboard errors.
+  }
+}
+
+/*
+ * Server-Sent Events:
+ * التنبيه يصل للوحة مباشرة بدون Refresh.
+ */
+
+const events =
+  new EventSource(
+    "/__waf/admin/events"
+  );
+
+events.onmessage =
+  event => {
+    try {
+      const data =
+        JSON.parse(
+          event.data
+        );
+
+      if (
+        data.type ===
+        "connected"
+      ) {
+        return;
+      }
+
+      addAlert(
+        data
+      );
+
+      loadStats();
+
+    } catch {
+      // Ignore malformed events.
+    }
+  };
+
+events.onerror =
+  () => {
+    // EventSource automatically reconnects.
+  };
+
+loadAlerts();
+
+loadStats();
+
+setInterval(
+  loadStats,
+  3000
+);
+
 </script>
+
 </body>
-</html>`);
+
+</html>
+`);
+  }
+);
+
+/* ============================================================
+   HEALTH
+   ============================================================ */
+
+app.get(
+  "/__waf/health",
+  (_req, res) => {
+    return res.json({
+      status: "ok",
+
+      service:
+        "single-site-cloud-waf",
+
+      protection:
+        "strong-l7",
+
+      globalConcurrent,
+
+      activeClients:
+        concurrentByIp.size
+    });
+  }
+);
+
+/* ============================================================
+   ADMIN STATUS
+   ============================================================ */
+
+app.get(
+  "/__waf/status/:ip",
+  (req, res) => {
+    const suppliedKey =
+      req.header(
+        "x-waf-api-key"
+      );
+
+    if (
+      suppliedKey !==
+      config.WAF_API_KEY
+    ) {
+      return res
+        .status(401)
+        .json({
+          error:
+            "unauthorized"
+        });
     }
 
-    if (activeRequests >= CONFIG.MAX_CONCURRENT_REQUESTS) {
-        return res.status(503).json({ status: 'SERVER_BUSY' });
+    const ip =
+      normalizeIp(
+        req.params.ip
+      );
+
+    return res.json({
+      ip,
+
+      blacklisted:
+        isBlacklisted(
+          ip
+        ),
+
+      risk:
+        getRisk(ip),
+
+      concurrent:
+        concurrentByIp.get(
+          ip
+        ) || 0
+    });
+  }
+);
+
+/* ============================================================
+   HONEYPOT
+   ============================================================ */
+
+app.all(
+  "/__waf_honeypot",
+  (req, res) => {
+    const ip =
+      getClientIp(req);
+
+    const score =
+      addRisk(
+        ip,
+        config.RISK_BLOCK_THRESHOLD
+      );
+
+    blacklist(
+      ip,
+      "honeypot_triggered"
+    );
+
+    addAlert({
+      ip,
+
+      path:
+        req.originalUrl,
+
+      risk:
+        score,
+
+      action:
+        "block",
+
+      reasons: [
+        "honeypot_triggered"
+      ]
+    });
+
+    return res
+      .status(404)
+      .json({
+        error:
+          "not_found"
+      });
+  }
+);
+
+/* ============================================================
+   MAIN WAF
+   ============================================================ */
+
+app.use(
+  async (
+    req,
+    res,
+    next
+  ) => {
+    if (
+      req.path ===
+      "/__waf/health"
+    ) {
+      return next();
     }
-    activeRequests++;
-    let released = false;
-    const release = () => {
-        if (released) return;
-        released = true;
-        activeRequests = Math.max(0, activeRequests - 1);
-    };
-    res.once('finish', release);
-    res.once('close', release);
+
+    if (
+      req.path.startsWith(
+        "/__waf/"
+      )
+    ) {
+      return next();
+    }
+
+    if (
+      req.path ===
+      "/admin"
+    ) {
+      return next();
+    }
+
+    let acquired =
+      false;
 
     try {
-        const clientIp = getClientIp(req);
-        req.clientIp = clientIp;
+      const decision =
+        await evaluate(
+          req
+        );
 
-        const sensitive = /(?:^|\/)(api\/auth|admin|exec)(?:\/|$)/i.test(req.path);
+      acquired =
+        decision.action ===
+          "allow" ||
+        decision.action ===
+          "honeypot";
 
-        const contentLength = req.headers['content-length'];
-        if (contentLength !== undefined) {
-            const parsedLength = Number(contentLength);
-            if (!Number.isSafeInteger(parsedLength) || parsedLength < 0) {
-                return res.status(400).json({ status: 'INVALID_CONTENT_LENGTH' });
-            }
-            if (parsedLength > CONFIG.MAX_BODY_SIZE) {
-                return res.status(413).json({ status: 'PAYLOAD_TOO_LARGE' });
-            }
+      res.setHeader(
+        "x-waf-request-id",
+        decision.requestId
+      );
+
+      res.setHeader(
+        "x-waf-risk-score",
+        String(
+          decision.riskScore
+        )
+      );
+
+      res.setHeader(
+        "x-waf-protected",
+        "true"
+      );
+
+      if (
+        decision.action ===
+        "block"
+      ) {
+        if (
+          acquired
+        ) {
+          releaseConcurrency(
+            getClientIp(
+              req
+            )
+          );
+
+          acquired =
+            false;
         }
 
-        if (behavioral.isBlocked(clientIp)) {
-            structuredLog('WARN', 'Blocked IP access', { ip: clientIp, path: req.path });
-            return res.status(403).json({ status: 'ACCESS_DENIED' });
+        return res
+          .status(403)
+          .json({
+            error:
+              "request_blocked",
+
+            requestId:
+              decision.requestId,
+
+            reasons:
+              decision.reasons
+          });
+      }
+
+      if (
+        decision.action ===
+        "honeypot"
+      ) {
+        if (
+          acquired
+        ) {
+          releaseConcurrency(
+            getClientIp(
+              req
+            )
+          );
+
+          acquired =
+            false;
         }
 
-        if (behavioral.rateLimit(clientIp)) {
-            structuredLog('WARN', 'Rate limit exceeded', { ip: clientIp });
-            return res.status(429).json({ status: 'RATE_LIMITED' });
-        }
+        return res
+          .status(404)
+          .json({
+            error:
+              "not_found",
 
-        const target = await resolveAndPinTarget(targetUrl);
+            requestId:
+              decision.requestId
+          });
+      }
 
-        const spool = new BodySpool(CONFIG.MAX_BODY_SIZE, CONFIG.BODY_SAMPLE_SIZE);
-        try {
-            await pipelineAsync(req, spool);
-        } catch (error) {
-            if (error.code === 'PAYLOAD_TOO_LARGE') return res.status(413).json({ status: 'PAYLOAD_TOO_LARGE' });
-            if (error.code === 'ECONNRESET') return;
-            if (!res.headersSent) return res.status(400).json({ status: 'INVALID_REQUEST_BODY' });
-            return;
-        }
-
-        const evaluation = behavioral.evaluate(req, spool.getSample(), spool.totalBytes, sensitive);
-        const score = Number(evaluation.totalRiskScore || 0);
-        let tier = 'NORMAL';
-        if (score >= 60) tier = 'BLOCK';
-        else if (score >= 40) tier = 'HIGH_RISK';
-        else if (score >= 20) tier = 'SUSPICIOUS';
-
-        if (tier === 'BLOCK') {
-            behavioral.blockIp(clientIp);
-            blockedRequestsCounter++;
-            structuredLog('ALERT', 'Behavioral block', { ip: clientIp, score, vector: evaluation.vector });
-            
-            let attackType = 'سلوك مشبوه أو تجاوز معدل الطلبات';
-            if (evaluation.vector?.velocity > 0) attackType = 'هجوم تدفق سريع (Velocity Flood / Brute Force)';
-            else if (evaluation.vector?.sequence > 0) attackType = 'تخطي تسلسل المسارات (Path Traversal / Sequence Violation)';
-            else if (evaluation.vector?.content > 0) attackType = 'حمولة عالية الإنتروبيا (High Entropy Payload / Possible Exploit)';
-
-            await sendSecurityAlert(clientIp, score, req.path, attackType);
-            return res.status(403).json({ status: 'ACCESS_DENIED' });
-        }
-
-        res.setHeader('X-TBP-Risk-Tier', tier);
-        res.setHeader('X-TBP-Risk-Score', String(score));
-
-        const headers = buildUpstreamHeaders(req, target, clientIp, spool.totalBytes);
-        const isHttps = target.parsed.protocol === 'https:';
-        const transport = isHttps ? https : http;
-        const upstreamPort = target.parsed.port ? Number(target.parsed.port) : (isHttps ? 443 : 80);
-        
-        const originalUrlObj = new URL(req.url, `http://${req.headers.host}`);
-        originalUrlObj.searchParams.delete('target');
-        const upstreamPath = originalUrlObj.pathname + originalUrlObj.search;
-
-        const options = {
-            hostname: target.pinnedIp,
-            port: upstreamPort,
-            method: req.method,
-            path: upstreamPath,
-            headers,
-            timeout: CONFIG.UPSTREAM_TIMEOUT
-        };
-
-        if (isHttps) {
-            options.servername = target.parsed.hostname;
-            options.rejectUnauthorized = true;
-        }
-
-        let responseFinished = false;
-        const proxyReq = transport.request(options, proxyRes => {
-            if (responseFinished) return;
-            responseFinished = true;
-            const safeHeaders = sanitizeResponseHeaders(proxyRes.headers);
-            if (!res.headersSent) {
-                res.writeHead(proxyRes.statusCode || 502, safeHeaders);
-            }
-            proxyRes.pipe(res);
-            proxyRes.once('error', error => {
-                structuredLog('ERROR', 'Upstream response error', { error: error.message });
-                if (!res.writableEnded) res.destroy();
-            });
-        });
-
-        let upstreamTimedOut = false;
-        proxyReq.setTimeout(CONFIG.UPSTREAM_TIMEOUT, () => {
-            upstreamTimedOut = true;
-            proxyReq.destroy(new Error('UPSTREAM_TIMEOUT'));
-        });
-
-        proxyReq.once('error', error => {
-            structuredLog('ERROR', 'Upstream error', { error: error.message, ip: clientIp });
-            if (!res.headersSent) {
-                return res.status(upstreamTimedOut ? 504 : 502).json({
-                    error: upstreamTimedOut ? 'GATEWAY_TIMEOUT' : 'BAD_GATEWAY'
-                });
-            }
-            if (!res.writableEnded) res.destroy();
-        });
-
-        proxyReq.write(spool.getSample());
-        proxyReq.end();
+      return next();
 
     } catch (error) {
-        structuredLog('ERROR', 'Gateway request failure', { error: error.stack || error.message, ip: req.clientIp });
-        if (!res.headersSent) return res.status(502).json({ error: 'BAD_GATEWAY' });
-        if (!res.writableEnded) res.destroy();
+
+      if (
+        acquired
+      ) {
+        releaseConcurrency(
+          getClientIp(
+            req
+          )
+        );
+      }
+
+      console.error(
+        "WAF evaluation error:",
+        error
+      );
+
+      return res
+        .status(503)
+        .json({
+          error:
+            "waf_unavailable"
+        });
     }
-});
+  }
+);
 
-server.listen(CONFIG.PORT, () => {
-    structuredLog('INFO', 'Dynamic TBP v15 started with Cyber UI (Memory Engine)', { port: CONFIG.PORT });
-});
+/* ============================================================
+   RELEASE CONCURRENCY
+   ============================================================ */
 
-async function shutdown(signal) {
-    if (isShuttingDown) return;
-    isShuttingDown = true;
-    structuredLog('INFO', 'Graceful shutdown started', { signal, activeRequests });
-    const forceTimer = setTimeout(() => {
-        structuredLog('ERROR', 'Forced shutdown');
-        process.exit(1);
-    }, 10_000);
-    forceTimer.unref();
-    server.close(() => {
-        clearTimeout(forceTimer);
-        process.exit(0);
-    });
+app.use(
+  (
+    req,
+    res,
+    next
+  ) => {
+    const ip =
+      getClientIp(
+        req
+      );
+
+    let released =
+      false;
+
+    const release =
+      () => {
+        if (
+          released
+        ) {
+          return;
+        }
+
+        released =
+          true;
+
+        releaseConcurrency(
+          ip
+        );
+      };
+
+    res.once(
+      "finish",
+      release
+    );
+
+    res.once(
+      "close",
+      release
+    );
+
+    next();
+  }
+);
+
+/* ============================================================
+   REVERSE PROXY
+   ============================================================ */
+
+const proxy =
+  createProxyMiddleware({
+    target:
+      config.TARGET_URL,
+
+    changeOrigin:
+      true,
+
+    xfwd:
+      true,
+
+    ws:
+      true,
+
+    proxyTimeout:
+      config.PROXY_TIMEOUT_MS,
+
+    timeout:
+      config.PROXY_TIMEOUT_MS,
+
+    onProxyReq(
+      proxyReq,
+      req
+    ) {
+      proxyReq.setHeader(
+        "x-waf-protected",
+        "true"
+      );
+
+      proxyReq.setHeader(
+        "x-waf-request-id",
+        req.headers[
+          "x-waf-request-id"
+        ] ||
+          crypto.randomUUID()
+      );
+
+      proxyReq.setHeader(
+        "x-forwarded-host",
+        req.headers.host ||
+          ""
+      );
+
+      /*
+       * express.json() يقرأ Body قبل الـProxy.
+       * fixRequestBody يعيد كتابة Body للطلب المرسل
+       * إلى TARGET_URL.
+       */
+
+      fixRequestBody(
+        proxyReq,
+        req
+      );
+    },
+
+    onError(
+      error,
+      _req,
+      res
+    ) {
+      console.error(
+        "Proxy error:",
+        error
+      );
+
+      if (
+        !res.headersSent
+      ) {
+        res
+          .status(502)
+          .json({
+            error:
+              "protected_site_unavailable"
+          });
+      }
+    }
+  });
+
+app.use(
+  "/",
+  proxy
+);
+
+/* ============================================================
+   ERROR HANDLER
+   ============================================================ */
+
+app.use(
+  (
+    error: unknown,
+    _req: Request,
+    res: Response,
+    _next: NextFunction
+  ) => {
+    console.error(
+      "Unhandled WAF error:",
+      error
+    );
+
+    if (
+      !res.headersSent
+    ) {
+      return res
+        .status(500)
+        .json({
+          error:
+            "internal_error"
+        });
+    }
+
+    return res.end();
+  }
+);
+
+/* ============================================================
+   SERVER
+   ============================================================ */
+
+const server =
+  http.createServer(
+    app
+  );
+
+server.requestTimeout =
+  config.REQUEST_TIMEOUT_MS;
+
+server.headersTimeout =
+  Math.min(
+    config.HEADERS_TIMEOUT_MS,
+    config.REQUEST_TIMEOUT_MS
+  );
+
+server.keepAliveTimeout =
+  config.KEEP_ALIVE_TIMEOUT_MS;
+
+server.maxHeadersCount =
+  100;
+
+/* ============================================================
+   SOCKET PROTECTION
+   ============================================================ */
+
+const socketCounts =
+  new Map<
+    string,
+    number
+  >();
+
+const MAX_SOCKETS_PER_IP =
+  config.MAX_CONCURRENT_PER_IP *
+  2;
+
+server.on(
+  "connection",
+  socket => {
+    const rawIp =
+      normalizeIp(
+        socket.remoteAddress ||
+          "0.0.0.0"
+      );
+
+    const current =
+      socketCounts.get(
+        rawIp
+      ) || 0;
+
+    if (
+      current >=
+      MAX_SOCKETS_PER_IP
+    ) {
+      socket.destroy();
+
+      return;
+    }
+
+    socketCounts.set(
+      rawIp,
+      current + 1
+    );
+
+    socket.setTimeout(
+      config.REQUEST_TIMEOUT_MS
+    );
+
+    socket.on(
+      "close",
+      () => {
+        const count =
+          socketCounts.get(
+            rawIp
+          ) || 0;
+
+        if (
+          count <= 1
+        ) {
+          socketCounts.delete(
+            rawIp
+          );
+        } else {
+          socketCounts.set(
+            rawIp,
+            count - 1
+          );
+        }
+      }
+    );
+  }
+);
+
+/* ============================================================
+   START
+   ============================================================ */
+
+server.listen(
+  config.PORT,
+  "0.0.0.0",
+  () => {
+    console.log(
+      "=========================================="
+    );
+
+    console.log(
+      " Strong Single-Site Cloud WAF"
+    );
+
+    console.log(
+      " Live Admin Dashboard Enabled"
+    );
+
+    console.log(
+      " L7 Anti-DDoS Protection Enabled"
+    );
+
+    console.log(
+      ` WAF: http://0.0.0.0:${config.PORT}`
+    );
+
+    console.log(
+      ` Target: ${config.TARGET_URL}`
+    );
+
+    console.log(
+      ` Admin: /admin`
+    );
+
+    console.log(
+      ` Rate: ${config.RATE_LIMIT_MAX}/${config.RATE_LIMIT_WINDOW}s`
+    );
+
+    console.log(
+      ` Burst: ${config.BURST_MAX}/${config.BURST_WINDOW_MS}ms`
+    );
+
+    console.log(
+      ` Max concurrent/IP: ${config.MAX_CONCURRENT_PER_IP}`
+    );
+
+    console.log(
+      ` Max global concurrent: ${config.MAX_GLOBAL_CONCURRENT}`
+    );
+
+    console.log(
+      "=========================================="
+    );
+  }
+);
+
+/* ============================================================
+   GRACEFUL SHUTDOWN
+   ============================================================ */
+
+function shutdown(
+  signal: string
+): void {
+  console.log(
+    `${signal}: shutting down WAF...`
+  );
+
+  saveDb();
+
+  server.close(
+    () => {
+      process.exit(
+        0
+      );
+    }
+  );
+
+  setTimeout(
+    () => {
+      process.exit(
+        1
+      );
+    },
+    10000
+  ).unref();
 }
 
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
-process.on('uncaughtException', error => {
-    structuredLog('ERROR', 'Uncaught exception', { error: error.stack || error.message });
-    shutdown('UNCAUGHT_EXCEPTION');
-});
-process.on('unhandledRejection', reason => {
-    structuredLog('ERROR', 'Unhandled rejection', {
-        error: reason instanceof Error ? reason.stack : String(reason)
-    });
-});
+process.on(
+  "SIGTERM",
+  () =>
+    shutdown(
+      "SIGTERM"
+    )
+);
+
+process.on(
+  "SIGINT",
+  () =>
+    shutdown(
+      "SIGINT"
+    )
+);
