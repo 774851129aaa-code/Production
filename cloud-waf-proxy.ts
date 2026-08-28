@@ -26,15 +26,11 @@ import {
 const ConfigSchema = z.object({
   PORT: z.coerce.number().int().positive().default(8080),
 
-  TARGET_URL: z.string().url(),
-
-  WAF_API_KEY: z.string().min(20),
-
   ADMIN_USER: z.string().min(3),
 
   ADMIN_PASSWORD: z.string().min(12),
 
-  DATA_FILE: z.string().default("waf-db.json"),
+  DATA_FILE: z.string().default("sites-db.json"),
 
   TRUST_PROXY: z.coerce.boolean().default(false),
 
@@ -82,112 +78,336 @@ const ConfigSchema = z.object({
 const config = ConfigSchema.parse({
   PORT: process.env.PORT,
 
-  TARGET_URL: process.env.TARGET_URL,
-
-  WAF_API_KEY: process.env.WAF_API_KEY,
-
   ADMIN_USER: process.env.ADMIN_USER,
 
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
 
-  DATA_FILE: process.env.DATA_FILE,
+  DATA_FILE:
+    process.env.DATA_FILE ||
+    "sites-db.json",
 
   TRUST_PROXY: process.env.TRUST_PROXY,
 
-  RATE_LIMIT_WINDOW: process.env.RATE_LIMIT_WINDOW,
+  RATE_LIMIT_WINDOW:
+    process.env.RATE_LIMIT_WINDOW,
 
-  RATE_LIMIT_MAX: process.env.RATE_LIMIT_MAX,
+  RATE_LIMIT_MAX:
+    process.env.RATE_LIMIT_MAX,
 
-  BURST_WINDOW_MS: process.env.BURST_WINDOW_MS,
+  BURST_WINDOW_MS:
+    process.env.BURST_WINDOW_MS,
 
-  BURST_MAX: process.env.BURST_MAX,
+  BURST_MAX:
+    process.env.BURST_MAX,
 
-  GLOBAL_RATE_WINDOW_MS: process.env.GLOBAL_RATE_WINDOW_MS,
+  GLOBAL_RATE_WINDOW_MS:
+    process.env.GLOBAL_RATE_WINDOW_MS,
 
-  GLOBAL_RATE_MAX: process.env.GLOBAL_RATE_MAX,
+  GLOBAL_RATE_MAX:
+    process.env.GLOBAL_RATE_MAX,
 
-  MAX_CONCURRENT_PER_IP: process.env.MAX_CONCURRENT_PER_IP,
+  MAX_CONCURRENT_PER_IP:
+    process.env.MAX_CONCURRENT_PER_IP,
 
-  MAX_GLOBAL_CONCURRENT: process.env.MAX_GLOBAL_CONCURRENT,
+  MAX_GLOBAL_CONCURRENT:
+    process.env.MAX_GLOBAL_CONCURRENT,
 
-  VIOLATION_LIMIT: process.env.VIOLATION_LIMIT,
+  VIOLATION_LIMIT:
+    process.env.VIOLATION_LIMIT,
 
-  VIOLATION_WINDOW_MS: process.env.VIOLATION_WINDOW_MS,
+  VIOLATION_WINDOW_MS:
+    process.env.VIOLATION_WINDOW_MS,
 
-  AUTO_BLACKLIST_SECONDS: process.env.AUTO_BLACKLIST_SECONDS,
+  AUTO_BLACKLIST_SECONDS:
+    process.env.AUTO_BLACKLIST_SECONDS,
 
-  RISK_BLOCK_THRESHOLD: process.env.RISK_BLOCK_THRESHOLD,
+  RISK_BLOCK_THRESHOLD:
+    process.env.RISK_BLOCK_THRESHOLD,
 
-  RISK_HONEYPOT_THRESHOLD: process.env.RISK_HONEYPOT_THRESHOLD,
+  RISK_HONEYPOT_THRESHOLD:
+    process.env.RISK_HONEYPOT_THRESHOLD,
 
-  RISK_TTL: process.env.RISK_TTL,
+  RISK_TTL:
+    process.env.RISK_TTL,
 
-  BLACKLIST_TTL: process.env.BLACKLIST_TTL,
+  BLACKLIST_TTL:
+    process.env.BLACKLIST_TTL,
 
-  MAX_BODY_SIZE: process.env.MAX_BODY_SIZE,
+  MAX_BODY_SIZE:
+    process.env.MAX_BODY_SIZE,
 
-  REQUEST_TIMEOUT_MS: process.env.REQUEST_TIMEOUT_MS,
+  REQUEST_TIMEOUT_MS:
+    process.env.REQUEST_TIMEOUT_MS,
 
-  HEADERS_TIMEOUT_MS: process.env.HEADERS_TIMEOUT_MS,
+  HEADERS_TIMEOUT_MS:
+    process.env.HEADERS_TIMEOUT_MS,
 
-  KEEP_ALIVE_TIMEOUT_MS: process.env.KEEP_ALIVE_TIMEOUT_MS,
+  KEEP_ALIVE_TIMEOUT_MS:
+    process.env.KEEP_ALIVE_TIMEOUT_MS,
 
-  PROXY_TIMEOUT_MS: process.env.PROXY_TIMEOUT_MS
+  PROXY_TIMEOUT_MS:
+    process.env.PROXY_TIMEOUT_MS
 });
 
 /* ============================================================
-   DATABASE
+   TYPES
    ============================================================ */
 
+type Action =
+  | "allow"
+  | "block"
+  | "honeypot";
+
+interface SiteSettings {
+  rateLimitWindow?: number;
+  rateLimitMax?: number;
+
+  burstWindowMs?: number;
+  burstMax?: number;
+
+  globalRateWindowMs?: number;
+  globalRateMax?: number;
+
+  maxConcurrentPerIp?: number;
+
+  maxGlobalConcurrent?: number;
+
+  violationLimit?: number;
+
+  violationWindowMs?: number;
+
+  autoBlacklistSeconds?: number;
+
+  riskBlockThreshold?: number;
+
+  riskHoneypotThreshold?: number;
+
+  riskTtl?: number;
+
+  blacklistTtl?: number;
+
+  enableSqlInjection?: boolean;
+
+  enableXss?: boolean;
+
+  enableRce?: boolean;
+
+  enablePathTraversal?: boolean;
+
+  enabled?: boolean;
+}
+
+interface SiteStats {
+  totalRequests: number;
+
+  allowedRequests: number;
+
+  blockedRequests: number;
+
+  honeypotRequests: number;
+
+  attacks: number;
+
+  lastRequestAt?: string;
+
+  lastAttackAt?: string;
+}
+
+interface Site {
+  id: string;
+
+  owner_id: string;
+
+  client_domain: string;
+
+  target_url: string;
+
+  api_key: string;
+
+  settings: SiteSettings;
+
+  stats: SiteStats;
+}
+
+interface BlacklistEntry {
+  reason: string;
+
+  createdAt: string;
+
+  expiresAt: number;
+}
+
+interface RiskEntry {
+  score: number;
+
+  expiresAt: number;
+}
+
+interface WafAlert {
+  id: string;
+
+  siteId: string;
+
+  ownerId: string;
+
+  domain: string;
+
+  time: string;
+
+  ip: string;
+
+  path: string;
+
+  risk: number;
+
+  action: Action;
+
+  reasons: string[];
+}
+
 interface DbSchema {
+  sites: Site[];
+
   blacklists: Record<
     string,
-    {
-      reason: string;
-      createdAt: string;
-      expiresAt: number;
-    }
+    BlacklistEntry
   >;
 
   risks: Record<
     string,
-    {
-      score: number;
-      expiresAt: number;
-    }
+    RiskEntry
   >;
+
+  alerts: WafAlert[];
 }
+
+interface Counter {
+  count: number;
+
+  expiresAt: number;
+}
+
+interface Decision {
+  action: Action;
+
+  riskScore: number;
+
+  reasons: string[];
+
+  requestId: string;
+
+  site: Site;
+}
+
+/* ============================================================
+   DATABASE
+   ============================================================ */
 
 const dbFilePath = path.resolve(
   process.cwd(),
   config.DATA_FILE
 );
 
+function createSiteStats(): SiteStats {
+  return {
+    totalRequests: 0,
+
+    allowedRequests: 0,
+
+    blockedRequests: 0,
+
+    honeypotRequests: 0,
+
+    attacks: 0
+  };
+}
+
 function emptyDb(): DbSchema {
   return {
+    sites: [],
+
     blacklists: {},
-    risks: {}
+
+    risks: {},
+
+    alerts: []
   };
+}
+
+function normalizeDomain(
+  domain: string
+): string {
+  return domain
+    .trim()
+    .toLowerCase()
+    .split(":")[0];
+}
+
+function normalizeHost(
+  host: string
+): string {
+  return host
+    .trim()
+    .toLowerCase()
+    .split(":")[0];
 }
 
 function loadDb(): DbSchema {
   try {
     if (!fs.existsSync(dbFilePath)) {
-      return emptyDb();
+      const initial =
+        emptyDb();
+
+      fs.writeFileSync(
+        dbFilePath,
+        JSON.stringify(
+          initial,
+          null,
+          2
+        ),
+        "utf8"
+      );
+
+      return initial;
     }
 
-    const parsed = JSON.parse(
-      fs.readFileSync(
-        dbFilePath,
-        "utf8"
-      )
-    );
+    const parsed =
+      JSON.parse(
+        fs.readFileSync(
+          dbFilePath,
+          "utf8"
+        )
+      );
+
+    const sites =
+      Array.isArray(parsed.sites)
+        ? parsed.sites
+        : [];
+
+    for (const site of sites) {
+      if (!site.stats) {
+        site.stats =
+          createSiteStats();
+      }
+    }
 
     return {
-      blacklists: parsed.blacklists || {},
-      risks: parsed.risks || {}
+      sites,
+
+      blacklists:
+        parsed.blacklists || {},
+
+      risks:
+        parsed.risks || {},
+
+      alerts:
+        Array.isArray(parsed.alerts)
+          ? parsed.alerts
+          : []
     };
+
   } catch (error) {
+
     console.error(
       "Database load error:",
       error
@@ -197,32 +417,59 @@ function loadDb(): DbSchema {
   }
 }
 
-let db = loadDb();
+let db =
+  loadDb();
 
-let dbDirty = false;
+let dbDirty =
+  false;
 
 function saveDb(): void {
   try {
-    const now = Date.now();
 
-    for (const [key, value] of Object.entries(
-      db.blacklists
-    )) {
-      if (value.expiresAt < now) {
+    const now =
+      Date.now();
+
+    for (
+      const [key, value]
+      of Object.entries(
+        db.blacklists
+      )
+    ) {
+
+      if (
+        value.expiresAt <
+        now
+      ) {
         delete db.blacklists[key];
       }
     }
 
-    for (const [key, value] of Object.entries(
-      db.risks
-    )) {
-      if (value.expiresAt < now) {
+    for (
+      const [key, value]
+      of Object.entries(
+        db.risks
+      )
+    ) {
+
+      if (
+        value.expiresAt <
+        now
+      ) {
         delete db.risks[key];
       }
     }
 
+    db.alerts =
+      db.alerts.slice(
+        0,
+        1000
+      );
+
+    const tempFile =
+      `${dbFilePath}.tmp`;
+
     fs.writeFileSync(
-      dbFilePath,
+      tempFile,
       JSON.stringify(
         db,
         null,
@@ -231,8 +478,16 @@ function saveDb(): void {
       "utf8"
     );
 
-    dbDirty = false;
+    fs.renameSync(
+      tempFile,
+      dbFilePath
+    );
+
+    dbDirty =
+      false;
+
   } catch (error) {
+
     console.error(
       "Database save error:",
       error
@@ -242,21 +497,74 @@ function saveDb(): void {
 
 setInterval(
   () => {
+
     if (dbDirty) {
       saveDb();
     }
+
   },
   5000
 );
 
 /* ============================================================
-   MEMORY RATE LIMITERS
+   SITE LOOKUP
    ============================================================ */
 
-interface Counter {
-  count: number;
-  expiresAt: number;
+function getSiteByHost(
+  host: string
+): Site | null {
+
+  const normalized =
+    normalizeHost(host);
+
+  return (
+    db.sites.find(
+      site => {
+
+        const domain =
+          normalizeDomain(
+            site.client_domain
+          );
+
+        return (
+          domain ===
+          normalized
+        );
+      }
+    ) || null
+  );
 }
+
+function getSiteById(
+  id: string
+): Site | null {
+
+  return (
+    db.sites.find(
+      site =>
+        site.id === id
+    ) || null
+  );
+}
+
+function getSiteByApiKey(
+  apiKey: string
+): Site | null {
+
+  return (
+    db.sites.find(
+      site =>
+        secureCompare(
+          site.api_key,
+          apiKey
+        )
+    ) || null
+  );
+}
+
+/* ============================================================
+   MEMORY RATE LIMITERS
+   ============================================================ */
 
 const requestCounters =
   new Map<string, Counter>();
@@ -273,74 +581,113 @@ const violations =
 const concurrentByIp =
   new Map<string, number>();
 
-let globalConcurrent = 0;
+const concurrentBySite =
+  new Map<string, number>();
+
+let globalConcurrent =
+  0;
 
 /* ============================================================
    LIVE ADMIN ALERTS
    ============================================================ */
 
-interface WafAlert {
-  id: string;
-  time: string;
-  ip: string;
-  path: string;
-  risk: number;
-  action: Action;
-  reasons: string[];
-}
-
-const alerts: WafAlert[] = [];
-
 const alertClients =
   new Set<Response>();
 
-const MAX_ALERTS = 200;
+const MAX_ALERTS =
+  200;
 
-function addAlert(data: {
-  ip: string;
-  path: string;
-  risk: number;
-  action: Action;
-  reasons: string[];
-}): void {
+function addAlert(
+  data: {
+    site: Site;
+
+    ip: string;
+
+    path: string;
+
+    risk: number;
+
+    action: Action;
+
+    reasons: string[];
+  }
+): void {
+
   const alert: WafAlert = {
-    id: crypto.randomUUID(),
 
-    time: new Date().toISOString(),
+    id:
+      crypto.randomUUID(),
 
-    ip: data.ip,
+    siteId:
+      data.site.id,
 
-    path: truncate(
-      data.path,
-      500
-    ),
+    ownerId:
+      data.site.owner_id,
 
-    risk: data.risk,
+    domain:
+      data.site.client_domain,
 
-    action: data.action,
+    time:
+      new Date().toISOString(),
 
-    reasons: data.reasons.slice(
-      0,
-      20
-    )
+    ip:
+      data.ip,
+
+    path:
+      truncate(
+        data.path,
+        500
+      ),
+
+    risk:
+      data.risk,
+
+    action:
+      data.action,
+
+    reasons:
+      data.reasons.slice(
+        0,
+        20
+      )
   };
 
-  alerts.unshift(alert);
+  db.alerts.unshift(
+    alert
+  );
 
-  if (alerts.length > MAX_ALERTS) {
-    alerts.length = MAX_ALERTS;
+  if (
+    db.alerts.length >
+    1000
+  ) {
+    db.alerts.length =
+      1000;
   }
+
+  dbDirty =
+    true;
 
   const payload =
     `data: ${JSON.stringify(
       alert
     )}\n\n`;
 
-  for (const client of alertClients) {
+  for (
+    const client
+    of alertClients
+  ) {
+
     try {
-      client.write(payload);
+
+      client.write(
+        payload
+      );
+
     } catch {
-      alertClients.delete(client);
+
+      alertClients.delete(
+        client
+      );
     }
   }
 }
@@ -350,29 +697,67 @@ function addAlert(data: {
    ============================================================ */
 
 function cleanupMemory(): void {
-  const now = Date.now();
 
-  for (const [key, value] of requestCounters) {
-    if (value.expiresAt < now) {
-      requestCounters.delete(key);
+  const now =
+    Date.now();
+
+  for (
+    const [key, value]
+    of requestCounters
+  ) {
+
+    if (
+      value.expiresAt <
+      now
+    ) {
+      requestCounters.delete(
+        key
+      );
     }
   }
 
-  for (const [key, value] of burstCounters) {
-    if (value.expiresAt < now) {
-      burstCounters.delete(key);
+  for (
+    const [key, value]
+    of burstCounters
+  ) {
+
+    if (
+      value.expiresAt <
+      now
+    ) {
+      burstCounters.delete(
+        key
+      );
     }
   }
 
-  for (const [key, value] of globalCounters) {
-    if (value.expiresAt < now) {
-      globalCounters.delete(key);
+  for (
+    const [key, value]
+    of globalCounters
+  ) {
+
+    if (
+      value.expiresAt <
+      now
+    ) {
+      globalCounters.delete(
+        key
+      );
     }
   }
 
-  for (const [key, value] of violations) {
-    if (value.expiresAt < now) {
-      violations.delete(key);
+  for (
+    const [key, value]
+    of violations
+  ) {
+
+    if (
+      value.expiresAt <
+      now
+    ) {
+      violations.delete(
+        key
+      );
     }
   }
 }
@@ -383,33 +768,26 @@ setInterval(
 );
 
 /* ============================================================
-   TYPES
-   ============================================================ */
-
-type Action =
-  | "allow"
-  | "block"
-  | "honeypot";
-
-interface Decision {
-  action: Action;
-  riskScore: number;
-  reasons: string[];
-  requestId: string;
-}
-
-/* ============================================================
    UTILITIES
    ============================================================ */
 
 function normalizeIp(
   ip: string
 ): string {
-  if (ip.startsWith("::ffff:")) {
-    return ip.slice(7);
+
+  if (
+    ip.startsWith(
+      "::ffff:"
+    )
+  ) {
+    return ip.slice(
+      7
+    );
   }
 
-  if (ip === "::1") {
+  if (
+    ip === "::1"
+  ) {
     return "127.0.0.1";
   }
 
@@ -419,8 +797,10 @@ function normalizeIp(
 function getClientIp(
   req: Request
 ): string {
+
   return normalizeIp(
-    req.ip || "0.0.0.0"
+    req.ip ||
+      "0.0.0.0"
   );
 }
 
@@ -428,17 +808,28 @@ function truncate(
   value: string,
   max = 4096
 ): string {
-  return value.length > max
-    ? value.slice(0, max)
+
+  return value.length >
+    max
+    ? value.slice(
+        0,
+        max
+      )
     : value;
 }
 
 function safeJson(
   value: unknown
 ): string {
+
   try {
-    return JSON.stringify(value);
+
+    return JSON.stringify(
+      value
+    );
+
   } catch {
+
     return "";
   }
 }
@@ -447,10 +838,17 @@ function secureCompare(
   a: string,
   b: string
 ): boolean {
-  const aBuf = Buffer.from(a);
-  const bBuf = Buffer.from(b);
 
-  if (aBuf.length !== bBuf.length) {
+  const aBuf =
+    Buffer.from(a);
+
+  const bBuf =
+    Buffer.from(b);
+
+  if (
+    aBuf.length !==
+    bBuf.length
+  ) {
     return false;
   }
 
@@ -460,24 +858,101 @@ function secureCompare(
   );
 }
 
+function settingNumber(
+  site: Site,
+  key:
+    | "rateLimitWindow"
+    | "rateLimitMax"
+    | "burstWindowMs"
+    | "burstMax"
+    | "globalRateWindowMs"
+    | "globalRateMax"
+    | "maxConcurrentPerIp"
+    | "maxGlobalConcurrent"
+    | "violationLimit"
+    | "violationWindowMs"
+    | "autoBlacklistSeconds"
+    | "riskBlockThreshold"
+    | "riskHoneypotThreshold"
+    | "riskTtl"
+    | "blacklistTtl",
+  fallback: number
+): number {
+
+  const value =
+    site.settings[key];
+
+  return (
+    typeof value ===
+      "number" &&
+    Number.isFinite(value) &&
+    value > 0
+  )
+    ? value
+    : fallback;
+}
+
+function settingBoolean(
+  site: Site,
+  key:
+    | "enabled"
+    | "enableSqlInjection"
+    | "enableXss"
+    | "enableRce"
+    | "enablePathTraversal",
+  fallback = true
+): boolean {
+
+  const value =
+    site.settings[key];
+
+  return typeof value ===
+    "boolean"
+    ? value
+    : fallback;
+}
+
 /* ============================================================
    BLACKLIST
    ============================================================ */
 
+function blacklistKey(
+  siteId: string,
+  ip: string
+): string {
+
+  return `${siteId}:${ip}`;
+}
+
 function isBlacklisted(
+  site: Site,
   ip: string
 ): boolean {
+
+  const key =
+    blacklistKey(
+      site.id,
+      ip
+    );
+
   const entry =
-    db.blacklists[ip];
+    db.blacklists[key];
 
   if (!entry) {
     return false;
   }
 
-  if (entry.expiresAt < Date.now()) {
-    delete db.blacklists[ip];
+  if (
+    entry.expiresAt <
+    Date.now()
+  ) {
 
-    dbDirty = true;
+    delete db.blacklists[
+      key
+    ];
+
+    dbDirty =
+      true;
 
     return false;
   }
@@ -486,10 +961,33 @@ function isBlacklisted(
 }
 
 function blacklist(
+  site: Site,
   ip: string,
   reason: string
 ): void {
-  db.blacklists[ip] = {
+
+  const key =
+    blacklistKey(
+      site.id,
+      ip
+    );
+
+  const ttl =
+    Math.max(
+      settingNumber(
+        site,
+        "blacklistTtl",
+        config.BLACKLIST_TTL
+      ),
+      settingNumber(
+        site,
+        "autoBlacklistSeconds",
+        config.AUTO_BLACKLIST_SECONDS
+      )
+    );
+
+  db.blacklists[key] = {
+
     reason,
 
     createdAt:
@@ -497,28 +995,43 @@ function blacklist(
 
     expiresAt:
       Date.now() +
-      Math.max(
-        config.BLACKLIST_TTL,
-        config.AUTO_BLACKLIST_SECONDS
-      ) *
-        1000
+      ttl * 1000
   };
 
-  dbDirty = true;
+  dbDirty =
+    true;
 }
 
 /* ============================================================
    RISK
    ============================================================ */
 
+function riskKey(
+  siteId: string,
+  ip: string
+): string {
+
+  return `${siteId}:${ip}`;
+}
+
 function getRisk(
+  site: Site,
   ip: string
 ): number {
-  const entry = db.risks[ip];
+
+  const key =
+    riskKey(
+      site.id,
+      ip
+    );
+
+  const entry =
+    db.risks[key];
 
   if (
     !entry ||
-    entry.expiresAt < Date.now()
+    entry.expiresAt <
+      Date.now()
   ) {
     return 0;
   }
@@ -527,32 +1040,52 @@ function getRisk(
 }
 
 function addRisk(
+  site: Site,
   ip: string,
   points: number
 ): number {
-  const now = Date.now();
 
-  let entry = db.risks[ip];
+  const key =
+    riskKey(
+      site.id,
+      ip
+    );
+
+  const now =
+    Date.now();
+
+  let entry =
+    db.risks[key];
 
   if (
     !entry ||
-    entry.expiresAt < now
+    entry.expiresAt <
+      now
   ) {
+
     entry = {
+
       score: 0,
 
       expiresAt:
         now +
-        config.RISK_TTL *
+        settingNumber(
+          site,
+          "riskTtl",
+          config.RISK_TTL
+        ) *
           1000
     };
   }
 
-  entry.score += points;
+  entry.score +=
+    points;
 
-  db.risks[ip] = entry;
+  db.risks[key] =
+    entry;
 
-  dbDirty = true;
+  dbDirty =
+    true;
 
   return entry.score;
 }
@@ -566,19 +1099,26 @@ function incrementCounter(
   key: string,
   windowMs: number
 ): number {
-  const now = Date.now();
 
-  let entry = map.get(key);
+  const now =
+    Date.now();
+
+  let entry =
+    map.get(key);
 
   if (
     !entry ||
-    entry.expiresAt < now
+    entry.expiresAt <
+      now
   ) {
+
     entry = {
+
       count: 0,
 
       expiresAt:
-        now + windowMs
+        now +
+        windowMs
     };
   }
 
@@ -597,12 +1137,20 @@ function incrementCounter(
    ============================================================ */
 
 function registerViolation(
+  site: Site,
   ip: string
 ): number {
+
   return incrementCounter(
     violations,
-    ip,
-    config.VIOLATION_WINDOW_MS
+
+    `${site.id}:${ip}`,
+
+    settingNumber(
+      site,
+      "violationWindowMs",
+      config.VIOLATION_WINDOW_MS
+    )
   );
 }
 
@@ -611,29 +1159,47 @@ function registerViolation(
    ============================================================ */
 
 function checkRateLimit(
+  site: Site,
   ip: string
 ): {
   allowed: boolean;
+
   remaining: number;
 } {
+
+  const max =
+    settingNumber(
+      site,
+      "rateLimitMax",
+      config.RATE_LIMIT_MAX
+    );
+
+  const windowMs =
+    settingNumber(
+      site,
+      "rateLimitWindow",
+      config.RATE_LIMIT_WINDOW
+    ) *
+    1000;
+
   const count =
     incrementCounter(
       requestCounters,
-      ip,
-      config.RATE_LIMIT_WINDOW *
-        1000
+
+      `${site.id}:${ip}`,
+
+      windowMs
     );
 
   return {
+
     allowed:
-      count <=
-      config.RATE_LIMIT_MAX,
+      count <= max,
 
     remaining:
       Math.max(
         0,
-        config.RATE_LIMIT_MAX -
-          count
+        max - count
       )
   };
 }
@@ -643,18 +1209,30 @@ function checkRateLimit(
    ============================================================ */
 
 function checkBurst(
+  site: Site,
   ip: string
 ): boolean {
+
   const count =
     incrementCounter(
       burstCounters,
-      ip,
-      config.BURST_WINDOW_MS
+
+      `${site.id}:${ip}`,
+
+      settingNumber(
+        site,
+        "burstWindowMs",
+        config.BURST_WINDOW_MS
+      )
     );
 
   return (
     count <=
-    config.BURST_MAX
+    settingNumber(
+      site,
+      "burstMax",
+      config.BURST_MAX
+    )
   );
 }
 
@@ -662,17 +1240,30 @@ function checkBurst(
    GLOBAL FLOOD
    ============================================================ */
 
-function checkGlobalRate(): boolean {
+function checkGlobalRate(
+  site: Site
+): boolean {
+
   const count =
     incrementCounter(
       globalCounters,
-      "global",
-      config.GLOBAL_RATE_WINDOW_MS
+
+      site.id,
+
+      settingNumber(
+        site,
+        "globalRateWindowMs",
+        config.GLOBAL_RATE_WINDOW_MS
+      )
     );
 
   return (
     count <=
-    config.GLOBAL_RATE_MAX
+    settingNumber(
+      site,
+      "globalRateMax",
+      config.GLOBAL_RATE_MAX
+    )
   );
 }
 
@@ -681,29 +1272,66 @@ function checkGlobalRate(): boolean {
    ============================================================ */
 
 function acquireConcurrency(
+  site: Site,
   ip: string
 ): boolean {
+
+  const maxGlobal =
+    settingNumber(
+      site,
+      "maxGlobalConcurrent",
+      config.MAX_GLOBAL_CONCURRENT
+    );
+
+  const maxIp =
+    settingNumber(
+      site,
+      "maxConcurrentPerIp",
+      config.MAX_CONCURRENT_PER_IP
+    );
+
   if (
     globalConcurrent >=
-    config.MAX_GLOBAL_CONCURRENT
+    maxGlobal
   ) {
     return false;
   }
 
-  const current =
-    concurrentByIp.get(ip) ||
-    0;
+  const ipKey =
+    `${site.id}:${ip}`;
+
+  const currentIp =
+    concurrentByIp.get(
+      ipKey
+    ) || 0;
 
   if (
-    current >=
-    config.MAX_CONCURRENT_PER_IP
+    currentIp >=
+    maxIp
+  ) {
+    return false;
+  }
+
+  const siteCurrent =
+    concurrentBySite.get(
+      site.id
+    ) || 0;
+
+  if (
+    siteCurrent >=
+    maxGlobal
   ) {
     return false;
   }
 
   concurrentByIp.set(
-    ip,
-    current + 1
+    ipKey,
+    currentIp + 1
+  );
+
+  concurrentBySite.set(
+    site.id,
+    siteCurrent + 1
   );
 
   globalConcurrent++;
@@ -712,18 +1340,52 @@ function acquireConcurrency(
 }
 
 function releaseConcurrency(
+  site: Site,
   ip: string
 ): void {
-  const current =
-    concurrentByIp.get(ip) ||
-    0;
 
-  if (current <= 1) {
-    concurrentByIp.delete(ip);
+  const ipKey =
+    `${site.id}:${ip}`;
+
+  const currentIp =
+    concurrentByIp.get(
+      ipKey
+    ) || 0;
+
+  if (
+    currentIp <= 1
+  ) {
+
+    concurrentByIp.delete(
+      ipKey
+    );
+
   } else {
+
     concurrentByIp.set(
-      ip,
-      current - 1
+      ipKey,
+      currentIp - 1
+    );
+  }
+
+  const currentSite =
+    concurrentBySite.get(
+      site.id
+    ) || 0;
+
+  if (
+    currentSite <= 1
+  ) {
+
+    concurrentBySite.delete(
+      site.id
+    );
+
+  } else {
+
+    concurrentBySite.set(
+      site.id,
+      currentSite - 1
     );
   }
 
@@ -766,7 +1428,7 @@ const PATH_PATTERNS = [
 ];
 
 const RCE_PATTERNS = [
-  /\$\([^)]{1,200}\)/,
+  /\$[^)]{1,200}/,
   /`[^`]{1,200}`/,
   /(?:^|[;&|])\s*(?:curl|wget)\s+/i,
   /(?:^|[;&|])\s*(?:bash|sh|cmd|powershell)\b/i,
@@ -778,24 +1440,34 @@ const RCE_PATTERNS = [
    ============================================================ */
 
 function inspectString(
+  site: Site,
   value: string,
   location: string
 ): {
   score: number;
+
   reasons: string[];
 } {
-  const input = truncate(value);
+
+  const input =
+    truncate(value);
 
   let score = 0;
 
-  const reasons: string[] = [];
+  const reasons: string[] =
+    [];
 
   if (
+    settingBoolean(
+      site,
+      "enableSqlInjection"
+    ) &&
     SQL_PATTERNS.some(
       pattern =>
         pattern.test(input)
     )
   ) {
+
     score += 35;
 
     reasons.push(
@@ -804,11 +1476,16 @@ function inspectString(
   }
 
   if (
+    settingBoolean(
+      site,
+      "enableXss"
+    ) &&
     XSS_PATTERNS.some(
       pattern =>
         pattern.test(input)
     )
   ) {
+
     score += 30;
 
     reasons.push(
@@ -817,11 +1494,16 @@ function inspectString(
   }
 
   if (
+    settingBoolean(
+      site,
+      "enablePathTraversal"
+    ) &&
     PATH_PATTERNS.some(
       pattern =>
         pattern.test(input)
     )
   ) {
+
     score += 25;
 
     reasons.push(
@@ -830,11 +1512,16 @@ function inspectString(
   }
 
   if (
+    settingBoolean(
+      site,
+      "enableRce"
+    ) &&
     RCE_PATTERNS.some(
       pattern =>
         pattern.test(input)
     )
   ) {
+
     score += 50;
 
     reasons.push(
@@ -844,24 +1531,33 @@ function inspectString(
 
   return {
     score,
+
     reasons
   };
 }
 
 function inspectRequest(
+  site: Site,
   req: Request
 ): {
   score: number;
+
   reasons: string[];
 } {
+
   let score = 0;
 
-  const reasons: string[] = [];
+  const reasons: string[] =
+    [];
 
   const values = [
+
     {
-      value: req.originalUrl,
-      location: "url"
+      value:
+        req.originalUrl,
+
+      location:
+        "url"
     },
 
     {
@@ -869,7 +1565,9 @@ function inspectRequest(
         req.headers[
           "user-agent"
         ],
-      location: "user-agent"
+
+      location:
+        "user-agent"
     },
 
     {
@@ -877,7 +1575,9 @@ function inspectRequest(
         req.headers[
           "referer"
         ],
-      location: "referer"
+
+      location:
+        "referer"
     },
 
     {
@@ -885,22 +1585,32 @@ function inspectRequest(
         req.headers[
           "origin"
         ],
-      location: "origin"
+
+      location:
+        "origin"
     }
+
   ];
 
-  for (const item of values) {
+  for (
+    const item
+    of values
+  ) {
+
     if (
       typeof item.value ===
       "string"
     ) {
+
       const result =
         inspectString(
+          site,
           item.value,
           item.location
         );
 
-      score += result.score;
+      score +=
+        result.score;
 
       reasons.push(
         ...result.reasons
@@ -912,19 +1622,23 @@ function inspectRequest(
     req.body !==
     undefined
   ) {
+
     const serialized =
       safeJson(
         req.body
       );
 
     if (serialized) {
+
       const result =
         inspectString(
+          site,
           serialized,
           "body"
         );
 
-      score += result.score;
+      score +=
+        result.score;
 
       reasons.push(
         ...result.reasons
@@ -933,6 +1647,7 @@ function inspectRequest(
   }
 
   return {
+
     score,
 
     reasons: [
@@ -944,59 +1659,192 @@ function inspectRequest(
 }
 
 /* ============================================================
+   SITE STATS
+   ============================================================ */
+
+function registerSiteRequest(
+  site: Site
+): void {
+
+  site.stats.totalRequests++;
+
+  site.stats.lastRequestAt =
+    new Date().toISOString();
+
+  dbDirty =
+    true;
+}
+
+function registerSiteAction(
+  site: Site,
+  action: Action,
+  attack = false
+): void {
+
+  if (
+    action ===
+    "allow"
+  ) {
+    site.stats.allowedRequests++;
+  }
+
+  if (
+    action ===
+    "block"
+  ) {
+    site.stats.blockedRequests++;
+  }
+
+  if (
+    action ===
+    "honeypot"
+  ) {
+    site.stats.honeypotRequests++;
+  }
+
+  if (attack) {
+
+    site.stats.attacks++;
+
+    site.stats.lastAttackAt =
+      new Date().toISOString();
+  }
+
+  dbDirty =
+    true;
+}
+
+/* ============================================================
    WAF DECISION
    ============================================================ */
 
 async function evaluate(
-  req: Request
+  req: Request,
+  site: Site
 ): Promise<Decision> {
+
   const requestId =
     crypto.randomUUID();
 
   const ip =
     getClientIp(req);
 
+  registerSiteRequest(
+    site
+  );
+
   if (
-    isBlacklisted(ip)
+    !settingBoolean(
+      site,
+      "enabled",
+      true
+    )
   ) {
+
+    registerSiteAction(
+      site,
+      "allow"
+    );
+
     return {
-      action: "block",
+
+      action:
+        "allow",
 
       riskScore:
-        config.RISK_BLOCK_THRESHOLD,
+        getRisk(
+          site,
+          ip
+        ),
 
-      reasons: [
-        "global_blacklist"
-      ],
+      reasons: [],
 
-      requestId
+      requestId,
+
+      site
     };
   }
 
   if (
-    !checkGlobalRate()
+    isBlacklisted(
+      site,
+      ip
+    )
   ) {
+
+    registerSiteAction(
+      site,
+      "block",
+      true
+    );
+
+    return {
+
+      action:
+        "block",
+
+      riskScore:
+        settingNumber(
+          site,
+          "riskBlockThreshold",
+          config.RISK_BLOCK_THRESHOLD
+        ),
+
+      reasons: [
+        "site_blacklist"
+      ],
+
+      requestId,
+
+      site
+    };
+  }
+
+  if (
+    !checkGlobalRate(
+      site
+    )
+  ) {
+
     const score =
       addRisk(
+        site,
         ip,
         20
       );
 
-    registerViolation(ip);
+    registerViolation(
+      site,
+      ip
+    );
 
     const action =
       score >=
-      config.RISK_HONEYPOT_THRESHOLD
+      settingNumber(
+        site,
+        "riskHoneypotThreshold",
+        config.RISK_HONEYPOT_THRESHOLD
+      )
         ? "honeypot"
         : "block";
 
+    registerSiteAction(
+      site,
+      action,
+      true
+    );
+
     addAlert({
+
+      site,
+
       ip,
 
       path:
         req.originalUrl,
 
-      risk: score,
+      risk:
+        score,
 
       action,
 
@@ -1006,46 +1854,74 @@ async function evaluate(
     });
 
     return {
+
       action,
 
-      riskScore: score,
+      riskScore:
+        score,
 
       reasons: [
         "global_rate_limit"
       ],
 
-      requestId
+      requestId,
+
+      site
     };
   }
 
   if (
-    !checkBurst(ip)
+    !checkBurst(
+      site,
+      ip
+    )
   ) {
+
     const score =
       addRisk(
+        site,
         ip,
         20
       );
 
     const count =
-      registerViolation(ip);
+      registerViolation(
+        site,
+        ip
+      );
 
     if (
       count >=
-      config.VIOLATION_LIMIT
+      settingNumber(
+        site,
+        "violationLimit",
+        config.VIOLATION_LIMIT
+      )
     ) {
+
       blacklist(
+        site,
         ip,
         "repeated_burst_violation"
       );
 
+      registerSiteAction(
+        site,
+        "block",
+        true
+      );
+
       addAlert({
+
+        site,
+
         ip,
 
         path:
           req.originalUrl,
 
-        risk: score,
+        risk:
+          score,
 
         action:
           "block",
@@ -1056,29 +1932,47 @@ async function evaluate(
       });
 
       return {
-        action: "block",
+
+        action:
+          "block",
 
         riskScore:
           Math.max(
             score,
-            config.RISK_BLOCK_THRESHOLD
+            settingNumber(
+              site,
+              "riskBlockThreshold",
+              config.RISK_BLOCK_THRESHOLD
+            )
           ),
 
         reasons: [
           "repeated_burst_violation"
         ],
 
-        requestId
+        requestId,
+
+        site
       };
     }
 
+    registerSiteAction(
+      site,
+      "honeypot",
+      true
+    );
+
     addAlert({
+
+      site,
+
       ip,
 
       path:
         req.originalUrl,
 
-      risk: score,
+      risk:
+        score,
 
       action:
         "honeypot",
@@ -1089,50 +1983,78 @@ async function evaluate(
     });
 
     return {
+
       action:
         "honeypot",
 
-      riskScore: score,
+      riskScore:
+        score,
 
       reasons: [
         "burst_rate_limit"
       ],
 
-      requestId
+      requestId,
+
+      site
     };
   }
 
   const rate =
-    checkRateLimit(ip);
+    checkRateLimit(
+      site,
+      ip
+    );
 
   if (
     !rate.allowed
   ) {
+
     const score =
       addRisk(
+        site,
         ip,
         30
       );
 
     const count =
-      registerViolation(ip);
+      registerViolation(
+        site,
+        ip
+      );
 
     if (
       count >=
-      config.VIOLATION_LIMIT
+      settingNumber(
+        site,
+        "violationLimit",
+        config.VIOLATION_LIMIT
+      )
     ) {
+
       blacklist(
+        site,
         ip,
         "repeated_rate_limit_violation"
       );
 
+      registerSiteAction(
+        site,
+        "block",
+        true
+      );
+
       addAlert({
+
+        site,
+
         ip,
 
         path:
           req.originalUrl,
 
-        risk: score,
+        risk:
+          score,
 
         action:
           "block",
@@ -1143,30 +2065,47 @@ async function evaluate(
       });
 
       return {
+
         action:
           "block",
 
         riskScore:
           Math.max(
             score,
-            config.RISK_BLOCK_THRESHOLD
+            settingNumber(
+              site,
+              "riskBlockThreshold",
+              config.RISK_BLOCK_THRESHOLD
+            )
           ),
 
         reasons: [
           "rate_limit_violation"
         ],
 
-        requestId
+        requestId,
+
+        site
       };
     }
 
+    registerSiteAction(
+      site,
+      "honeypot",
+      true
+    );
+
     addAlert({
+
+      site,
+
       ip,
 
       path:
         req.originalUrl,
 
-      risk: score,
+      risk:
+        score,
 
       action:
         "honeypot",
@@ -1177,47 +2116,75 @@ async function evaluate(
     });
 
     return {
+
       action:
         "honeypot",
 
-      riskScore: score,
+      riskScore:
+        score,
 
       reasons: [
         "rate_limit_violation"
       ],
 
-      requestId
+      requestId,
+
+      site
     };
   }
 
   if (
-    !acquireConcurrency(ip)
+    !acquireConcurrency(
+      site,
+      ip
+    )
   ) {
+
     const score =
       addRisk(
+        site,
         ip,
         25
       );
 
     const count =
-      registerViolation(ip);
+      registerViolation(
+        site,
+        ip
+      );
 
     if (
       count >=
-      config.VIOLATION_LIMIT
+      settingNumber(
+        site,
+        "violationLimit",
+        config.VIOLATION_LIMIT
+      )
     ) {
+
       blacklist(
+        site,
         ip,
         "connection_flood"
       );
 
+      registerSiteAction(
+        site,
+        "block",
+        true
+      );
+
       addAlert({
+
+        site,
+
         ip,
 
         path:
           req.originalUrl,
 
-        risk: score,
+        risk:
+          score,
 
         action:
           "block",
@@ -1228,30 +2195,47 @@ async function evaluate(
       });
 
       return {
+
         action:
           "block",
 
         riskScore:
           Math.max(
             score,
-            config.RISK_BLOCK_THRESHOLD
+            settingNumber(
+              site,
+              "riskBlockThreshold",
+              config.RISK_BLOCK_THRESHOLD
+            )
           ),
 
         reasons: [
           "connection_flood"
         ],
 
-        requestId
+        requestId,
+
+        site
       };
     }
 
+    registerSiteAction(
+      site,
+      "honeypot",
+      true
+    );
+
     addAlert({
+
+      site,
+
       ip,
 
       path:
         req.originalUrl,
 
-      risk: score,
+      risk:
+        score,
 
       action:
         "honeypot",
@@ -1262,35 +2246,64 @@ async function evaluate(
     });
 
     return {
+
       action:
         "honeypot",
 
-      riskScore: score,
+      riskScore:
+        score,
 
       reasons: [
         "too_many_concurrent_requests"
       ],
 
-      requestId
+      requestId,
+
+      site
     };
   }
 
   const inspection =
-    inspectRequest(req);
+    inspectRequest(
+      site,
+      req
+    );
 
   const risk =
     inspection.score > 0
+
       ? addRisk(
+          site,
           ip,
           inspection.score
         )
-      : getRisk(ip);
+
+      : getRisk(
+          site,
+          ip
+        );
+
+  const blockThreshold =
+    settingNumber(
+      site,
+      "riskBlockThreshold",
+      config.RISK_BLOCK_THRESHOLD
+    );
+
+  const honeypotThreshold =
+    settingNumber(
+      site,
+      "riskHoneypotThreshold",
+      config.RISK_HONEYPOT_THRESHOLD
+    );
 
   if (
     risk >=
-    config.RISK_BLOCK_THRESHOLD
+    blockThreshold
   ) {
+
     blacklist(
+      site,
       ip,
       inspection.reasons.join(
         ","
@@ -1298,7 +2311,16 @@ async function evaluate(
         "risk_threshold"
     );
 
+    registerSiteAction(
+      site,
+      "block",
+      true
+    );
+
     addAlert({
+
+      site,
+
       ip,
 
       path:
@@ -1318,10 +2340,12 @@ async function evaluate(
     });
 
     return {
+
       action:
         "block",
 
-      riskScore: risk,
+      riskScore:
+        risk,
 
       reasons:
         inspection.reasons.length
@@ -1330,15 +2354,27 @@ async function evaluate(
               "risk_threshold"
             ],
 
-      requestId
+      requestId,
+
+      site
     };
   }
 
   if (
     risk >=
-    config.RISK_HONEYPOT_THRESHOLD
+    honeypotThreshold
   ) {
+
+    registerSiteAction(
+      site,
+      "honeypot",
+      true
+    );
+
     addAlert({
+
+      site,
+
       ip,
 
       path:
@@ -1354,28 +2390,42 @@ async function evaluate(
     });
 
     return {
+
       action:
         "honeypot",
 
-      riskScore: risk,
+      riskScore:
+        risk,
 
       reasons:
         inspection.reasons,
 
-      requestId
+      requestId,
+
+      site
     };
   }
 
+  registerSiteAction(
+    site,
+    "allow",
+    inspection.score > 0
+  );
+
   return {
+
     action:
       "allow",
 
-    riskScore: risk,
+    riskScore:
+      risk,
 
     reasons:
       inspection.reasons,
 
-    requestId
+    requestId,
+
+    site
   };
 }
 
@@ -1393,6 +2443,7 @@ app.disable(
 if (
   config.TRUST_PROXY
 ) {
+
   app.set(
     "trust proxy",
     true
@@ -1443,12 +2494,14 @@ function adminAuth(
   res: Response,
   next: NextFunction
 ) {
+
   const authorization =
     req.headers.authorization;
 
   if (
     !authorization
   ) {
+
     res.setHeader(
       "WWW-Authenticate",
       'Basic realm="WAF Admin"'
@@ -1470,6 +2523,7 @@ function adminAuth(
     parts.length !== 2 ||
     parts[0] !== "Basic"
   ) {
+
     return res
       .status(401)
       .send(
@@ -1480,6 +2534,7 @@ function adminAuth(
   let decoded = "";
 
   try {
+
     decoded =
       Buffer.from(
         parts[1],
@@ -1487,7 +2542,9 @@ function adminAuth(
       ).toString(
         "utf8"
       );
+
   } catch {
+
     return res
       .status(401)
       .send(
@@ -1503,6 +2560,7 @@ function adminAuth(
   if (
     separator === -1
   ) {
+
     return res
       .status(401)
       .send(
@@ -1531,6 +2589,7 @@ function adminAuth(
       config.ADMIN_PASSWORD
     )
   ) {
+
     res.setHeader(
       "WWW-Authenticate",
       'Basic realm="WAF Admin"'
@@ -1547,24 +2606,493 @@ function adminAuth(
 }
 
 /* ============================================================
-   ADMIN API
+   API KEY AUTH
+   ============================================================ */
+
+function siteApiAuth(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+
+  const suppliedKey =
+    req.header(
+      "x-waf-api-key"
+    );
+
+  if (
+    !suppliedKey
+  ) {
+
+    return res
+      .status(401)
+      .json({
+        error:
+          "missing_api_key"
+      });
+  }
+
+  const site =
+    getSiteByApiKey(
+      suppliedKey
+    );
+
+  if (!site) {
+
+    return res
+      .status(401)
+      .json({
+        error:
+          "invalid_api_key"
+      });
+  }
+
+  (
+    req as Request & {
+      wafSite?: Site;
+    }
+  ).wafSite =
+    site;
+
+  return next();
+}
+
+/* ============================================================
+   ADMIN API - SITES
    ============================================================ */
 
 app.get(
-  "/__waf/admin/alerts",
+  "/__waf/admin/sites",
   adminAuth,
   (_req, res) => {
+
     return res.json({
+
+      sites:
+        db.sites.map(
+          site => ({
+            id:
+              site.id,
+
+            owner_id:
+              site.owner_id,
+
+            client_domain:
+              site.client_domain,
+
+            target_url:
+              site.target_url,
+
+            settings:
+              site.settings,
+
+            stats:
+              site.stats
+          })
+        )
+    });
+  }
+);
+
+/* ============================================================
+   ADMIN API - CREATE SITE
+   ============================================================ */
+
+app.post(
+  "/__waf/admin/sites",
+  adminAuth,
+  (req, res) => {
+
+    const schema =
+      z.object({
+
+        owner_id:
+          z.string().min(1),
+
+        client_domain:
+          z.string().min(1),
+
+        target_url:
+          z.string().url(),
+
+        api_key:
+          z.string().min(20).optional(),
+
+        settings:
+          z.record(
+            z.unknown()
+          ).default({})
+      });
+
+    const parsed =
+      schema.safeParse(
+        req.body
+      );
+
+    if (
+      !parsed.success
+    ) {
+
+      return res
+        .status(400)
+        .json({
+          error:
+            "invalid_site_data",
+
+          details:
+            parsed.error.flatten()
+        });
+    }
+
+    const domain =
+      normalizeDomain(
+        parsed.data.client_domain
+      );
+
+    if (
+      db.sites.some(
+        site =>
+          normalizeDomain(
+            site.client_domain
+          ) === domain
+      )
+    ) {
+
+      return res
+        .status(409)
+        .json({
+          error:
+            "domain_already_exists"
+        });
+    }
+
+    const site: Site = {
+
+      id:
+        crypto.randomUUID(),
+
+      owner_id:
+        parsed.data.owner_id,
+
+      client_domain:
+        domain,
+
+      target_url:
+        parsed.data.target_url,
+
+      api_key:
+        parsed.data.api_key ||
+        crypto.randomBytes(
+          32
+        ).toString(
+          "hex"
+        ),
+
+      settings:
+        parsed.data.settings,
+
+      stats:
+        createSiteStats()
+    };
+
+    db.sites.push(
+      site
+    );
+
+    dbDirty =
+      true;
+
+    saveDb();
+
+    return res
+      .status(201)
+      .json({
+        site
+      });
+  }
+);
+
+/* ============================================================
+   ADMIN API - DELETE SITE
+   ============================================================ */
+
+app.delete(
+  "/__waf/admin/sites/:id",
+  adminAuth,
+  (req, res) => {
+
+    const index =
+      db.sites.findIndex(
+        site =>
+          site.id ===
+          req.params.id
+      );
+
+    if (
+      index === -1
+    ) {
+
+      return res
+        .status(404)
+        .json({
+          error:
+            "site_not_found"
+        });
+    }
+
+    const [
+      removed
+    ] =
+      db.sites.splice(
+        index,
+        1
+      );
+
+    for (
+      const key of
+      Object.keys(
+        db.blacklists
+      )
+    ) {
+
+      if (
+        key.startsWith(
+          `${removed.id}:`
+        )
+      ) {
+        delete db.blacklists[
+          key
+        ];
+      }
+    }
+
+    for (
+      const key of
+      Object.keys(
+        db.risks
+      )
+    ) {
+
+      if (
+        key.startsWith(
+          `${removed.id}:`
+        )
+      ) {
+        delete db.risks[
+          key
+        ];
+      }
+    }
+
+    db.alerts =
+      db.alerts.filter(
+        alert =>
+          alert.siteId !==
+          removed.id
+      );
+
+    dbDirty =
+      true;
+
+    saveDb();
+
+    return res.json({
+      deleted:
+        true
+    });
+  }
+);
+
+/* ============================================================
+   SITE API - STATS
+   ============================================================ */
+
+app.get(
+  "/__waf/api/stats",
+  siteApiAuth,
+  (req, res) => {
+
+    const site =
+      (
+        req as Request & {
+          wafSite?: Site;
+        }
+      ).wafSite!;
+
+    return res.json({
+
+      site: {
+
+        id:
+          site.id,
+
+        owner_id:
+          site.owner_id,
+
+        client_domain:
+          site.client_domain,
+
+        target_url:
+          site.target_url
+      },
+
+      stats:
+        site.stats
+    });
+  }
+);
+
+/* ============================================================
+   SITE API - ALERTS
+   ============================================================ */
+
+app.get(
+  "/__waf/api/alerts",
+  siteApiAuth,
+  (req, res) => {
+
+    const site =
+      (
+        req as Request & {
+          wafSite?: Site;
+        }
+      ).wafSite!;
+
+    const limit =
+      Math.min(
+        Math.max(
+          Number(
+            req.query.limit
+          ) || 100,
+          1
+        ),
+        500
+      );
+
+    const alerts =
+      db.alerts
+        .filter(
+          alert =>
+            alert.siteId ===
+            site.id
+        )
+        .slice(
+          0,
+          limit
+        );
+
+    return res.json({
+
+      site_id:
+        site.id,
+
+      client_domain:
+        site.client_domain,
+
       alerts
     });
   }
 );
 
+/* ============================================================
+   SITE API - STATUS
+   ============================================================ */
+
+app.get(
+  "/__waf/api/status",
+  siteApiAuth,
+  (req, res) => {
+
+    const site =
+      (
+        req as Request & {
+          wafSite?: Site;
+        }
+      ).wafSite!;
+
+    const ip =
+      normalizeIp(
+        String(
+          req.query.ip ||
+            getClientIp(req)
+        )
+      );
+
+    return res.json({
+
+      site_id:
+        site.id,
+
+      client_domain:
+        site.client_domain,
+
+      ip,
+
+      blacklisted:
+        isBlacklisted(
+          site,
+          ip
+        ),
+
+      risk:
+        getRisk(
+          site,
+          ip
+        ),
+
+      concurrent:
+        concurrentByIp.get(
+          `${site.id}:${ip}`
+        ) || 0
+    });
+  }
+);
+
+/* ============================================================
+   ADMIN API - ALERTS
+   ============================================================ */
+
+app.get(
+  "/__waf/admin/alerts",
+  adminAuth,
+  (req, res) => {
+
+    const siteId =
+      typeof req.query.site_id ===
+      "string"
+        ? req.query.site_id
+        : null;
+
+    const alerts =
+      siteId
+        ? db.alerts.filter(
+            alert =>
+              alert.siteId ===
+              siteId
+          )
+        : db.alerts;
+
+    return res.json({
+      alerts:
+        alerts.slice(
+          0,
+          500
+        )
+    });
+  }
+);
+
+/* ============================================================
+   ADMIN API - STATS
+   ============================================================ */
+
 app.get(
   "/__waf/admin/stats",
   adminAuth,
   (_req, res) => {
-    let blacklisted = 0;
+
+    let blacklisted =
+      0;
 
     const now =
       Date.now();
@@ -1575,6 +3103,7 @@ app.get(
         db.blacklists
       )
     ) {
+
       if (
         entry.expiresAt >
         now
@@ -1583,19 +3112,63 @@ app.get(
       }
     }
 
+    const totals =
+      db.sites.reduce(
+        (
+          result,
+          site
+        ) => {
+
+          result.requests +=
+            site.stats.totalRequests;
+
+          result.allowed +=
+            site.stats.allowedRequests;
+
+          result.blocked +=
+            site.stats.blockedRequests;
+
+          result.honeypot +=
+            site.stats.honeypotRequests;
+
+          result.attacks +=
+            site.stats.attacks;
+
+          return result;
+
+        },
+        {
+          requests: 0,
+
+          allowed: 0,
+
+          blocked: 0,
+
+          honeypot: 0,
+
+          attacks: 0
+        }
+      );
+
     return res.json({
+
+      sites:
+        db.sites.length,
+
       globalConcurrent,
 
       activeClients:
         concurrentByIp.size,
 
+      activeSites:
+        concurrentBySite.size,
+
       blacklisted,
 
       alerts:
-        alerts.length,
+        db.alerts.length,
 
-      target:
-        config.TARGET_URL,
+      totals,
 
       uptime:
         Math.floor(
@@ -1605,10 +3178,55 @@ app.get(
   }
 );
 
+/* ============================================================
+   ADMIN API - SITE DETAILS
+   ============================================================ */
+
+app.get(
+  "/__waf/admin/sites/:id",
+  adminAuth,
+  (req, res) => {
+
+    const site =
+      getSiteById(
+        req.params.id
+      );
+
+    if (!site) {
+
+      return res
+        .status(404)
+        .json({
+          error:
+            "site_not_found"
+        });
+    }
+
+    return res.json({
+      site,
+
+      alerts:
+        db.alerts.filter(
+          alert =>
+            alert.siteId ===
+            site.id
+        ).slice(
+          0,
+          200
+        )
+    });
+  }
+);
+
+/* ============================================================
+   ADMIN EVENTS
+   ============================================================ */
+
 app.get(
   "/__waf/admin/events",
   adminAuth,
   (req, res) => {
+
     res.setHeader(
       "Content-Type",
       "text/event-stream"
@@ -1631,7 +3249,9 @@ app.get(
 
     res.flushHeaders();
 
-    alertClients.add(res);
+    alertClients.add(
+      res
+    );
 
     res.write(
       `data: ${JSON.stringify({
@@ -1643,11 +3263,15 @@ app.get(
     const heartbeat =
       setInterval(
         () => {
+
           try {
+
             res.write(
               ": heartbeat\n\n"
             );
+
           } catch {
+
             clearInterval(
               heartbeat
             );
@@ -1656,6 +3280,7 @@ app.get(
               res
             );
           }
+
         },
         15000
       );
@@ -1663,6 +3288,7 @@ app.get(
     req.on(
       "close",
       () => {
+
         clearInterval(
           heartbeat
         );
@@ -1683,6 +3309,7 @@ app.get(
   "/admin",
   adminAuth,
   (_req, res) => {
+
     res.type(
       "html"
     ).send(`
@@ -1698,7 +3325,7 @@ app.get(
   content="width=device-width,initial-scale=1"
 />
 
-<title>WAF Admin</title>
+<title>Multi-Site WAF Admin</title>
 
 <style>
 
@@ -1766,7 +3393,7 @@ header {
 }
 
 .container {
-  max-width: 1300px;
+  max-width: 1400px;
 
   margin: auto;
 
@@ -1779,7 +3406,7 @@ header {
   grid-template-columns:
     repeat(
       auto-fit,
-      minmax(190px, 1fr)
+      minmax(180px, 1fr)
     );
 
   gap: 15px;
@@ -1812,6 +3439,16 @@ header {
   font-weight: 700;
 }
 
+.grid {
+  display: grid;
+
+  grid-template-columns:
+    minmax(300px, .8fr)
+    minmax(500px, 1.5fr);
+
+  gap: 20px;
+}
+
 .panel {
   background: #10161d;
 
@@ -1830,6 +3467,58 @@ header {
     1px solid #222c36;
 
   font-weight: 700;
+}
+
+.site {
+  padding: 16px;
+
+  border-bottom:
+    1px solid #1e2730;
+
+  cursor: pointer;
+}
+
+.site:hover {
+  background: #151d26;
+}
+
+.site:last-child {
+  border-bottom: 0;
+}
+
+.site-name {
+  font-weight: 700;
+
+  margin-bottom: 6px;
+}
+
+.site-target {
+  color: #8794a1;
+
+  font-size: 12px;
+
+  word-break: break-all;
+}
+
+.site-stats {
+  margin-top: 10px;
+
+  display: flex;
+
+  gap: 10px;
+
+  flex-wrap: wrap;
+}
+
+.tag {
+  padding:
+    4px 7px;
+
+  background: #18212b;
+
+  border-radius: 5px;
+
+  font-size: 11px;
 }
 
 .alert {
@@ -1910,6 +3599,15 @@ header {
 }
 
 @media (
+  max-width: 900px
+) {
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (
   max-width: 600px
 ) {
 
@@ -1924,7 +3622,6 @@ header {
   .logo {
     font-size: 19px;
   }
-
 }
 
 </style>
@@ -1936,7 +3633,7 @@ header {
 <header>
 
 <div class="logo">
-  🛡️ WAF Admin
+  🛡️ Multi-Site WAF Admin
 </div>
 
 <div class="status">
@@ -1956,12 +3653,12 @@ header {
 <div class="card">
 
 <div class="card-title">
-  العملاء النشطون
+  المواقع
 </div>
 
 <div
   class="number"
-  id="clients"
+  id="sites"
 >
   0
 </div>
@@ -1971,12 +3668,27 @@ header {
 <div class="card">
 
 <div class="card-title">
-  الاتصالات الحالية
+  الطلبات
 </div>
 
 <div
   class="number"
-  id="connections"
+  id="requests"
+>
+  0
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-title">
+  الهجمات
+</div>
+
+<div
+  class="number"
+  id="attacks"
 >
   0
 </div>
@@ -2001,14 +3713,32 @@ header {
 <div class="card">
 
 <div class="card-title">
-  التنبيهات المسجلة
+  الاتصالات الحالية
 </div>
 
 <div
   class="number"
-  id="alertCount"
+  id="connections"
 >
   0
+</div>
+
+</div>
+
+</div>
+
+<div class="grid">
+
+<div class="panel">
+
+<div class="panel-header">
+  🌐 المواقع
+</div>
+
+<div id="sitesList">
+
+<div class="empty">
+  لا توجد مواقع
 </div>
 
 </div>
@@ -2033,21 +3763,23 @@ header {
 
 </div>
 
+</div>
+
 <script>
 
-const alertsElement =
+const sitesElement =
   document.getElementById(
-    "alerts"
+    "sites"
   );
 
-const clientsElement =
+const requestsElement =
   document.getElementById(
-    "clients"
+    "requests"
   );
 
-const connectionsElement =
+const attacksElement =
   document.getElementById(
-    "connections"
+    "attacks"
   );
 
 const blacklistedElement =
@@ -2055,14 +3787,25 @@ const blacklistedElement =
     "blacklisted"
   );
 
-const alertCountElement =
+const connectionsElement =
   document.getElementById(
-    "alertCount"
+    "connections"
+  );
+
+const sitesList =
+  document.getElementById(
+    "sitesList"
+  );
+
+const alertsElement =
+  document.getElementById(
+    "alerts"
   );
 
 function escapeHtml(
   value
 ) {
+
   return String(value)
     .replaceAll(
       "&",
@@ -2123,6 +3866,15 @@ function renderAlert(
     </span>
 
     <div class="meta">
+      Site:
+      <strong>
+        \${escapeHtml(
+          alert.domain
+        )}
+      </strong>
+    </div>
+
+    <div class="meta">
       IP:
       <strong>
         \${escapeHtml(
@@ -2173,25 +3925,164 @@ function addAlert(
       ".empty"
     )
   ) {
+
     alertsElement.innerHTML =
       "";
   }
 
-  const element =
+  alertsElement.prepend(
     renderAlert(
       alert
-    );
-
-  alertsElement.prepend(
-    element
+    )
   );
 
   while (
     alertsElement.children
       .length > 200
   ) {
+
     alertsElement.lastElementChild
       ?.remove();
+  }
+}
+
+async function loadSites() {
+
+  try {
+
+    const response =
+      await fetch(
+        "/__waf/admin/sites",
+        {
+          credentials:
+            "same-origin"
+        }
+      );
+
+    if (
+      !response.ok
+    ) {
+      return;
+    }
+
+    const data =
+      await response.json();
+
+    sitesList.innerHTML =
+      "";
+
+    if (
+      !data.sites ||
+      !data.sites.length
+    ) {
+
+      sitesList.innerHTML =
+        '<div class="empty">لا توجد مواقع</div>';
+
+      return;
+    }
+
+    for (
+      const site of
+      data.sites
+    ) {
+
+      const element =
+        document.createElement(
+          "div"
+        );
+
+      element.className =
+        "site";
+
+      element.innerHTML = \`
+        <div class="site-name">
+          \${escapeHtml(
+            site.client_domain
+          )}
+        </div>
+
+        <div class="site-target">
+          \${escapeHtml(
+            site.target_url
+          )}
+        </div>
+
+        <div class="site-stats">
+
+          <span class="tag">
+            Requests:
+            \${escapeHtml(
+              site.stats?.totalRequests ?? 0
+            )}
+          </span>
+
+          <span class="tag">
+            Blocked:
+            \${escapeHtml(
+              site.stats?.blockedRequests ?? 0
+            )}
+          </span>
+
+          <span class="tag">
+            Attacks:
+            \${escapeHtml(
+              site.stats?.attacks ?? 0
+            )}
+          </span>
+
+        </div>
+      \`;
+
+      sitesList.appendChild(
+        element
+      );
+    }
+
+  } catch {
+    // Ignore dashboard errors.
+  }
+}
+
+async function loadStats() {
+
+  try {
+
+    const response =
+      await fetch(
+        "/__waf/admin/stats",
+        {
+          credentials:
+            "same-origin"
+        }
+      );
+
+    if (
+      !response.ok
+    ) {
+      return;
+    }
+
+    const data =
+      await response.json();
+
+    sitesElement.textContent =
+      data.sites ?? 0;
+
+    requestsElement.textContent =
+      data.totals?.requests ?? 0;
+
+    attacksElement.textContent =
+      data.totals?.attacks ?? 0;
+
+    blacklistedElement.textContent =
+      data.blacklisted ?? 0;
+
+    connectionsElement.textContent =
+      data.globalConcurrent ?? 0;
+
+  } catch {
+    // Ignore dashboard errors.
   }
 }
 
@@ -2228,9 +4119,6 @@ async function loadAlerts() {
       alertsElement.innerHTML =
         '<div class="empty">لا توجد تنبيهات حتى الآن</div>';
 
-      alertCountElement.textContent =
-        "0";
-
       return;
     }
 
@@ -2238,52 +4126,11 @@ async function loadAlerts() {
       const alert of
       data.alerts
     ) {
+
       addAlert(
         alert
       );
     }
-
-    alertCountElement.textContent =
-      data.alerts.length;
-
-  } catch {
-    // Ignore dashboard polling errors.
-  }
-}
-
-async function loadStats() {
-
-  try {
-
-    const response =
-      await fetch(
-        "/__waf/admin/stats",
-        {
-          credentials:
-            "same-origin"
-        }
-      );
-
-    if (
-      !response.ok
-    ) {
-      return;
-    }
-
-    const data =
-      await response.json();
-
-    clientsElement.textContent =
-      data.activeClients ?? 0;
-
-    connectionsElement.textContent =
-      data.globalConcurrent ?? 0;
-
-    blacklistedElement.textContent =
-      data.blacklisted ?? 0;
-
-    alertCountElement.textContent =
-      data.alerts ?? 0;
 
   } catch {
     // Ignore dashboard errors.
@@ -2318,10 +4165,11 @@ events.onmessage =
 
       loadStats();
 
+      loadSites();
+
     } catch {
       // Ignore malformed events.
     }
-
   };
 
 events.onerror =
@@ -2329,13 +4177,20 @@ events.onerror =
     // EventSource automatically reconnects.
   };
 
-loadAlerts();
+loadSites();
 
 loadStats();
+
+loadAlerts();
 
 setInterval(
   loadStats,
   3000
+);
+
+setInterval(
+  loadSites,
+  5000
 );
 
 </script>
@@ -2354,14 +4209,20 @@ setInterval(
 app.get(
   "/__waf/health",
   (_req, res) => {
+
     return res.json({
-      status: "ok",
+
+      status:
+        "ok",
 
       service:
-        "single-site-cloud-waf",
+        "multi-site-cloud-waf",
 
       protection:
         "strong-l7",
+
+      sites:
+        db.sites.length,
 
       globalConcurrent,
 
@@ -2372,28 +4233,20 @@ app.get(
 );
 
 /* ============================================================
-   ADMIN STATUS
+   OLD STATUS COMPATIBILITY
    ============================================================ */
 
 app.get(
   "/__waf/status/:ip",
+  siteApiAuth,
   (req, res) => {
-    const suppliedKey =
-      req.header(
-        "x-waf-api-key"
-      );
 
-    if (
-      suppliedKey !==
-      config.WAF_API_KEY
-    ) {
-      return res
-        .status(401)
-        .json({
-          error:
-            "unauthorized"
-        });
-    }
+    const site =
+      (
+        req as Request & {
+          wafSite?: Site;
+        }
+      ).wafSite!;
 
     const ip =
       normalizeIp(
@@ -2401,19 +4254,30 @@ app.get(
       );
 
     return res.json({
+
+      site_id:
+        site.id,
+
+      domain:
+        site.client_domain,
+
       ip,
 
       blacklisted:
         isBlacklisted(
+          site,
           ip
         ),
 
       risk:
-        getRisk(ip),
+        getRisk(
+          site,
+          ip
+        ),
 
       concurrent:
         concurrentByIp.get(
-          ip
+          `${site.id}:${ip}`
         ) || 0
     });
   }
@@ -2426,27 +4290,63 @@ app.get(
 app.all(
   "/__waf_honeypot",
   (req, res) => {
+
+    const host =
+      req.headers.host ||
+      "";
+
+    const site =
+      getSiteByHost(
+        host
+      );
+
+    if (!site) {
+
+      return res
+        .status(404)
+        .json({
+          error:
+            "not_found"
+        });
+    }
+
     const ip =
       getClientIp(req);
 
     const score =
       addRisk(
+        site,
         ip,
-        config.RISK_BLOCK_THRESHOLD
+        settingNumber(
+          site,
+          "riskBlockThreshold",
+          config.RISK_BLOCK_THRESHOLD
+        )
       );
 
     blacklist(
+      site,
       ip,
       "honeypot_triggered"
     );
 
+    registerSiteAction(
+      site,
+      "block",
+      true
+    );
+
     addAlert({
+
+      site,
+
       ip,
 
       path:
         req.originalUrl,
 
-      risk: score,
+      risk:
+        score,
 
       action:
         "block",
@@ -2466,190 +4366,42 @@ app.all(
 );
 
 /* ============================================================
-   INDEX.HTML
+   SITE RESOLUTION
    ============================================================ */
 
-const indexFilePath =
-  path.resolve(
-    process.cwd(),
-    "index.html"
-  );
+function resolveSite(
+  req: Request,
+  res: Response
+): Site | null {
 
-/*
- * الصفحة الرئيسية:
- *
- * index.html يجب أن يكون في نفس مجلد
- * cloud-waf-proxy.ts
- */
+  const host =
+    req.headers.host ||
+    "";
 
-app.get(
-  "/",
-  async (
-    req,
-    res,
-    next
-  ) => {
+  const site =
+    getSiteByHost(
+      host
+    );
 
-    let acquired =
-      false;
+  if (!site) {
 
-    try {
+    res
+      .status(404)
+      .json({
+        error:
+          "site_not_configured",
 
-      const decision =
-        await evaluate(
-          req
-        );
+        host
+      });
 
-      acquired =
-        decision.action ===
-          "allow" ||
-        decision.action ===
-          "honeypot";
-
-      res.setHeader(
-        "x-waf-request-id",
-        decision.requestId
-      );
-
-      res.setHeader(
-        "x-waf-risk-score",
-        String(
-          decision.riskScore
-        )
-      );
-
-      res.setHeader(
-        "x-waf-protected",
-        "true"
-      );
-
-      if (
-        decision.action ===
-        "block"
-      ) {
-
-        if (acquired) {
-          releaseConcurrency(
-            getClientIp(req)
-          );
-
-          acquired =
-            false;
-        }
-
-        return res
-          .status(403)
-          .json({
-            error:
-              "request_blocked",
-
-            requestId:
-              decision.requestId,
-
-            reasons:
-              decision.reasons
-          });
-      }
-
-      if (
-        decision.action ===
-        "honeypot"
-      ) {
-
-        if (acquired) {
-          releaseConcurrency(
-            getClientIp(req)
-          );
-
-          acquired =
-            false;
-        }
-
-        return res
-          .status(404)
-          .json({
-            error:
-              "not_found",
-
-            requestId:
-              decision.requestId
-          });
-      }
-
-      if (
-        !fs.existsSync(
-          indexFilePath
-        )
-      ) {
-
-        if (acquired) {
-          releaseConcurrency(
-            getClientIp(req)
-          );
-
-          acquired =
-            false;
-        }
-
-        return res
-          .status(404)
-          .send(
-            "index.html not found"
-          );
-      }
-
-      res.once(
-        "finish",
-        () => {
-          if (acquired) {
-            releaseConcurrency(
-              getClientIp(req)
-            );
-
-            acquired =
-              false;
-          }
-        }
-      );
-
-      res.once(
-        "close",
-        () => {
-          if (acquired) {
-            releaseConcurrency(
-              getClientIp(req)
-            );
-
-            acquired =
-              false;
-          }
-        }
-      );
-
-      return res.sendFile(
-        indexFilePath
-      );
-
-    } catch (error) {
-
-      if (acquired) {
-        releaseConcurrency(
-          getClientIp(req)
-        );
-      }
-
-      console.error(
-        "Index WAF error:",
-        error
-      );
-
-      return next(error);
-    }
+    return null;
   }
-);
+
+  return site;
+}
 
 /* ============================================================
-   MAIN WAF
+   WAF MIDDLEWARE
    ============================================================ */
 
 app.use(
@@ -2658,13 +4410,6 @@ app.use(
     res,
     next
   ) => {
-
-    if (
-      req.path ===
-      "/__waf/health"
-    ) {
-      return next();
-    }
 
     if (
       req.path.startsWith(
@@ -2681,11 +4426,14 @@ app.use(
       return next();
     }
 
-    if (
-      req.path ===
-      "/"
-    ) {
-      return next();
+    const site =
+      resolveSite(
+        req,
+        res
+      );
+
+    if (!site) {
+      return;
     }
 
     let acquired =
@@ -2695,14 +4443,18 @@ app.use(
 
       const decision =
         await evaluate(
-          req
+          req,
+          site
         );
 
       acquired =
         decision.action ===
-          "allow" ||
-        decision.action ===
-          "honeypot";
+        "allow";
+
+      res.setHeader(
+        "x-waf-site-id",
+        site.id
+      );
 
       res.setHeader(
         "x-waf-request-id",
@@ -2729,6 +4481,7 @@ app.use(
         if (acquired) {
 
           releaseConcurrency(
+            site,
             getClientIp(req)
           );
 
@@ -2739,11 +4492,15 @@ app.use(
         return res
           .status(403)
           .json({
+
             error:
               "request_blocked",
 
             requestId:
               decision.requestId,
+
+            siteId:
+              site.id,
 
             reasons:
               decision.reasons
@@ -2758,6 +4515,7 @@ app.use(
         if (acquired) {
 
           releaseConcurrency(
+            site,
             getClientIp(req)
           );
 
@@ -2768,6 +4526,7 @@ app.use(
         return res
           .status(404)
           .json({
+
             error:
               "not_found",
 
@@ -2776,6 +4535,27 @@ app.use(
           });
       }
 
+      (
+        req as Request & {
+          wafSite?: Site;
+        }
+      ).wafSite =
+        site;
+
+      (
+        req as Request & {
+          wafRequestId?: string;
+        }
+      ).wafRequestId =
+        decision.requestId;
+
+      (
+        req as Request & {
+          wafAcquired?: boolean;
+        }
+      ).wafAcquired =
+        acquired;
+
       return next();
 
     } catch (error) {
@@ -2783,6 +4563,7 @@ app.use(
       if (acquired) {
 
         releaseConcurrency(
+          site,
           getClientIp(req)
         );
       }
@@ -2803,7 +4584,7 @@ app.use(
 );
 
 /* ============================================================
-   RELEASE CONCURRENCY
+   CONCURRENCY RELEASE
    ============================================================ */
 
 app.use(
@@ -2813,8 +4594,16 @@ app.use(
     next
   ) => {
 
-    const ip =
-      getClientIp(req);
+    const site =
+      (
+        req as Request & {
+          wafSite?: Site;
+        }
+      ).wafSite;
+
+    if (!site) {
+      return next();
+    }
 
     let released =
       false;
@@ -2829,9 +4618,27 @@ app.use(
         released =
           true;
 
-        releaseConcurrency(
-          ip
-        );
+        const acquired =
+          (
+            req as Request & {
+              wafAcquired?: boolean;
+            }
+          ).wafAcquired;
+
+        if (acquired) {
+
+          releaseConcurrency(
+            site,
+            getClientIp(req)
+          );
+
+          (
+            req as Request & {
+              wafAcquired?: boolean;
+            }
+          ).wafAcquired =
+            false;
+        }
       };
 
     res.once(
@@ -2844,18 +4651,16 @@ app.use(
       release
     );
 
-    next();
+    return next();
   }
 );
 
 /* ============================================================
-   REVERSE PROXY
+   DYNAMIC REVERSE PROXY
    ============================================================ */
 
 const proxy =
   createProxyMiddleware({
-    target:
-      config.TARGET_URL,
 
     changeOrigin:
       true,
@@ -2872,10 +4677,43 @@ const proxy =
     timeout:
       config.PROXY_TIMEOUT_MS,
 
+    router:
+      (
+        req
+      ) => {
+
+        const site =
+          (
+            req as Request & {
+              wafSite?: Site;
+            }
+          ).wafSite;
+
+        if (!site) {
+          return undefined;
+        }
+
+        return site.target_url;
+      },
+
     onProxyReq(
       proxyReq,
       req
     ) {
+
+      const site =
+        (
+          req as Request & {
+            wafSite?: Site;
+          }
+        ).wafSite;
+
+      const requestId =
+        (
+          req as Request & {
+            wafRequestId?: string;
+          }
+        ).wafRequestId;
 
       proxyReq.setHeader(
         "x-waf-protected",
@@ -2883,292 +4721,19 @@ const proxy =
       );
 
       proxyReq.setHeader(
-        "x-waf-request-id",
-        req.headers[
-          "x-waf-request-id"
-        ] ||
-          crypto.randomUUID()
-      );
-
-      proxyReq.setHeader(
-        "x-forwarded-host",
-        req.headers.host ||
+        "x-waf-site-id",
+        site?.id ||
           ""
       );
 
-      fixRequestBody(
-        proxyReq,
-        req
-      );
-    },
-
-    onError(
-      error,
-      _req,
-      res
-    ) {
-
-      console.error(
-        "Proxy error:",
-        error
+      proxyReq.setHeader(
+        "x-waf-client-domain",
+        site?.client_domain ||
+          ""
       );
 
-      if (
-        !res.headersSent
-      ) {
-
-        res
-          .status(502)
-          .json({
-            error:
-              "protected_site_unavailable"
-          });
-      }
-    }
-  });
-
-app.use(
-  "/",
-  proxy
-);
-
-/* ============================================================
-   ERROR HANDLER
-   ============================================================ */
-
-app.use(
-  (
-    error: unknown,
-    _req: Request,
-    res: Response,
-    _next: NextFunction
-  ) => {
-
-    console.error(
-      "Unhandled WAF error:",
-      error
-    );
-
-    if (
-      !res.headersSent
-    ) {
-
-      return res
-        .status(500)
-        .json({
-          error:
-            "internal_error"
-        });
-    }
-
-    return res.end();
-  }
-);
-
-/* ============================================================
-   SERVER
-   ============================================================ */
-
-const server =
-  http.createServer(
-    app
-  );
-
-server.requestTimeout =
-  config.REQUEST_TIMEOUT_MS;
-
-server.headersTimeout =
-  Math.min(
-    config.HEADERS_TIMEOUT_MS,
-    config.REQUEST_TIMEOUT_MS
-  );
-
-server.keepAliveTimeout =
-  config.KEEP_ALIVE_TIMEOUT_MS;
-
-server.maxHeadersCount =
-  100;
-
-/* ============================================================
-   SOCKET PROTECTION
-   ============================================================ */
-
-const socketCounts =
-  new Map<
-    string,
-    number
-  >();
-
-const MAX_SOCKETS_PER_IP =
-  config.MAX_CONCURRENT_PER_IP *
-  2;
-
-server.on(
-  "connection",
-  socket => {
-
-    const rawIp =
-      normalizeIp(
-        socket.remoteAddress ||
-          "0.0.0.0"
-      );
-
-    const current =
-      socketCounts.get(
-        rawIp
-      ) || 0;
-
-    if (
-      current >=
-      MAX_SOCKETS_PER_IP
-    ) {
-
-      socket.destroy();
-
-      return;
-    }
-
-    socketCounts.set(
-      rawIp,
-      current + 1
-    );
-
-    socket.setTimeout(
-      config.REQUEST_TIMEOUT_MS
-    );
-
-    socket.on(
-      "close",
-      () => {
-
-        const count =
-          socketCounts.get(
-            rawIp
-          ) || 0;
-
-        if (
-          count <= 1
-        ) {
-
-          socketCounts.delete(
-            rawIp
-          );
-
-        } else {
-
-          socketCounts.set(
-            rawIp,
-            count - 1
-          );
-        }
-      }
-    );
-  }
-);
-
-/* ============================================================
-   START
-   ============================================================ */
-
-server.listen(
-  config.PORT,
-  "0.0.0.0",
-  () => {
-
-    console.log(
-      "=========================================="
-    );
-
-    console.log(
-      " Strong Single-Site Cloud WAF"
-    );
-
-    console.log(
-      " Live Admin Dashboard Enabled"
-    );
-
-    console.log(
-      " L7 Anti-DDoS Protection Enabled"
-    );
-
-    console.log(
-      ` WAF: http://0.0.0.0:${config.PORT}`
-    );
-
-    console.log(
-      ` Target: ${config.TARGET_URL}`
-    );
-
-    console.log(
-      ` Index: /index.html`
-    );
-
-    console.log(
-      ` Admin: /admin`
-    );
-
-    console.log(
-      ` Rate: ${config.RATE_LIMIT_MAX}/${config.RATE_LIMIT_WINDOW}s`
-    );
-
-    console.log(
-      ` Burst: ${config.BURST_MAX}/${config.BURST_WINDOW_MS}ms`
-    );
-
-    console.log(
-      ` Max concurrent/IP: ${config.MAX_CONCURRENT_PER_IP}`
-    );
-
-    console.log(
-      ` Max global concurrent: ${config.MAX_GLOBAL_CONCURRENT}`
-    );
-
-    console.log(
-      "=========================================="
-    );
-  }
-);
-
-/* ============================================================
-   GRACEFUL SHUTDOWN
-   ============================================================ */
-
-function shutdown(
-  signal: string
-): void {
-
-  console.log(
-    `${signal}: shutting down WAF...`
-  );
-
-  saveDb();
-
-  server.close(
-    () => {
-      process.exit(0);
-    }
-  );
-
-  setTimeout(
-    () => {
-      process.exit(1);
-    },
-    10000
-  ).unref();
-}
-
-process.on(
-  "SIGTERM",
-  () =>
-    shutdown(
-      "SIGTERM"
-    )
-);
-
-process.on(
-  "SIGINT",
-  () =>
-    shutdown(
-      "SIGINT"
-    )
-);
+      proxyReq.setHeader(
+        "x-waf-owner-id",
+        site?.owner_id ||
+          ""
+     
