@@ -1,13 +1,10 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html><html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#02060b">
   <meta name="description" content="Routix — Web Application Firewall & Traffic Protection">
-  <title>Routix — Cloud WAF</title>
-
-  <style>
+  <title>Routix — Cloud WAF</title>  <style>
     :root {
       --bg: #02050a;
       --bg2: #06101a;
@@ -407,7 +404,7 @@
 
     /* =========================================================
        HEADER
-    ========================================================= */
+    ========================================================== */
 
     header {
       position: fixed;
@@ -510,7 +507,7 @@
 
     /* =========================================================
        MAIN
-    ========================================================= */
+    ========================================================== */
 
     main {
       opacity: 1;
@@ -551,7 +548,7 @@
 
     /* =========================================================
        DASHBOARD HERO
-    ========================================================= */
+    ========================================================== */
 
     .dashboard {
       min-height: 100vh;
@@ -624,7 +621,7 @@
 
     /* =========================================================
        SECURITY RADAR
-    ========================================================= */
+    ========================================================== */
 
     .radar-card {
       position: relative;
@@ -716,7 +713,7 @@
 
     /* =========================================================
        STATS
-    ========================================================= */
+    ========================================================== */
 
     .stats {
       display: grid;
@@ -754,7 +751,7 @@
 
     /* =========================================================
        FEATURES
-    ========================================================= */
+    ========================================================== */
 
     .features {
       display: grid;
@@ -828,7 +825,7 @@
 
     /* =========================================================
        API / INTEGRATION
-    ========================================================= */
+    ========================================================== */
 
     .integration {
       display: grid;
@@ -924,7 +921,7 @@
 
     /* =========================================================
        L7 / REQUEST FLOW
-    ========================================================= */
+    ========================================================== */
 
     .flow {
       display: grid;
@@ -966,7 +963,7 @@
 
     /* =========================================================
        ADMIN
-    ========================================================= */
+    ========================================================== */
 
     .admin-card {
       position: relative;
@@ -1016,7 +1013,7 @@
 
     /* =========================================================
        SETTINGS
-    ========================================================= */
+    ========================================================== */
 
     .settings-grid {
       display: grid;
@@ -1053,7 +1050,7 @@
 
     /* =========================================================
        ABOUT
-    ========================================================= */
+    ========================================================== */
 
     .about {
       display: grid;
@@ -1094,7 +1091,7 @@
 
     /* =========================================================
        FOOTER
-    ========================================================= */
+    ========================================================== */
 
     footer {
       padding: 30px 6%;
@@ -1110,7 +1107,7 @@
 
     /* =========================================================
        RESPONSIVE
-    ========================================================= */
+    ========================================================== */
 
     @media (max-width: 1050px) {
       nav a {
@@ -1259,778 +1256,726 @@
         scroll-behavior: auto !important;
       }
     }
-  </style>
-</head>
-
-<body class="locked">
-
-  <!-- =========================================================
+  </style></head><body class="locked">  <!-- =========================================================
        BACKGROUND
-  ========================================================== -->
-
-  <div class="cyber-bg"></div>
+  ========================================================== -->  <div class="cyber-bg"></div>
   <div class="orb one"></div>
   <div class="orb two"></div>
   <div class="particles" id="particles"></div>
-  <div class="scanlines"></div>
-
-  <!-- =========================================================
+  <div class="scanlines"></div>  <!-- =========================================================
        INTRO SCREEN
-  ========================================================== -->
+  ========================================================== -->  <section class="intro" id="intro"><div class="intro-tech">
+  <div class="intro-grid"></div>
+</div>
 
-  <section class="intro" id="intro">
+<div class="intro-content">
 
-    <div class="intro-tech">
-      <div class="intro-grid"></div>
-    </div>
+  <div class="intro-status">
+    <span class="live-dot"></span>
+    ROUTIX WAF SYSTEM • PROTECTION LAYER READY
+  </div>
 
-    <div class="intro-content">
+  <div class="intro-logo"></div>
 
-      <div class="intro-status">
-        <span class="live-dot"></span>
-        ROUTIX WAF SYSTEM • PROTECTION LAYER READY
-      </div>
+  <h1>
+    Routix<span>.</span>
+  </h1>
 
-      <div class="intro-logo"></div>
+  <p>
+    Web Application Firewall مصمم لمراقبة وحماية
+    تطبيقات الويب من الترافيك المشبوه، الهجمات
+    على مستوى L7، تجاوز المعدلات، والمصادر عالية الخطورة.
+  </p>
 
-      <h1>
-        Routix<span>.</span>
-      </h1>
+  <button class="enter-btn" onclick="enterPlatform()">
+    دخول إلى المنصة
+    <span>←</span>
+  </button>
 
-      <p>
-        Web Application Firewall مصمم لمراقبة وحماية
-        تطبيقات الويب من الترافيك المشبوه، الهجمات
-        على مستوى L7، تجاوز المعدلات، والمصادر عالية الخطورة.
-      </p>
+</div>
 
-      <button class="enter-btn" onclick="enterPlatform()">
-        دخول إلى المنصة
-        <span>←</span>
-      </button>
+<div class="intro-corner">
+  ROUTIX / SECURITY INFRASTRUCTURE / 2026
+</div>
 
-    </div>
-
-    <div class="intro-corner">
-      ROUTIX / SECURITY INFRASTRUCTURE / 2026
-    </div>
-
-  </section>
-
-  <!-- =========================================================
+  </section>  <!-- =========================================================
        HEADER
-  ========================================================== -->
+  ========================================================== -->  <header><a href="#home" class="brand">
+  <span class="brand-logo"></span>
+  <span class="brand-name">Routix</span>
+</a>
 
-  <header>
+<nav id="nav">
 
-    <a href="#home" class="brand">
-      <span class="brand-logo"></span>
-      <span class="brand-name">Routix</span>
-    </a>
+  <a href="#home">الرئيسية</a>
+  <a href="#features">المميزات</a>
+  <a href="#api">API</a>
+  <a href="#integration">طريقة الربط</a>
+  <a href="#admin">لوحة الإدارة</a>
+  <a href="#settings">الإعدادات</a>
+  <a href="#about">من نحن</a>
 
-    <nav id="nav">
+</nav>
 
-      <a href="#home">الرئيسية</a>
-      <a href="#features">المميزات</a>
-      <a href="#api">API</a>
-      <a href="#integration">طريقة الربط</a>
-      <a href="#admin">لوحة الإدارة</a>
-      <a href="#settings">الإعدادات</a>
-      <a href="#about">من نحن</a>
+<a href="/admin" class="header-admin">
+  <span>▣</span>
+  لوحة الإدارة
+</a>
 
-    </nav>
+<button class="mobile-menu" onclick="toggleMenu()">
+  ☰
+</button>
 
-    <a href="/admin" class="header-admin">
-      <span>▣</span>
-      لوحة الإدارة
-    </a>
-
-    <button class="mobile-menu" onclick="toggleMenu()">
-      ☰
-    </button>
-
-  </header>
-
-  <!-- =========================================================
+  </header>  <!-- =========================================================
        MAIN
-  ========================================================== -->
+  ========================================================== -->  <main id="home"><!-- DASHBOARD / HERO -->
 
-  <main id="home">
+<section class="section dashboard">
 
-    <!-- DASHBOARD / HERO -->
+  <div class="dashboard-copy">
 
-    <section class="section dashboard">
+    <span class="eyebrow">
+      ROUTIX / CLOUD WAF
+    </span>
 
-      <div class="dashboard-copy">
+    <h1>
+      حماية موقعك تبدأ<br>
+      من أول <span>Request.</span>
+    </h1>
 
-        <span class="eyebrow">
-          ROUTIX / CLOUD WAF
-        </span>
+    <p>
+      Routix يعمل كطبقة حماية أمام تطبيقك،
+      يراقب الترافيك وطلبات HTTP، يحد من
+      المعدلات المرتفعة، يكتشف أنماط الهجمات
+      ويمنحك رؤية مباشرة لما يحدث على مستوى
+      البنية التحتية والتطبيق.
+    </p>
 
-        <h1>
-          حماية موقعك تبدأ<br>
-          من أول <span>Request.</span>
-        </h1>
+    <div class="dashboard-actions">
 
-        <p>
-          Routix يعمل كطبقة حماية أمام تطبيقك،
-          يراقب الترافيك وطلبات HTTP، يحد من
-          المعدلات المرتفعة، يكتشف أنماط الهجمات
-          ويمنحك رؤية مباشرة لما يحدث على مستوى
-          البنية التحتية والتطبيق.
-        </p>
+      <a href="/admin" class="btn btn-primary">
+        فتح لوحة الإدارة ←
+      </a>
 
-        <div class="dashboard-actions">
+      <a href="#features" class="btn">
+        استكشف المميزات
+      </a>
 
-          <a href="/admin" class="btn btn-primary">
-            فتح لوحة الإدارة ←
-          </a>
+    </div>
 
-          <a href="#features" class="btn">
-            استكشف المميزات
-          </a>
+    <div class="stats">
 
-        </div>
-
-        <div class="stats">
-
-          <div class="stat">
-            <div class="stat-label">WAF STATUS</div>
-            <div class="stat-value green">ACTIVE</div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-label">LAYER</div>
-            <div class="stat-value cyan">L7</div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-label">RATE CONTROL</div>
-            <div class="stat-value">ON</div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-label">LIVE EVENTS</div>
-            <div class="stat-value green">READY</div>
-          </div>
-
-        </div>
-
+      <div class="stat">
+        <div class="stat-label">WAF STATUS</div>
+        <div class="stat-value green">ACTIVE</div>
       </div>
 
-      <div class="radar-card">
-
-        <div class="radar">
-
-          <div class="radar-ring"></div>
-          <div class="radar-sweep"></div>
-
-        </div>
-
-        <div class="radar-label">
-          <span>TRAFFIC_MONITOR</span>
-          <strong>● PROTECTED</strong>
-        </div>
-
+      <div class="stat">
+        <div class="stat-label">LAYER</div>
+        <div class="stat-value cyan">L7</div>
       </div>
 
-    </section>
+      <div class="stat">
+        <div class="stat-label">RATE CONTROL</div>
+        <div class="stat-value">ON</div>
+      </div>
 
-    <!-- FEATURES -->
+      <div class="stat">
+        <div class="stat-label">LIVE EVENTS</div>
+        <div class="stat-value green">READY</div>
+      </div>
 
-    <section id="features" class="section">
+    </div>
+
+  </div>
+
+  <div class="radar-card">
+
+    <div class="radar">
+
+      <div class="radar-ring"></div>
+      <div class="radar-sweep"></div>
+
+    </div>
+
+    <div class="radar-label">
+      <span>TRAFFIC_MONITOR</span>
+      <strong>● PROTECTED</strong>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- FEATURES -->
+
+<section id="features" class="section">
+
+  <div class="section-title">
+
+    <span class="eyebrow">
+      SECURITY ENGINE
+    </span>
+
+    <h2>
+      حماية متعددة الطبقات للترافيك
+    </h2>
+
+    <p>
+      Routix يجمع بين التحكم بالترافيك،
+      تحليل الطلبات، تقييم المخاطر وآليات
+      الحماية المختلفة داخل طبقة واحدة.
+    </p>
+
+  </div>
+
+  <div class="features">
+
+    <article class="feature">
+      <div class="feature-icon">◈</div>
+      <h3>Rate Limiting</h3>
+      <p>
+        تحديد عدد الطلبات المسموح بها لكل IP
+        خلال نافذة زمنية وتقليل إساءة استخدام
+        الموارد.
+      </p>
+      <span class="tag">TRAFFIC_CONTROL</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">⚡</div>
+      <h3>Burst Protection</h3>
+      <p>
+        التعامل مع الارتفاعات المفاجئة والسريعة
+        في الطلبات قبل انتقال الضغط إلى التطبيق
+        الأصلي.
+      </p>
+      <span class="tag">BURST_DETECTION</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">L7</div>
+      <h3>Layer 7 Protection</h3>
+      <p>
+        فحص طلبات HTTP على مستوى التطبيق
+        وتحليل المسارات والرؤوس والبيانات
+        وفق قواعد الحماية.
+      </p>
+      <span class="tag">HTTP_INSPECTION</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">SQL</div>
+      <h3>SQLi Detection</h3>
+      <p>
+        كشف أنماط شائعة مرتبطة بمحاولات
+        SQL Injection داخل الطلبات.
+      </p>
+      <span class="tag">ATTACK_DETECTION</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">X</div>
+      <h3>XSS Detection</h3>
+      <p>
+        فحص الأنماط المعروفة المرتبطة بمحاولات
+        Cross-Site Scripting.
+      </p>
+      <span class="tag">WEB_SECURITY</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">R</div>
+      <h3>Risk Scoring</h3>
+      <p>
+        بناء درجة خطورة للمصادر والطلبات
+        للمساعدة في اتخاذ قرار الحظر أو
+        التقييد أو المراقبة.
+      </p>
+      <span class="tag">RISK_ENGINE</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">H</div>
+      <h3>Honeypot</h3>
+      <p>
+        مسارات طُعم يمكن استخدامها لرصد
+        المصادر التي تتفاعل مع نقاط لا يفترض
+        أن يستخدمها المستخدم الطبيعي.
+      </p>
+      <span class="tag">THREAT_INTELLIGENCE</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">⊘</div>
+      <h3>Blacklist</h3>
+      <p>
+        التعامل مع المصادر التي تتجاوز سياسات
+        الحماية وإبقاؤها ضمن قائمة الحظر
+        حسب منطق النظام.
+      </p>
+      <span class="tag">IP_CONTROL</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">↯</div>
+      <h3>Concurrency Control</h3>
+      <p>
+        التحكم في عدد الاتصالات المتزامنة
+        لكل IP وعلى مستوى الخدمة لتقليل
+        الضغط غير الطبيعي.
+      </p>
+      <span class="tag">CONNECTION_LIMIT</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">◌</div>
+      <h3>Live Alerts</h3>
+      <p>
+        مراقبة الأحداث والتنبيهات بشكل مباشر
+        من خلال قناة الأحداث الخاصة بالـWAF
+        دون الحاجة لتحديث الصفحة.
+      </p>
+      <span class="tag">REAL_TIME</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">▣</div>
+      <h3>Security Headers</h3>
+      <p>
+        تحسين طبقة HTTP الأمنية باستخدام
+        إعدادات Security Headers المناسبة
+        للسيرفر.
+      </p>
+      <span class="tag">HTTP_SECURITY</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">↗</div>
+      <h3>Reverse Proxy</h3>
+      <p>
+        تمرير الطلبات الطبيعية إلى التطبيق الأصلي
+        مع إبقاء التطبيق خلف طبقة Routix.
+      </p>
+      <span class="tag">PROXY_LAYER</span>
+    </article>
+
+  </div>
+
+</section>
+
+<!-- L7 FLOW -->
+
+<section id="api" class="section">
+
+  <div class="section-title">
+
+    <span class="eyebrow">
+      REQUEST PIPELINE
+    </span>
+
+    <h2>
+      كيف يمر الطلب داخل Routix؟
+    </h2>
+
+    <p>
+      الفكرة الأساسية هي أن Routix يصبح نقطة
+      الدخول العامة، بينما يبقى التطبيق الأصلي
+      خلفه.
+    </p>
+
+  </div>
+
+  <div class="flow">
+
+    <div class="flow-node">
+      <b>CLIENT</b>
+      <span>
+        المستخدم يرسل HTTP Request
+      </span>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-node">
+      <b>ROUTIX</b>
+      <span>
+        استقبال وفحص الطلب
+      </span>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-node">
+      <b>WAF ENGINE</b>
+      <span>
+        Rate / L7 / Risk / Rules
+      </span>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-node">
+      <b>DECISION</b>
+      <span>
+        Allow / Block / Limit
+      </span>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-node">
+      <b>TARGET</b>
+      <span>
+        تمرير الطلب الطبيعي للتطبيق
+      </span>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- API & INTEGRATION -->
+
+<section id="integration" class="section">
+
+  <div class="section-title">
+
+    <span class="eyebrow">
+      API & INTEGRATION
+    </span>
+
+    <h2>
+      اربط Routix بموقع العميل
+    </h2>
+
+    <p>
+      Routix يعمل كطبقة حماية أمام تطبيق العميل،
+      بحيث تمر الطلبات عبر طبقة الحماية أولًا قبل
+      الوصول إلى التطبيق الأصلي.
+    </p>
+
+  </div>
+
+  <div class="integration">
+
+    <div class="steps">
+
+      <div class="step">
+        <b class="step-number">01</b>
+        <div>
+          <strong>أضف موقعك إلى Routix</strong>
+          <span>
+            أنشئ إعداد الموقع من خلال لوحة الإدارة
+            وحدد النطاق والتطبيق المرتبط به.
+          </span>
+        </div>
+      </div>
+
+      <div class="step">
+        <b class="step-number">02</b>
+        <div>
+          <strong>احصل على Token خاص بالموقع</strong>
+          <span>
+            لكل موقع Token مستقل يستخدم لربط الموقع
+            بخدمة Routix. لا تشارك الـToken مع أي شخص.
+          </span>
+        </div>
+      </div>
+
+      <div class="step">
+        <b class="step-number">03</b>
+        <div>
+          <strong>وجّه الدومين إلى Routix</strong>
+          <span>
+            بعد إعداد الموقع، وجّه حركة المرور الخاصة
+            بالدومين إلى نقطة الدخول الخاصة بـRoutix.
+          </span>
+        </div>
+      </div>
+
+      <div class="step">
+        <b class="step-number">04</b>
+        <div>
+          <strong>احتفظ بإعدادات السيرفر بشكل آمن</strong>
+          <span>
+            مفاتيح النظام وبيانات الإدارة وإعدادات
+            التطبيق الداخلي تبقى على السيرفر ولا تظهر
+            في الواجهة العامة.
+          </span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="code-card">
+
+      <div class="code-title">
+        <span class="code-dot"></span>
+        ROUTIX / SITE CONFIGURATION
+      </div>
+
+<pre># Routix Site Configuration
+
+SITE_DOMAIN=your-domain.com
+
+SITE_TOKEN=YOUR_SITE_TOKEN
+
+# يتم إنشاء القيم الحساسة
+# وإدارتها من خلال السيرفر
+
+# لا تضع:
+# WAF_API_KEY
+# ADMIN_PASSWORD
+# TARGET_URL الداخلي
+# أو أي أسرار خاصة بالسيرفر
+# داخل كود الواجهة العامة.</pre>      <div class="warning">
+        لأسباب أمنية، لا يتم عرض مفاتيح النظام أو بيانات
+        الإدارة أو إعدادات البنية الداخلية في الصفحة العامة.
+        استخدم Token الموقع الذي يتم إنشاؤه من لوحة الإدارة
+        لربط موقعك بخدمة Routix.
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- ADMIN -->
+
+<section id="admin" class="section">
+
+  <div class="admin-card">
+
+    <div class="admin-status">
+      <span class="live-dot"></span>
+      ROUTIX ADMIN / LIVE MONITORING
+    </div>
+
+    <h2>
+      لوحة الإدارة جاهزة.
+    </h2>
+
+    <p>
+      الوصول إلى لوحة الإدارة الحالية يتم من خلال
+      المسار <b>/admin</b>. من هناك يمكن إدارة ومراقبة
+      حالة الـWAF والأحداث والإحصائيات وفق الوظائف
+      الموجودة في السيرفر.
+    </p>
+
+    <a href="/admin" class="btn btn-primary">
+      فتح لوحة الإدارة ←
+    </a>
+
+  </div>
+
+</section>
+
+<!-- SETTINGS -->
+
+<section id="settings" class="section">
+
+  <div class="section-title">
+
+    <span class="eyebrow">
+      WAF CONFIGURATION
+    </span>
+
+    <h2>
+      الإعدادات التشغيلية
+    </h2>
+
+    <p>
+      يتم التحكم في السلوك التشغيلي للـWAF
+      من خلال إعدادات البيئة الموجودة على السيرفر.
+    </p>
+
+  </div>
+
+  <div class="settings-grid">
+
+    <article class="setting">
+      <h3>Traffic Control</h3>
+      <p>
+        التحكم في معدل الطلبات والحدود العامة
+        وحدود الـBurst.
+      </p>
+      <code>
+        RATE LIMITING<br>
+        BURST PROTECTION<br>
+        GLOBAL TRAFFIC
+      </code>
+    </article>
+
+    <article class="setting">
+      <h3>Risk Engine</h3>
+      <p>
+        تقييم مستوى خطورة الطلبات والمصادر
+        واتخاذ الإجراء المناسب وفق سياسة النظام.
+      </p>
+      <code>
+        RISK ENGINE<br>
+        THREAT DETECTION<br>
+        SECURITY RULES
+      </code>
+    </article>
+
+    <article class="setting">
+      <h3>Concurrency</h3>
+      <p>
+        التحكم في عدد الاتصالات المتزامنة لكل
+        مصدر وعلى مستوى الخدمة.
+      </p>
+      <code>
+        PER-IP LIMIT<br>
+        GLOBAL LIMIT<br>
+        CONNECTION CONTROL
+      </code>
+    </article>
+
+    <article class="setting">
+      <h3>Proxy</h3>
+      <p>
+        إدارة الاتصال بين Routix والتطبيق الأصلي
+        الموجود خلف طبقة الحماية.
+      </p>
+      <code>
+        REVERSE PROXY<br>
+        UPSTREAM<br>
+        CONNECTION ROUTING
+      </code>
+    </article>
+
+    <article class="setting">
+      <h3>Request Limits</h3>
+      <p>
+        التحكم في حدود ومهلات الطلبات والاتصال
+        مع التطبيق الأصلي.
+      </p>
+      <code>
+        REQUEST LIMITS<br>
+        TIMEOUT CONTROL<br>
+        HEADER LIMITS
+      </code>
+    </article>
+
+    <article class="setting">
+      <h3>Security</h3>
+      <p>
+        مفاتيح النظام وبيانات الإدارة والإعدادات
+        الحساسة تتم إدارتها داخليًا على السيرفر.
+      </p>
+      <code>
+        SERVER SIDE ONLY<br>
+        PRIVATE CONFIGURATION<br>
+        SECRET STORAGE
+      </code>
+    </article>
+
+  </div>
+
+</section>
+
+<!-- ABOUT -->
+
+<section id="about" class="section">
+
+  <div class="about">
+
+    <div class="about-copy">
+
+      <span class="eyebrow">
+        ABOUT ROUTIX
+      </span>
 
       <div class="section-title">
 
-        <span class="eyebrow">
-          SECURITY ENGINE
-        </span>
-
         <h2>
-          حماية متعددة الطبقات للترافيك
+          نبني الحماية بعقلية
+          البنية التحتية.
         </h2>
 
         <p>
-          Routix يجمع بين التحكم بالترافيك،
-          تحليل الطلبات، تقييم المخاطر وآليات
-          الحماية المختلفة داخل طبقة واحدة.
+          Routix مشروع تقني طوره مطورون شغوفون
+          بالأمن السيبراني، البنية التحتية وتطوير
+          الأنظمة.
+          <br><br>
+          نؤمن أن طبقة الحماية الجيدة يجب أن تكون
+          عملية، واضحة وقابلة للمراقبة، وأن تمنح
+          المطور رؤية أفضل لما يحدث على مستوى
+          الترافيك والطلبات بدل أن تكون مجرد طبقة
+          غير مرئية أمام التطبيق.
+          <br><br>
+          هدف Routix هو توفير طبقة WAF قابلة للدمج
+          مع المواقع والتطبيقات، مع أدوات للتحكم
+          بالترافيك ومراقبة الأحداث الأمنية.
         </p>
 
       </div>
 
-      <div class="features">
+      <a href="#features" class="btn btn-primary">
+        استكشف Routix ←
+      </a>
 
-        <article class="feature">
-          <div class="feature-icon">◈</div>
-          <h3>Rate Limiting</h3>
-          <p>
-            تحديد عدد الطلبات المسموح بها لكل IP
-            خلال نافذة زمنية وتقليل إساءة استخدام
-            الموارد.
-          </p>
-          <span class="tag">TRAFFIC_CONTROL</span>
-        </article>
+    </div>
 
-        <article class="feature">
-          <div class="feature-icon">⚡</div>
-          <h3>Burst Protection</h3>
-          <p>
-            التعامل مع الارتفاعات المفاجئة والسريعة
-            في الطلبات قبل انتقال الضغط إلى التطبيق
-            الأصلي.
-          </p>
-          <span class="tag">BURST_DETECTION</span>
-        </article>
+    <div class="terminal">
 
-        <article class="feature">
-          <div class="feature-icon">L7</div>
-          <h3>Layer 7 Protection</h3>
-          <p>
-            فحص طلبات HTTP على مستوى التطبيق
-            وتحليل المسارات والرؤوس والبيانات
-            وفق قواعد الحماية.
-          </p>
-          <span class="tag">HTTP_INSPECTION</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">SQL</div>
-          <h3>SQLi Detection</h3>
-          <p>
-            كشف أنماط شائعة مرتبطة بمحاولات
-            SQL Injection داخل الطلبات.
-          </p>
-          <span class="tag">ATTACK_DETECTION</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">X</div>
-          <h3>XSS Detection</h3>
-          <p>
-            فحص الأنماط المعروفة المرتبطة بمحاولات
-            Cross-Site Scripting.
-          </p>
-          <span class="tag">WEB_SECURITY</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">R</div>
-          <h3>Risk Scoring</h3>
-          <p>
-            بناء درجة خطورة للمصادر والطلبات
-            للمساعدة في اتخاذ قرار الحظر أو
-            التقييد أو المراقبة.
-          </p>
-          <span class="tag">RISK_ENGINE</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">H</div>
-          <h3>Honeypot</h3>
-          <p>
-            مسارات طُعم يمكن استخدامها لرصد
-            المصادر التي تتفاعل مع نقاط لا يفترض
-            أن يستخدمها المستخدم الطبيعي.
-          </p>
-          <span class="tag">THREAT_INTELLIGENCE</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">⊘</div>
-          <h3>Blacklist</h3>
-          <p>
-            التعامل مع المصادر التي تتجاوز سياسات
-            الحماية وإبقاؤها ضمن قائمة الحظر
-            حسب منطق النظام.
-          </p>
-          <span class="tag">IP_CONTROL</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">↯</div>
-          <h3>Concurrency Control</h3>
-          <p>
-            التحكم في عدد الاتصالات المتزامنة
-            لكل IP وعلى مستوى الخدمة لتقليل
-            الضغط غير الطبيعي.
-          </p>
-          <span class="tag">CONNECTION_LIMIT</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">◌</div>
-          <h3>Live Alerts</h3>
-          <p>
-            مراقبة الأحداث والتنبيهات بشكل مباشر
-            من خلال قناة الأحداث الخاصة بالـWAF
-            دون الحاجة لتحديث الصفحة.
-          </p>
-          <span class="tag">REAL_TIME</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">▣</div>
-          <h3>Security Headers</h3>
-          <p>
-            تحسين طبقة HTTP الأمنية باستخدام
-            إعدادات Security Headers المناسبة
-            للسيرفر.
-          </p>
-          <span class="tag">HTTP_SECURITY</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">↗</div>
-          <h3>Reverse Proxy</h3>
-          <p>
-            تمرير الطلبات الطبيعية إلى TARGET_URL
-            مع إبقاء التطبيق الأصلي خلف طبقة
-            Routix.
-          </p>
-          <span class="tag">PROXY_LAYER</span>
-        </article>
-
+      <div>
+        <span class="white">$</span>
+        routix start
       </div>
 
-    </section>
-
-    <!-- L7 FLOW -->
-
-    <section id="api" class="section">
-
-      <div class="section-title">
-
-        <span class="eyebrow">
-          REQUEST PIPELINE
-        </span>
-
-        <h2>
-          كيف يمر الطلب داخل Routix؟
-        </h2>
-
-        <p>
-          الفكرة الأساسية هي أن Routix يصبح نقطة
-          الدخول العامة، بينما يبقى التطبيق الأصلي
-          خلفه.
-        </p>
-
+      <div class="green">
+        ✓ WAF protection enabled
       </div>
 
-      <div class="flow">
-
-        <div class="flow-node">
-          <b>CLIENT</b>
-          <span>
-            المستخدم يرسل HTTP Request
-          </span>
-        </div>
-
-        <div class="flow-arrow">→</div>
-
-        <div class="flow-node">
-          <b>ROUTIX</b>
-          <span>
-            استقبال وفحص الطلب
-          </span>
-        </div>
-
-        <div class="flow-arrow">→</div>
-
-        <div class="flow-node">
-          <b>WAF ENGINE</b>
-          <span>
-            Rate / L7 / Risk / Rules
-          </span>
-        </div>
-
-        <div class="flow-arrow">→</div>
-
-        <div class="flow-node">
-          <b>DECISION</b>
-          <span>
-            Allow / Block / Limit
-          </span>
-        </div>
-
-        <div class="flow-arrow">→</div>
-
-        <div class="flow-node">
-          <b>TARGET</b>
-          <span>
-            تمرير الطلب الطبيعي للتطبيق
-          </span>
-        </div>
-
+      <div class="green">
+        ✓ L7 inspection enabled
       </div>
 
-    </section>
-
-    <!-- API & INTEGRATION -->
-
-    <section id="integration" class="section">
-
-      <div class="section-title">
-
-        <span class="eyebrow">
-          API & INTEGRATION
-        </span>
-
-        <h2>
-          اربط Routix بموقع العميل
-        </h2>
-
-        <p>
-          لا تحتاج إلى وضع كود الحماية داخل موقع
-          العميل. اجعل Routix أمام التطبيق،
-          وحدد TARGET_URL للتطبيق الأصلي.
-        </p>
-
+      <div class="green">
+        ✓ Rate limiting enabled
       </div>
 
-      <div class="integration">
-
-        <div class="steps">
-
-          <div class="step">
-            <b class="step-number">01</b>
-            <div>
-              <strong>شغّل التطبيق الأصلي</strong>
-              <span>
-                مثال: التطبيق يعمل داخليًا على
-                127.0.0.1:3000.
-              </span>
-            </div>
-          </div>
-
-          <div class="step">
-            <b class="step-number">02</b>
-            <div>
-              <strong>حدد TARGET_URL</strong>
-              <span>
-                Routix يستخدم TARGET_URL لمعرفة
-                التطبيق الذي سيتم تمرير الطلبات
-                الطبيعية إليه.
-              </span>
-            </div>
-          </div>
-
-          <div class="step">
-            <b class="step-number">03</b>
-            <div>
-              <strong>وجّه الدومين إلى Routix</strong>
-              <span>
-                الدومين العام يصل إلى Routix بدلًا
-                من الوصول المباشر إلى التطبيق.
-              </span>
-            </div>
-          </div>
-
-          <div class="step">
-            <b class="step-number">04</b>
-            <div>
-              <strong>اترك أسرار السيرفر في البيئة</strong>
-              <span>
-                WAF_API_KEY وبيانات الإدارة لا توضع
-                داخل JavaScript الخاص بالواجهة.
-              </span>
-            </div>
-          </div>
-
-        </div>
-
-        <div class="code-card">
-
-          <div class="code-title">
-            <span class="code-dot"></span>
-            .env
-          </div>
-
-<pre># Routix
-
-PORT=8080
-
-# Original application
-TARGET_URL=http://127.0.0.1:3000
-
-# Security
-WAF_API_KEY=ضع_مفتاحاً_عشوائياً_طويلاً
-
-# Admin
-ADMIN_USER=admin
-ADMIN_PASSWORD=ضع_كلمة_مرور_قوية_وطويلة
-
-# Proxy
-TRUST_PROXY=false
-
-# Storage
-DATA_FILE=waf-db.json
-
-# Rate Limiting
-RATE_LIMIT_WINDOW=60
-RATE_LIMIT_MAX=120
-
-# Burst Protection
-BURST_WINDOW_MS=1000
-BURST_MAX=15
-
-# Global Traffic
-GLOBAL_RATE_WINDOW_MS=1000
-GLOBAL_RATE_MAX=2000
-
-# Concurrent Connections
-MAX_CONCURRENT_PER_IP=30
-MAX_GLOBAL_CONCURRENT=1000</pre>
-
-          <div class="warning">
-            ملاحظة: أسماء المتغيرات هنا مبنية على إعدادات Routix
-            التي ذكرتها. إذا كان السيرفر الفعلي يستخدم أسماء
-            مختلفة، استخدم أسماء متغيرات السيرفر الحقيقية.
-          </div>
-
-        </div>
-
+      <div class="green">
+        ✓ Risk engine enabled
       </div>
 
-    </section>
-
-    <!-- ADMIN -->
-
-    <section id="admin" class="section">
-
-      <div class="admin-card">
-
-        <div class="admin-status">
-          <span class="live-dot"></span>
-          ROUTIX ADMIN / LIVE MONITORING
-        </div>
-
-        <h2>
-          لوحة الإدارة جاهزة.
-        </h2>
-
-        <p>
-          الوصول إلى لوحة الإدارة الحالية يتم من خلال
-          المسار <b>/admin</b>. من هناك يمكن إدارة ومراقبة
-          حالة الـWAF والأحداث والإحصائيات وفق الوظائف
-          الموجودة في السيرفر.
-        </p>
-
-        <a href="/admin" class="btn btn-primary">
-          فتح لوحة الإدارة ←
-        </a>
-
+      <div class="green">
+        ✓ Honeypot monitoring enabled
       </div>
 
-    </section>
-
-    <!-- SETTINGS -->
-
-    <section id="settings" class="section">
-
-      <div class="section-title">
-
-        <span class="eyebrow">
-          WAF CONFIGURATION
-        </span>
-
-        <h2>
-          الإعدادات التشغيلية
-        </h2>
-
-        <p>
-          يتم التحكم في السلوك التشغيلي للـWAF
-          من خلال متغيرات البيئة الموجودة على السيرفر.
-        </p>
-
+      <div class="green">
+        ✓ Blacklist engine enabled
       </div>
 
-      <div class="settings-grid">
-
-        <article class="setting">
-          <h3>Traffic Control</h3>
-          <p>
-            التحكم في معدل الطلبات والحدود العامة
-            وحدود الـBurst.
-          </p>
-          <code>
-            RATE_LIMIT_MAX<br>
-            BURST_MAX<br>
-            GLOBAL_RATE_MAX
-          </code>
-        </article>
-
-        <article class="setting">
-          <h3>Risk Engine</h3>
-          <p>
-            إعدادات تقييم المخاطر والإجراءات الناتجة
-            عن ارتفاع مستوى الخطورة.
-          </p>
-          <code>
-            RISK_BLOCK_THRESHOLD<br>
-            RISK_HONEYPOT_THRESHOLD<br>
-            RISK_TTL
-          </code>
-        </article>
-
-        <article class="setting">
-          <h3>Concurrency</h3>
-          <p>
-            تحديد عدد الاتصالات المتزامنة لكل IP
-            وعلى مستوى الخدمة.
-          </p>
-          <code>
-            MAX_CONCURRENT_PER_IP<br>
-            MAX_GLOBAL_CONCURRENT
-          </code>
-        </article>
-
-        <article class="setting">
-          <h3>Proxy</h3>
-          <p>
-            إعدادات الاتصال بين Routix والتطبيق
-            الأصلي الموجود خلف الـWAF.
-          </p>
-          <code>
-            TARGET_URL<br>
-            TRUST_PROXY<br>
-            PROXY_TIMEOUT_MS
-          </code>
-        </article>
-
-        <article class="setting">
-          <h3>Request Limits</h3>
-          <p>
-            التحكم في المهلات الخاصة بالطلبات
-            والرؤوس والاتصال مع التطبيق.
-          </p>
-          <code>
-            REQUEST_TIMEOUT_MS<br>
-            HEADERS_TIMEOUT_MS<br>
-            PROXY_TIMEOUT_MS
-          </code>
-        </article>
-
-        <article class="setting">
-          <h3>Security</h3>
-          <p>
-            مفاتيح API وبيانات الإدارة يجب أن تبقى
-            في بيئة السيرفر فقط.
-          </p>
-          <code>
-            WAF_API_KEY<br>
-            ADMIN_USER<br>
-            ADMIN_PASSWORD
-          </code>
-        </article>
-
+      <div class="green">
+        ✓ Live admin events enabled
       </div>
 
-    </section>
-
-    <!-- ABOUT -->
-
-    <section id="about" class="section">
-
-      <div class="about">
-
-        <div class="about-copy">
-
-          <span class="eyebrow">
-            ABOUT ROUTIX
-          </span>
-
-          <div class="section-title">
-
-            <h2>
-              نبني الحماية بعقلية
-              البنية التحتية.
-            </h2>
-
-            <p>
-              Routix مشروع تقني طوره مطورون شغوفون
-              بالأمن السيبراني، البنية التحتية وتطوير
-              الأنظمة.
-              <br><br>
-              نؤمن أن طبقة الحماية الجيدة يجب أن تكون
-              عملية، واضحة وقابلة للمراقبة، وأن تمنح
-              المطور رؤية أفضل لما يحدث على مستوى
-              الترافيك والطلبات بدل أن تكون مجرد طبقة
-              غير مرئية أمام التطبيق.
-              <br><br>
-              هدف Routix هو توفير طبقة WAF قابلة للدمج
-              مع المواقع والتطبيقات، مع أدوات للتحكم
-              بالترافيك ومراقبة الأحداث الأمنية.
-            </p>
-
-          </div>
-
-          <a href="#features" class="btn btn-primary">
-            استكشف Routix ←
-          </a>
-
-        </div>
-
-        <div class="terminal">
-
-          <div>
-            <span class="white">$</span>
-            routix start
-          </div>
-
-          <div class="green">
-            ✓ WAF protection enabled
-          </div>
-
-          <div class="green">
-            ✓ L7 inspection enabled
-          </div>
-
-          <div class="green">
-            ✓ Rate limiting enabled
-          </div>
-
-          <div class="green">
-            ✓ Risk engine enabled
-          </div>
-
-          <div class="green">
-            ✓ Honeypot monitoring enabled
-          </div>
-
-          <div class="green">
-            ✓ Blacklist engine enabled
-          </div>
-
-          <div class="green">
-            ✓ Live admin events enabled
-          </div>
-
-          <div>
-            <span class="cyan">→</span>
-            proxying to TARGET_URL
-          </div>
-
-          <div>
-            <span class="cyan">→</span>
-            listening on :8080
-          </div>
-
-        </div>
-
+      <div>
+        <span class="cyan">→</span>
+        proxying through Routix
       </div>
 
-    </section>
+      <div>
+        <span class="cyan">→</span>
+        protection layer active
+      </div>
 
-  </main>
+    </div>
 
-  <!-- =========================================================
+  </div>
+
+</section>
+
+  </main>  <!-- =========================================================
        FOOTER
-  ========================================================== -->
-
-  <footer>
+  ========================================================== -->  <footer>
     © 2026 <span>Routix</span> — Cloud WAF & Application Protection
-  </footer>
-
-  <script>
+  </footer>  <script>
     /* =========================================================
        INTRO
     ========================================================== */
@@ -2090,7 +2035,5 @@ MAX_GLOBAL_CONCURRENT=1000</pre>
       }
     });
 
-  </script>
-
-</body>
+  </script></body>
 </html>
