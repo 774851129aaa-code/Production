@@ -1,19 +1,21 @@
 {
-  "name": "tbp-shield",
+  "name": "cloud-waf-proxy",
   "version": "1.0.0",
-  "description": "Advanced Behavioral WAF & Security Shield for Express.js",
-  "main": "index.js",
+  "description": "Single-Site Cloud WAF Reverse Proxy with Strong L7 Protection and Live Admin Dashboard",
+  "main": "cloud-waf-proxy.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "tsx cloud-waf-proxy.ts"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "redis": "^4.6.10"
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "http-proxy-middleware": "^3.0.0",
+    "zod": "^3.23.8"
   },
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "keywords": ["waf", "security", "express", "firewall", "protection"],
-  "author": "Abdullah Mohammed",
-  "license": "MIT"
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.10",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.2"
+  }
 }
