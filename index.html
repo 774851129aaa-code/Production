@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Routix Cloud WAF - حماية ومراقبة متقدمة لتطبيقات الويب">
+  <title>Routix — Cloud WAF</title>
+
+  <style>
+    :root {
+      --bg: #03060b;
+      --bg2: #07101a;
+      --panel: rgba(9, 17, 28, .78);
+      --panel2: rgba(13, 25, 40, .9);
+      --cyan: #35e7ff;
+      --blue: #397cff;
+      --green: #42e6a4;
+      --red: #ff5570;
+      --yellow: #ffc857;
+      --text: #eefaff;
+      --muted: #8ea3b7;
+      --border: rgba(53, 231, 255, .14);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at 75% 15%, rgba(57,124,255,.18), transparent 30%),
+        radial-gradient(circle at 15% 65%, rgba(53,231,255,.09), transparent 28%),
+        var(--bg);
+      color: var(--text);
+      font-family: Tahoma, Arial, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font-family: inherit;
+    }
+
+    /* =========================
+       BACKGROUND
+    ========================= */
+
+    .grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .23;
+      background-image:
+        linear-gradient(rgba(53,231,255,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(53,231,255,.045) 1px, transparent 1px);
+      background-size: 55px 55px;
+      mask-image: linear-gradient(to bottom, black, transparent 90%);
+      z-index: -3;
+    }
+
+    .scanlines {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 50;
+      opacity: .12;
+      background:
+        linear-gradient(
+          transparent 50%,
+          rgba(53,231,255,.025) 50%
+        );
+      background-size: 100% 6px;
+    }
+
+    .background-glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      border: 1px solid rgba(53,231,255,.08);
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow:
+        0 0 100px rgba(53,231,255,.05),
+        inset 0 0 100px rgba(57,124,255,.04);
+      pointer-events: none;
+      z-index: -2;
+    }
+
+    .background-glow::before,
+    .background-glow::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      border: 1px dashed rgba(53,231,255,.13);
+    }
+
+    .background-glow::before {
+      inset: 70px;
+    }
+
+    .background-glow::after {
+      inset: 160px;
+      border-style: solid;
+    }
+
+    /* =========================
+       HEADER
+    ========================= */
+
+    header {
+      position: fixed;
+      z-index: 40;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 78px;
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      padding: 0 6%;
+
+      background: rgba(3,6,11,.7);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .brand-name {
+      font-size: 21px;
+    }
+
+    .logo {
+      position: relative;
+      width: 39px;
+      height: 39px;
+      border: 1px solid var(--cyan);
+      transform: rotate(45deg);
+      box-shadow: 0 0 25px rgba(53,231,255,.2);
+    }
+
+    .logo::before {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border: 1px solid rgba(53,231,255,.65);
+    }
+
+    .logo::after {
+      content: "";
+      position: absolute;
+      inset: 14px;
+      background: rgba(53,231,255,.12);
+      border: 1px solid var(--cyan);
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    nav a {
+      color: #aebfd0;
+      font-size: 13px;
+      padding: 10px 13px;
+      border-radius: 10px;
+      transition: .2s;
+    }
+
+    nav a:hover {
+      color: white;
+      background: rgba(53,231,255,.07);
+    }
+
+    .mobile-menu {
+      display: none;
+      background: transparent;
+      color: white;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      padding: 9px 12px;
+      cursor: pointer;
+    }
+
+    /* =========================
+       HERO
+    ========================= */
+
+    .hero {
+      min-height: 100vh;
+      padding: 130px 6% 80px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      position: relative;
+      text-align: center;
+    }
+
+    .hero-content {
+      max-width: 900px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+
+      padding: 8px 14px;
+
+      border: 1px solid var(--border);
+      border-radius: 999px;
+
+      background: rgba(53,231,255,.045);
+
+      color: #a8eefa;
+      font-size: 12px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 14px var(--green);
+    }
+
+    .hero h1 {
+      margin: 27px 0 22px;
+
+      font-size: clamp(52px, 9vw, 100px);
+      line-height: .95;
+      letter-spacing: -5px;
+    }
+
+    .cyan {
+      color: var(--cyan);
+      text-shadow: 0 0 40px rgba(53,231,255,.25);
+    }
+
+    .hero p {
+      max-width: 730px;
+      margin: auto;
+
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.9;
+    }
+
+    .hero-buttons {
+      margin-top: 34px;
+
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+
+      min-height: 48px;
+      padding: 0 23px;
+
+      border-radius: 12px;
+
+      border: 1px solid var(--border);
+
+      background: rgba(255,255,255,.035);
+
+      color: white;
+
+      cursor: pointer;
+
+      transition: .22s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      border-color: rgba(53,231,255,.4);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      color: #021018;
+      border: 0;
+      font-weight: 900;
+      box-shadow: 0 15px 40px rgba(57,124,255,.2);
+    }
+
+    /* =========================
+       SECTIONS
+    ========================= */
+
+    .section {
+      max-width: 1200px;
+      margin: auto;
+      padding: 90px 6%;
+    }
+
+    .section-title {
+      max-width: 720px;
+      margin-bottom: 35px;
+    }
+
+    .section-title small {
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .section-title h2 {
+      margin: 10px 0;
+      font-size: 38px;
+    }
+
+    .section-title p {
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    /* =========================
+       FEATURES
+    ========================= */
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .feature {
+      padding: 25px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(13,25,40,.88),
+          rgba(5,10,17,.82)
+        );
+
+      border: 1px solid var(--border);
+      border-radius: 18px;
+
+      transition: .25s;
+    }
+
+    .feature:hover {
+      transform: translateY(-5px);
+      border-color: rgba(53,231,255,.32);
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+
+      display: grid;
+      place-items: center;
+
+      margin-bottom: 17px;
+
+      border: 1px solid rgba(53,231,255,.23);
+      border-radius: 12px;
+
+      color: var(--cyan);
+      font-size: 19px;
+    }
+
+    .feature h3 {
+      margin-bottom: 9px;
+      font-size: 17px;
+    }
+
+    .feature p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    /* =========================
+       API
+    ========================= */
+
+    .integration {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .steps {
+      display: grid;
+      gap: 12px;
+    }
+
+    .step {
+      display: flex;
+      gap: 14px;
+
+      padding: 18px;
+
+      background: rgba(9,17,28,.76);
+
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+
+    .step-number {
+      min-width: 33px;
+      height: 33px;
+
+      display: grid;
+      place-items: center;
+
+      border-radius: 9px;
+
+      background: rgba(53,231,255,.08);
+
+      color: var(--cyan);
+      font-weight: 900;
+    }
+
+    .step strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .step span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    pre {
+      height: 100%;
+      margin: 0;
+      padding: 22px;
+
+      direction: ltr;
+      text-align: left;
+
+      overflow: auto;
+
+      border-radius: 18px;
+      border: 1px solid var(--border);
+
+      background: #010409;
+
+      color: #bdeaf2;
+
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .warning {
+      margin-top: 12px;
+      color: #7f94a7;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    /* =========================
+       ADMIN
+    ========================= */
+
+    .admin-card {
+      padding: 35px;
+
+      border-radius: 22px;
+
+      border: 1px solid var(--border);
+
+      background:
+        linear-gradient(
+          135deg,
+          rgba(53,231,255,.07),
+          rgba(57,124,255,.035)
+        );
+    }
+
+    /* =========================
+       ABOUT
+    ========================= */
+
+    .about {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      align-items: center;
+    }
+
+    .terminal {
+      padding: 23px;
+
+      background: #010409;
+
+      border: 1px solid var(--border);
+      border-radius: 18px;
+
+      font-family: Consolas, monospace;
+      line-height: 2;
+      color: #9ddde8;
+    }
+
+    .terminal .green {
+      color: var(--green);
+    }
+
+    .terminal .white {
+      color: white;
+    }
+
+    /* =========================
+       FOOTER
+    ========================= */
+
+    footer {
+      padding: 30px 6%;
+
+      text-align: center;
+
+      border-top: 1px solid rgba(255,255,255,.06);
+
+      color: #718294;
+      font-size: 12px;
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 900px) {
+
+      nav {
+        display: none;
+      }
+
+      .mobile-menu {
+        display: block;
+      }
+
+      .features {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .integration,
+      .about {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+
+      header {
+        padding: 0 5%;
+      }
+
+      .hero {
+        padding-left: 5%;
+        padding-right: 5%;
+      }
+
+      .hero h1 {
+        font-size: 56px;
+        letter-spacing: -3px;
+      }
+
+      .hero p {
+        font-size: 15px;
+      }
+
+      .features {
+        grid-template-columns: 1fr;
+      }
+
+      .section {
+        padding: 65px 5%;
+      }
+
+      .section-title h2 {
+        font-size: 30px;
+      }
+
+      .background-glow {
+        width: 340px;
+        height: 340px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="grid"></div>
+<div class="scanlines"></div>
+<div class="background-glow"></div>
+
+<!-- =========================
+     HEADER
+========================= -->
+
+<header>
+
+  <a href="#" class="brand">
+
+    <span class="logo"></span>
+
+    <span class="brand-name">
+      Routix
+    </span>
+
+  </a>
+
+  <nav>
+
+    <a href="#features">
+      المميزات
+    </a>
+
+    <a href="#integration">
+      API والربط
+    </a>
+
+    <a href="#admin">
+      لوحة الإدارة
+    </a>
+
+    <a href="#settings">
+      الإعدادات
+    </a>
+
+    <a href="#about">
+      من نحن
+    </a>
+
+  </nav>
+
+  <button
+    class="mobile-menu"
+    onclick="toggleMobileMenu()"
+  >
+    ☰
+  </button>
+
+</header>
+
+<!-- =========================
+     HERO
+========================= -->
+
+<section class="hero">
+
+  <div class="hero-content">
+
+    <div class="status">
+
+      <span class="status-dot"></span>
+
+      Routix Cloud WAF • Protection Active
+
+    </div>
+
+    <h1>
+
+      حماية أذكى.<br>
+
+      <span class="cyan">
+        Routix.
+      </span>
+
+    </h1>
+
+    <p>
+
+      طبقة حماية لتطبيقات الويب تراقب الطلبات،
+      تحد من المعدلات العالية، تكشف الأنماط المشبوهة،
+      وتوفر لك مراقبة مباشرة من لوحة الإدارة.
+
+    </p>
+
+    <div class="hero-buttons">
+
+      <a
+        href="#features"
+        class="btn btn-primary"
+      >
+        دخول إلى المنصة ←
+      </a>
+
+      <a
+        href="#integration"
+        class="btn"
+      >
+        طريقة الربط
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================
+     FEATURES
+========================= -->
+
+<section
+  id="features"
+  class="section"
+>
+
+  <div class="section-title">
+
+    <small>
+      ROUTIX FEATURES
+    </small>
+
+    <h2>
+      طبقة حماية مبنية حول طلبات موقعك
+    </h2>
+
+    <p>
+      مجموعة من آليات الحماية الموجودة في طبقة الـWAF
+      مع لوحة مراقبة وتنبيهات مباشرة.
+    </p>
+
+  </div>
+
+  <div class="features">
+
+    <article class="feature">
+
+      <div class="feature-icon">
+        ◈
+      </div>
+
+      <h3>
+        Rate Limiting
+      </h3>
+
+      <p>
+        التحكم في عدد الطلبات لكل IP ضمن فترة زمنية
+        مع حماية إضافية ضد الارتفاعات المفاجئة.
+      </p>
+
+    </article>
+
+    <article class="feature">
+
+      <div class="feature-icon">
+        ⚡
+      </div>
+
+      <h3>
+        Burst Protection
+      </h3>
+
+      <p>
+        اكتشاف الارتفاع السريع في الطلبات والتعامل
+        معه قبل أن يسبب ضغطًا غير طبيعي على التطبيق.
+      </p>
+
+    </article>
+
+    <article class="feature">
+
+      <div class="feature-icon">
+        ◉
+      </div>
+
+      <h3>
+        SQL Injection Detection
+      </h3>
+
+      <p>
+        فحص أنماط معروفة مرتبطة بمحاولات
+        SQL Injection داخل الطلبات.
+      </p>
+
+    </article>
+
+    <article class="feature">
+
+      <div class="feature-icon">
+        ⌁
+      </div>
+
+      <h3>
+        XSS Detection
+      </h3>
+
+      <p>
+        اكتشاف مجموعة من الأنماط المعروفة
+        المرتبطة بمحاولات XSS.
+      </p>
+
+    </article>
+
+    <article class="feature">
+
+      <div class="feature-icon">
+        ⌗
+      </div>
+
+      <h3>
+        Risk Scoring
+      </h3>
+
+      <p>
+        حساب نقاط المخاطر لكل IP واستخدامها
+        للمساعدة في تحديد الإجراء المناسب.
+      </p>
+
+    </article>
+
+    <article class="feature">
+
+      <div class="feature-icon">
+        ⊘
+      </div>
+
+      <h3>
+        Blacklist
+      </h3>
+
+      <p>
+        الاحتفاظ بالمصادر التي تجاوزت سياسات الحماية
+        ضمن قائمة حظر مؤقتة.
+      </p>
+
+    </article>
+
+    <article class="feature">
+
+      <div class="feature-icon">
+        ↯
+      </div>
+
+      <h3>
+        Concurrency Control
+      </h3>
+
+      <p>
+        تحديد الاتصالات المتزامنة لكل IP وعلى مستوى
+        الخدمة لتقليل ضغط الاتصالات.
+      </p>
+
+    </article>
+
+    <article class="feature">
+
+      <div class="feature-icon">
+        ◌
+      </div>
+
+      <h3>
+        Live Alerts
+      </h3>
+
+      <p>
+        استقبال التنبيهات مباشرة باستخدام
+        Server-Sent Events بدون تحديث الصفحة.
+      </p>
+
+    </article>
+
+    <article class="feature">
+
+      <div class="feature-icon">
+        ▣
+      </div>
+
+      <h3>
+        Security Headers
+      </h3>
+
+      <p>
+        استخدام Helmet وإعدادات HTTP إضافية
+        لتحسين طبقة أمان التطبيق.
+      </p>
+
+    </article>
+
+  </div>
+
+</section>
+
+<!-- =========================
+     API / INTEGRATION
+========================= -->
+
+<section
+  id="integration"
+  class="section"
+>
+
+  <div class="section-title">
+
+    <small>
+      API & INTEGRATION
+    </small>
+
+    <h2>
+      اربط Routix بموقعك
+    </h2>
+
+    <p>
+      اجعل Routix نقطة الدخول العامة للموقع،
+      واجعل التطبيق الأصلي خلف طبقة الحماية.
+    </p>
+
+  </div>
+
+  <div class="integration">
+
+    <div class="steps">
+
+      <div class="step">
+
+        <b class="step-number">
+          1
+        </b>
+
+        <div>
+
+          <strong>
+            شغّل موقعك الأصلي
+          </strong>
+
+          <span>
+            مثال: التطبيق الأصلي يعمل داخليًا
+            على 127.0.0.1:3000.
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="step">
+
+        <b class="step-number">
+          2
+        </b>
+
+        <div>
+
+          <strong>
+            حدد TARGET_URL
+          </strong>
+
+          <span>
+            ضع عنوان الموقع الأصلي داخل
+            متغير البيئة TARGET_URL.
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="step">
+
+        <b class="step-number">
+          3
+        </b>
+
+        <div>
+
+          <strong>
+            وجّه الدومين إلى Routix
+          </strong>
+
+          <span>
+            الدومين العام يجب أن يصل إلى
+            WAF وليس مباشرة إلى التطبيق الأصلي.
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="step">
+
+        <b class="step-number">
+          4
+        </b>
+
+        <div>
+
+          <strong>
+            استخدم API Key
+          </strong>
+
+          <span>
+            واجهة حالة الـWAF تستخدم
+            x-waf-api-key.
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div>
+
+<pre># .env
+
+PORT=8080
+
+TARGET_URL=http://127.0.0.1:3000
+
+WAF_API_KEY=ضع_مفتاحاً_عشوائياً_طويلاً
+
+ADMIN_USER=admin
+
+ADMIN_PASSWORD=ضع_كلمة_مرور_قوية_وطويلة
+
+TRUST_PROXY=false
+
+DATA_FILE=waf-db.json
+
+RATE_LIMIT_WINDOW=60
+RATE_LIMIT_MAX=120
+
+BURST_WINDOW_MS=1000
+BURST_MAX=15
+
+GLOBAL_RATE_WINDOW_MS=1000
+GLOBAL_RATE_MAX=2000
+
+MAX_CONCURRENT_PER_IP=30
+MAX_GLOBAL_CONCURRENT=1000</pre>
+
+      <div class="warning">
+
+        ⚠️ لا تضع WAF_API_KEY أو ADMIN_PASSWORD
+        داخل JavaScript الخاص بالواجهة.
+        هذه البيانات يجب أن تبقى في بيئة السيرفر.
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================
+     ADMIN
+========================= -->
+
+<section
+  id="admin"
+  class="section"
+>
+
+  <div class="admin-card">
+
+    <div class="section-title">
+
+      <small>
+        LIVE ADMIN
+      </small>
+
+      <h2>
+        لوحة الإدارة المباشرة
+      </h2>
+
+      <p>
+        سيرفر Routix الذي أرسلته يحتوي بالفعل
+        على لوحة الإدارة في المسار /admin،
+        بالإضافة إلى الإحصائيات والتنبيهات المباشرة.
+      </p>
+
+    </div>
+
+    <a
+      href="/admin"
+      class="btn btn-primary"
+    >
+      فتح لوحة الإدارة ←
+    </a>
+
+  </div>
+
+</section>
+
+<!-- =========================
+     SETTINGS
+========================= -->
+
+<section
+  id="settings"
+  class="section"
+>
+
+  <div class="section-title">
+
+    <small>
+      SETTINGS
+    </small>
+
+    <h2>
+      إعدادات الحماية
+    </h2>
+
+    <p>
+      إعدادات Routix التشغيلية يتم التحكم بها
+      من متغيرات البيئة الموجودة على السيرفر.
+    </p>
+
+  </div>
+
+  <div class="features">
+
+    <article class="feature">
+
+      <div class="feature-icon">
+        ⚙
+      </div>
+
+      <h3>
+        Traffic Control
+      </h3>
+
+      <p>
+        RATE_LIMIT_MAX و BURST_MAX و
+        GLOBAL_RATE_MAX للتحكم في الترافيك.
+      </p>
+
+    </article>
+
+    <article class="feature">
+
+      <div class="feature-icon">
+        ◇
+      </div>
+
+      <h3>
+        Risk Engine
+      </h3>
+
+      <p>
+        RISK_BLOCK_THRESHOLD و
+        RISK_HONEYPOT_THRESHOLD و RISK_TTL.
+      </p>
+
+    </article>
+
+    <article class="feature">
+
+      <div class="feature-icon">
+        ◷
+      </div>
+
+      <h3>
+        Timeouts
+      </h3>
+
+      <p>
+        REQUEST_TIMEOUT_MS و HEADERS_TIMEOUT_MS
+        و PROXY_TIMEOUT_MS.
+      </p>
+
+    </article>
+
+  </div>
+
+</section>
+
+<!-- =========================
+     ABOUT
+========================= -->
+
+<section
+  id="about"
+  class="section"
+>
+
+  <div class="about">
+
+    <div>
+
+      <div class="section-title">
+
+        <small>
+          ABOUT ROUTIX
+        </small>
+
+        <h2>
+          مطورون شغوفون بالأمن والبنية التحتية
+        </h2>
+
+        <p>
+          Routix مشروع تقني طوره مطورون شغوفون
+          بالأمن السيبراني والبنية التحتية وتطوير
+          الأنظمة. نؤمن أن أدوات الحماية يجب أن تكون
+          عملية، واضحة، وقابلة للمراقبة.
+
+          <br><br>
+
+          هدفنا بناء طبقة حماية سهلة الدمج مع المواقع
+          والتطبيقات، وتمنح المطور رؤية أفضل لما يحدث
+          على مستوى الطلبات والترافيك.
+        </p>
+
+      </div>
+
+      <a
+        href="#features"
+        class="btn btn-primary"
+      >
+        استكشف Routix
+      </a>
+
+    </div>
+
+    <div class="terminal">
+
+      <div>
+        <span class="white">$</span>
+        routix start
+      </div>
+
+      <div class="green">
+        ✓ WAF protection enabled
+      </div>
+
+      <div class="green">
+        ✓ Rate limiting enabled
+      </div>
+
+      <div class="green">
+        ✓ Risk engine enabled
+      </div>
+
+      <div class="green">
+        ✓ Live admin events enabled
+      </div>
+
+      <div>
+        <span class="white">→</span>
+        listening on :8080
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<footer>
+
+  © 2026 Routix — Cloud WAF & Application Protection
+
+</footer>
+
+<script>
+
+  function toggleMobileMenu() {
+
+    const nav = document.querySelector("nav");
+
+    if (!nav) return;
+
+    if (nav.style.display === "flex") {
+
+      nav.style.display = "";
+
+      return;
+
+    }
+
+    nav.style.display = "flex";
+
+    nav.style.position = "absolute";
+
+    nav.style.top = "78px";
+
+    nav.style.left = "5%";
+
+    nav.style.right = "5%";
+
+    nav.style.flexDirection = "column";
+
+    nav.style.alignItems = "stretch";
+
+    nav.style.padding = "10px";
+
+    nav.style.background = "rgba(3,6,11,.97)";
+
+    nav.style.border = "1px solid rgba(53,231,255,.14)";
+
+    nav.style.borderRadius = "14px";
+
+  }
+
+</script>
+
+</body>
+</html>
