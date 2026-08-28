@@ -7,7 +7,8 @@ COPY cloud-waf-proxy.ts ./
 FROM node:20-alpine
 WORKDIR /app
 COPY package*.json ./
-RUN npm install --production
+# نسخ الحزم المثبتة بالكامل من مرحلة البناء لضمان توفر أدوات التشغيل مثل tsx
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/cloud-waf-proxy.ts ./
 
 EXPOSE 8080
