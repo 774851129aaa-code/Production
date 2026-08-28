@@ -276,7 +276,6 @@ async function resolveAndPinTarget(targetUrl) {
     return result;
 }
 
-// Memory-based Storage لتجنب مشاكل الملفات المؤقتة في Render
 const memoryBlocks = new Map();
 const memoryProfiles = new Map();
 const memoryBaselines = new Map();
@@ -582,7 +581,6 @@ class BodySpool extends Transform {
     }
 }
 
-// معالجة الطلبات العامة وواجهة لوحة التحكم
 app.use(async (req, res) => {
     if (req.path.startsWith('/_tbp/')) {
         return res.status(404).json({ error: 'NOT_FOUND' });
@@ -742,7 +740,6 @@ button{cursor:pointer;}
             <div class="logo-icon"><i class="fa-solid fa-route"></i></div>
             Routix
         </div>
-        <!-- زر الإغلاق الجديد مخصص للهواتف -->
         <button class="close-btn" onclick="toggleSidebar()"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="nav-title">PLATFORM</div>
@@ -870,6 +867,7 @@ button{cursor:pointer;}
     <div class="modal-box">
         <div class="modal-head">
             <strong><i class="fa-solid fa-terminal"></i> ربط Routix Gateway</strong>
+            <!-- زر الإغلاق بعلامة x -->
             <button class="icon-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="modal-body">
@@ -889,7 +887,11 @@ function enterDashboard(){
 }
 function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
 function openModal(){ document.getElementById('modal').classList.add('show'); }
-function closeModal(){ document.getElementById('modal').classList.remove('show'); }
+
+// دالة إغلاق النافذة عند الضغط على زر X
+function closeModal(){ 
+    document.getElementById('modal').classList.remove('show'); 
+}
 
 async function fetchLiveMetrics() {
     try {
