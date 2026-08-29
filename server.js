@@ -7,6 +7,7 @@ const jwt = require('jsonwebtoken');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
+const argon2 = require('argon2');
 
 require('dotenv').config();
 
@@ -24,7 +25,11 @@ app.use(
     })
 );
 
-app.use(express.json({ limit: '10kb' }));
+app.use(
+    express.json({
+        limit: '10kb'
+    })
+);
 
 app.use(cookieParser());
 
@@ -41,16 +46,26 @@ const allowedOrigins = [
 app.use(
     cors({
         origin: function (origin, callback) {
-            if (!origin || allowedOrigins.includes(origin)) {
-                callback(null, true);
-            } else {
-                callback(new Error('Blocked by CORS policy'));
+
+            if (
+                !origin ||
+                allowedOrigins.includes(origin)
+            ) {
+                return callback(null, true);
             }
+
+            return callback(
+                new Error('Blocked by CORS policy')
+            );
         },
 
         credentials: true,
 
-        methods: ['GET', 'POST', 'OPTIONS'],
+        methods: [
+            'GET',
+            'POST',
+            'OPTIONS'
+        ],
 
         allowedHeaders: [
             'Content-Type',
@@ -65,9 +80,11 @@ app.use(
 
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 20,
+
+    max: 30,
 
     standardHeaders: true,
+
     legacyHeaders: false,
 
     message: {
@@ -77,15 +94,17 @@ const limiter = rateLimit({
     }
 });
 
-app.use('/api/', limiter);
+app.use(
+    '/api/',
+    limiter
+);
 
 /* =========================================================
-   SECRETS
+   ENVIRONMENT VARIABLES
 ========================================================= */
 
 const JWT_SECRET =
-    process.env.JWT_SECRET ||
-    'CHANGE_THIS_SECRET_IN_ENV';
+    process.env.JWT_SECRET;
 
 const MONGO_URI =
     process.env.MONGO_URI;
@@ -98,300 +117,214 @@ const SENDER_EMAIL =
     'ttbnatlh@gmail.com';
 
 /* =========================================================
+   REQUIRED SECRETS
+========================================================= */
+
+if (!JWT_SECRET) {
+
+    console.error(
+        'JWT_SECRET is missing from environment variables.'
+    );
+
+    process.exit(1);
+}
+
+if (!MONGO_URI) {
+
+    console.error(
+        'MONGO_URI is missing from environment variables.'
+    );
+
+    process.exit(1);
+}
+
+/* =========================================================
    SESSION COOKIE
 ========================================================= */
 
-const SESSION_COOKIE = 'routix_session';
+const SESSION_COOKIE =
+    'routix_session';
 
 const SESSION_COOKIE_OPTIONS = {
+
     httpOnly: true,
 
-    // مطلوب عند استخدام الواجهة وسيرفر المصادقة على نطاقين مختلفين
-    sameSite: 'none',
-
-    // مطلوب مع SameSite=None
     secure: true,
 
-    // يمنع إرسال الكوكي مع مسارات غير API
+    sameSite: 'none',
+
     path: '/',
 
-    // JWT نفسه ينتهي بعد 7 أيام
-    maxAge: 7 * 24 * 60 * 60 * 1000
+    maxAge:
+        7 *
+        24 *
+        60 *
+        60 *
+        1000
 };
 
 /* =========================================================
    MONGODB
 ========================================================= */
 
-if (!MONGO_URI) {
-    console.error('MONGO_URI is missing from environment variables.');
-    process.exit(1);
-}
-
 mongoose
     .connect(MONGO_URI)
     .then(() => {
-        console.log('Connected to MongoDB successfully!');
+
+        console.log(
+            'Connected to MongoDB successfully!'
+        );
     })
-    .catch((err) => {
-        console.error('MongoDB connection error:', err);
+    .catch((error) => {
+
+        console.error(
+            'MongoDB connection error:',
+            error
+        );
+
         process.exit(1);
     });
+
+/* =========================================================
+   USER SCHEMA
+========================================================= */
+
+const userSchema =
+    new mongoose.Schema({
+
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+            lowercase: true,
+            trim: true,
+            index: true
+        },
+
+        passwordHash: {
+            type: String,
+            required: true
+        },
+
+        emailVerified: {
+            type: Boolean,
+            default: true
+        },
+
+        createdAt: {
+            type: Date,
+            default: Date.now
+        },
+
+        lastLoginAt: {
+            type: Date,
+            default: null
+        }
+    });
+
+const UserModel =
+    mongoose.model(
+        'User',
+        userSchema
+    );
 
 /* =========================================================
    OTP SCHEMA
 ========================================================= */
 
-const otpSchema = new mongoose.Schema({
-    email: {
-        type: String,
-        required: true,
-        lowercase: true,
-        trim: true,
-        index: true
-    },
+const otpSchema =
+    new mongoose.Schema({
 
-    otp: {
-        type: String,
-        required: true
-    },
+        email: {
+            type: String,
+            required: true,
+            lowercase: true,
+            trim: true,
+            index: true
+        },
 
-    createdAt: {
-        type: Date,
-        default: Date.now,
-        expires: 300
-    }
-});
+        otp: {
+            type: String,
+            required: true
+        },
 
-const OTPModel = mongoose.model(
-    'OTPVerification',
-    otpSchema
-);
+        /*
+         * كلمة المرور المشفرة مؤقتاً أثناء
+         * عملية إنشاء الحساب.
+         *
+         * لا نحفظ كلمة المرور الأصلية.
+         */
+        passwordHash: {
+            type: String,
+            required: true
+        },
+
+        createdAt: {
+            type: Date,
+            default: Date.now,
+            expires: 300
+        }
+    });
+
+const OTPModel =
+    mongoose.model(
+        'OTPVerification',
+        otpSchema
+    );
 
 /* =========================================================
-   EMAIL VALIDATION
+   EMAIL HELPERS
 ========================================================= */
 
 function normalizeEmail(email) {
+
     return String(email || '')
         .trim()
         .toLowerCase();
 }
 
 function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        email
+    );
 }
 
 /* =========================================================
-   1. SEND OTP
+   PASSWORD VALIDATION
 ========================================================= */
 
-app.post('/api/send-otp', async (req, res) => {
-    try {
-        const email = normalizeEmail(req.body.email);
+function isValidPassword(password) {
 
-        if (!isValidEmail(email)) {
-            return res.status(400).json({
-                success: false,
-                message: 'البريد الإلكتروني غير صالح أو مطلوب'
-            });
-        }
-
-        if (!BREVO_API_KEY) {
-            console.error(
-                'BREVO_API_KEY is missing from environment variables.'
-            );
-
-            return res.status(500).json({
-                success: false,
-                message: 'خدمة البريد غير مهيأة على السيرفر'
-            });
-        }
-
-        const otpCode = Math.floor(
-            100000 + Math.random() * 900000
-        ).toString();
-
-        await OTPModel.findOneAndUpdate(
-            { email },
-
-            {
-                email,
-                otp: otpCode,
-                createdAt: new Date()
-            },
-
-            {
-                upsert: true,
-                new: true,
-                setDefaultsOnInsert: true
-            }
-        );
-
-        const response = await fetch(
-            'https://api.brevo.com/v3/smtp/email',
-            {
-                method: 'POST',
-
-                headers: {
-                    accept: 'application/json',
-                    'api-key': BREVO_API_KEY,
-                    'content-type': 'application/json'
-                },
-
-                body: JSON.stringify({
-                    sender: {
-                        name: 'Routix Security',
-                        email: SENDER_EMAIL
-                    },
-
-                    to: [
-                        {
-                            email
-                        }
-                    ],
-
-                    subject:
-                        'رمز التحقق الأمني الخاص بك',
-
-                    htmlContent: `
-                        <div dir="rtl"
-                             style="
-                                font-family:Tahoma,Arial,sans-serif;
-                                padding:20px;
-                                color:#333;
-                                background:#f9f9f9;
-                                border-radius:8px;
-                             ">
-
-                            <h2 style="color:#4F46E5;">
-                                رمز التحقق الأمني
-                            </h2>
-
-                            <p>
-                                مرحباً بك في Routix،
-                            </p>
-
-                            <p>
-                                كود التحقق الخاص بك هو:
-                            </p>
-
-                            <h1 style="
-                                color:#4F46E5;
-                                letter-spacing:6px;
-                                background:#fff;
-                                padding:10px;
-                                display:inline-block;
-                                border-radius:5px;
-                            ">
-                                ${otpCode}
-                            </h1>
-
-                            <p>
-                                هذا الرمز صالح لمدة 5 دقائق فقط.
-                            </p>
-
-                            <p>
-                                يرجى عدم مشاركة الرمز مع أي شخص.
-                            </p>
-
-                        </div>
-                    `
-                })
-            }
-        );
-
-        let data = {};
-
-        try {
-            data = await response.json();
-        } catch {
-            data = {};
-        }
-
-        if (!response.ok) {
-            console.error(
-                'Brevo error:',
-                data
-            );
-
-            return res.status(400).json({
-                success: false,
-                message: 'فشل في إرسال البريد'
-            });
-        }
-
-        return res.json({
-            success: true,
-            message:
-                'تم إرسال كود التحقق بنجاح إلى بريدك'
-        });
-
-    } catch (error) {
-        console.error(
-            'Send OTP Error:',
-            error
-        );
-
-        return res.status(500).json({
-            success: false,
-            message: 'خطأ داخلي في الخادم'
-        });
+    if (
+        typeof password !== 'string'
+    ) {
+        return false;
     }
-});
+
+    /*
+     * الحد الأدنى 8 أحرف
+     */
+    return (
+        password.length >= 8 &&
+        password.length <= 128
+    );
+}
 
 /* =========================================================
-   2. VERIFY OTP + CREATE HTTPONLY SESSION
+   CREATE SESSION
 ========================================================= */
 
-app.post('/api/verify-otp', async (req, res) => {
-    try {
-        const email = normalizeEmail(
-            req.body.email
-        );
+function createSession(
+    res,
+    user
+) {
 
-        const otp = String(
-            req.body.otp || ''
-        ).trim();
-
-        if (!isValidEmail(email) || !otp) {
-            return res.status(400).json({
-                success: false,
-                message:
-                    'البريد الإلكتروني وكود التحقق مطلوبان'
-            });
-        }
-
-        const record =
-            await OTPModel.findOne({
-                email
-            });
-
-        if (!record) {
-            return res.status(400).json({
-                success: false,
-                message:
-                    'انتهت صلاحية الكود أو البريد غير صحيح'
-            });
-        }
-
-        if (record.otp !== otp) {
-            return res.status(400).json({
-                success: false,
-                message:
-                    'كود التحقق غير صحيح'
-            });
-        }
-
-        /* حذف OTP بعد استخدامه */
-        await OTPModel.deleteOne({
-            _id: record._id
-        });
-
-        /* إنشاء JWT */
-        const token = jwt.sign(
+    const token =
+        jwt.sign(
             {
-                email
+                userId: user._id.toString(),
+                email: user.email
             },
 
             JWT_SECRET,
@@ -401,120 +334,877 @@ app.post('/api/verify-otp', async (req, res) => {
             }
         );
 
-        /*
-         * تخزين JWT داخل HttpOnly Cookie
-         *
-         * JavaScript لن يستطيع الوصول إليها
-         * عبر document.cookie
-         */
-        res.cookie(
-            SESSION_COOKIE,
-            token,
-            SESSION_COOKIE_OPTIONS
-        );
-
-        return res.json({
-            success: true,
-
-            message:
-                'تم التحقق بنجاح وتم إنشاء الجلسة',
-
-            user: {
-                email
-            }
-        });
-
-    } catch (error) {
-        console.error(
-            'Verify OTP Error:',
-            error
-        );
-
-        return res.status(500).json({
-            success: false,
-            message:
-                'خطأ داخلي في الخادم'
-        });
-    }
-});
+    res.cookie(
+        SESSION_COOKIE,
+        token,
+        SESSION_COOKIE_OPTIONS
+    );
+}
 
 /* =========================================================
-   SESSION VERIFICATION
+   1. CHECK EMAIL
 ========================================================= */
 
-const verifySession = (
-    req,
-    res,
-    next
-) => {
+app.post(
+    '/api/check-email',
+    async (req, res) => {
 
-    /*
-     * أولاً نبحث عن HttpOnly Cookie
-     */
-    const cookieToken =
-        req.cookies[SESSION_COOKIE];
+        try {
 
-    /*
-     * دعم Authorization بشكل اختياري
-     * في حال احتجته لمسارات أخرى
-     */
-    const authHeader =
-        req.headers.authorization;
-
-    const bearerToken =
-        authHeader &&
-        authHeader.startsWith('Bearer ')
-            ? authHeader.slice(7)
-            : null;
-
-    const token =
-        cookieToken || bearerToken;
-
-    if (!token) {
-        return res.status(401).json({
-            success: false,
-            message:
-                'مطلوب تسجيل الدخول'
-        });
-    }
-
-    jwt.verify(
-        token,
-        JWT_SECRET,
-        (err, user) => {
-
-            if (err) {
-
-                /*
-                 * إذا كانت الجلسة منتهية
-                 * نحذف الكوكي القديمة
-                 */
-                res.clearCookie(
-                    SESSION_COOKIE,
-                    {
-                        httpOnly: true,
-                        sameSite: 'none',
-                        secure: true,
-                        path: '/'
-                    }
+            const email =
+                normalizeEmail(
+                    req.body.email
                 );
 
-                return res.status(401).json({
+            if (
+                !isValidEmail(email)
+            ) {
+
+                return res.status(400).json({
+
                     success: false,
+
                     message:
-                        'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى'
+                        'البريد الإلكتروني غير صالح أو مطلوب'
                 });
             }
 
-            req.user = user;
+            const user =
+                await UserModel.findOne({
+                    email
+                }).select('_id');
 
-            next();
+            return res.json({
+
+                success: true,
+
+                registered:
+                    !!user
+            });
+
+        } catch (error) {
+
+            console.error(
+                'Check Email Error:',
+                error
+            );
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    'خطأ داخلي في الخادم'
+            });
         }
-    );
-};
+    }
+);
 
 /* =========================================================
-   3. PROFILE / SESSION CHECK
+   2. REGISTER - SEND OTP
+========================================================= */
+
+app.post(
+    '/api/register',
+    async (req, res) => {
+
+        try {
+
+            const email =
+                normalizeEmail(
+                    req.body.email
+                );
+
+            const password =
+                String(
+                    req.body.password || ''
+                );
+
+            /* -----------------------------------------
+               Validate email
+            ----------------------------------------- */
+
+            if (
+                !isValidEmail(email)
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        'البريد الإلكتروني غير صالح'
+                });
+            }
+
+            /* -----------------------------------------
+               Validate password
+            ----------------------------------------- */
+
+            if (
+                !isValidPassword(password)
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        'كلمة المرور يجب أن تكون بين 8 و128 حرفاً'
+                });
+            }
+
+            /* -----------------------------------------
+               Check existing account
+            ----------------------------------------- */
+
+            const existingUser =
+                await UserModel.findOne({
+                    email
+                });
+
+            if (existingUser) {
+
+                return res.status(409).json({
+
+                    success: false,
+
+                    registered: true,
+
+                    message:
+                        'هذا البريد مسجل مسبقاً، استخدم تسجيل الدخول'
+                });
+            }
+
+            /* -----------------------------------------
+               Hash password
+            ----------------------------------------- */
+
+            const passwordHash =
+                await argon2.hash(
+                    password,
+                    {
+                        type:
+                            argon2.argon2id
+                    }
+                );
+
+            /* -----------------------------------------
+               Generate OTP
+            ----------------------------------------- */
+
+            const otpCode =
+                Math.floor(
+                    100000 +
+                    Math.random() *
+                    900000
+                ).toString();
+
+            /* -----------------------------------------
+               Save OTP + hashed password
+            ----------------------------------------- */
+
+            await OTPModel.findOneAndUpdate(
+
+                {
+                    email
+                },
+
+                {
+                    email,
+
+                    otp:
+                        otpCode,
+
+                    passwordHash,
+
+                    createdAt:
+                        new Date()
+                },
+
+                {
+                    upsert: true,
+
+                    new: true,
+
+                    setDefaultsOnInsert: true
+                }
+            );
+
+            /* -----------------------------------------
+               Check Brevo
+            ----------------------------------------- */
+
+            if (!BREVO_API_KEY) {
+
+                console.error(
+                    'BREVO_API_KEY is missing.'
+                );
+
+                return res.status(500).json({
+
+                    success: false,
+
+                    message:
+                        'خدمة البريد غير مهيأة على السيرفر'
+                });
+            }
+
+            /* -----------------------------------------
+               Send OTP
+            ----------------------------------------- */
+
+            const response =
+                await fetch(
+                    'https://api.brevo.com/v3/smtp/email',
+                    {
+
+                        method: 'POST',
+
+                        headers: {
+
+                            accept:
+                                'application/json',
+
+                            'api-key':
+                                BREVO_API_KEY,
+
+                            'content-type':
+                                'application/json'
+                        },
+
+                        body:
+                            JSON.stringify({
+
+                                sender: {
+
+                                    name:
+                                        'Routix Security',
+
+                                    email:
+                                        SENDER_EMAIL
+                                },
+
+                                to: [
+                                    {
+                                        email
+                                    }
+                                ],
+
+                                subject:
+                                    'رمز إنشاء حساب Routix',
+
+                                htmlContent: `
+
+                                    <div
+                                        dir="rtl"
+                                        style="
+                                            font-family:
+                                                Tahoma,
+                                                Arial,
+                                                sans-serif;
+
+                                            padding:20px;
+
+                                            color:#333;
+
+                                            background:#f9f9f9;
+
+                                            border-radius:8px;
+                                        "
+                                    >
+
+                                        <h2
+                                            style="
+                                                color:#4F46E5;
+                                            "
+                                        >
+                                            إنشاء حساب Routix
+                                        </h2>
+
+                                        <p>
+                                            مرحباً بك في Routix.
+                                        </p>
+
+                                        <p>
+                                            رمز التحقق الخاص بك هو:
+                                        </p>
+
+                                        <h1
+                                            style="
+                                                color:#4F46E5;
+
+                                                letter-spacing:6px;
+
+                                                background:#fff;
+
+                                                padding:10px;
+
+                                                display:inline-block;
+
+                                                border-radius:5px;
+                                            "
+                                        >
+                                            ${otpCode}
+                                        </h1>
+
+                                        <p>
+                                            هذا الرمز صالح لمدة 5 دقائق فقط.
+                                        </p>
+
+                                        <p>
+                                            لا تشارك الرمز مع أي شخص.
+                                        </p>
+
+                                    </div>
+
+                                `
+                            })
+                    }
+                );
+
+            let data = {};
+
+            try {
+
+                data =
+                    await response.json();
+
+            } catch {
+
+                data = {};
+            }
+
+            if (
+                !response.ok
+            ) {
+
+                console.error(
+                    'Brevo error:',
+                    data
+                );
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        'فشل في إرسال رمز التحقق'
+                });
+            }
+
+            return res.json({
+
+                success: true,
+
+                registered: false,
+
+                message:
+                    'تم إرسال رمز التحقق إلى بريدك'
+            });
+
+        } catch (error) {
+
+            console.error(
+                'Register Error:',
+                error
+            );
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    'خطأ داخلي في الخادم'
+            });
+        }
+    }
+);
+
+/* =========================================================
+   3. VERIFY OTP + CREATE ACCOUNT + SESSION
+========================================================= */
+
+app.post(
+    '/api/verify-otp',
+    async (req, res) => {
+
+        try {
+
+            const email =
+                normalizeEmail(
+                    req.body.email
+                );
+
+            const otp =
+                String(
+                    req.body.otp || ''
+                ).trim();
+
+            if (
+                !isValidEmail(email) ||
+                !/^\d{6}$/.test(otp)
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        'البريد الإلكتروني ورمز التحقق مطلوبان'
+                });
+            }
+
+            /* -----------------------------------------
+               Check if account already exists
+            ----------------------------------------- */
+
+            const existingUser =
+                await UserModel.findOne({
+                    email
+                });
+
+            if (existingUser) {
+
+                await OTPModel.deleteMany({
+                    email
+                });
+
+                return res.status(409).json({
+
+                    success: false,
+
+                    registered: true,
+
+                    message:
+                        'هذا البريد مسجل مسبقاً، استخدم تسجيل الدخول'
+                });
+            }
+
+            /* -----------------------------------------
+               Find OTP
+            ----------------------------------------- */
+
+            const record =
+                await OTPModel.findOne({
+                    email
+                });
+
+            if (!record) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        'انتهت صلاحية رمز التحقق أو لم يتم طلب رمز'
+                });
+            }
+
+            /* -----------------------------------------
+               Verify OTP
+            ----------------------------------------- */
+
+            if (
+                record.otp !== otp
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        'رمز التحقق غير صحيح'
+                });
+            }
+
+            /* -----------------------------------------
+               Create account
+            ----------------------------------------- */
+
+            const user =
+                await UserModel.create({
+
+                    email:
+
+                        record.email,
+
+                    passwordHash:
+
+                        record.passwordHash,
+
+                    emailVerified:
+
+                        true,
+
+                    createdAt:
+
+                        new Date(),
+
+                    lastLoginAt:
+
+                        new Date()
+                });
+
+            /* -----------------------------------------
+               Delete used OTP
+            ----------------------------------------- */
+
+            await OTPModel.deleteOne({
+                _id:
+                    record._id
+            });
+
+            /* -----------------------------------------
+               Create HttpOnly session
+            ----------------------------------------- */
+
+            createSession(
+                res,
+                user
+            );
+
+            return res.status(201).json({
+
+                success: true,
+
+                registered: true,
+
+                message:
+                    'تم إنشاء الحساب وتسجيل الدخول بنجاح',
+
+                user: {
+
+                    id:
+                        user._id.toString(),
+
+                    email:
+                        user.email
+                }
+            });
+
+        } catch (error) {
+
+            console.error(
+                'Verify OTP Error:',
+                error
+            );
+
+            /*
+             * منع مشكلة duplicate email
+             */
+            if (
+                error &&
+                error.code === 11000
+            ) {
+
+                return res.status(409).json({
+
+                    success: false,
+
+                    registered: true,
+
+                    message:
+                        'هذا البريد مسجل مسبقاً، استخدم تسجيل الدخول'
+                });
+            }
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    'خطأ داخلي في الخادم'
+            });
+        }
+    }
+);
+
+/* =========================================================
+   4. LOGIN WITH EMAIL + PASSWORD
+========================================================= */
+
+app.post(
+    '/api/login',
+    async (req, res) => {
+
+        try {
+
+            const email =
+                normalizeEmail(
+                    req.body.email
+                );
+
+            const password =
+                String(
+                    req.body.password || ''
+                );
+
+            if (
+                !isValidEmail(email)
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        'البريد الإلكتروني غير صالح'
+                });
+            }
+
+            if (
+                !password
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        'كلمة المرور مطلوبة'
+                });
+            }
+
+            /* -----------------------------------------
+               Find user
+            ----------------------------------------- */
+
+            const user =
+                await UserModel.findOne({
+                    email
+                });
+
+            if (!user) {
+
+                return res.status(401).json({
+
+                    success: false,
+
+                    registered: false,
+
+                    message:
+                        'البريد الإلكتروني أو كلمة المرور غير صحيحة'
+                });
+            }
+
+            /* -----------------------------------------
+               Verify password
+            ----------------------------------------- */
+
+            let passwordCorrect =
+                false;
+
+            try {
+
+                passwordCorrect =
+                    await argon2.verify(
+                        user.passwordHash,
+                        password
+                    );
+
+            } catch {
+
+                passwordCorrect =
+                    false;
+            }
+
+            if (
+                !passwordCorrect
+            ) {
+
+                return res.status(401).json({
+
+                    success: false,
+
+                    registered: true,
+
+                    message:
+                        'البريد الإلكتروني أو كلمة المرور غير صحيحة'
+                });
+            }
+
+            /* -----------------------------------------
+               Update last login
+            ----------------------------------------- */
+
+            user.lastLoginAt =
+                new Date();
+
+            await user.save();
+
+            /* -----------------------------------------
+               Create HttpOnly session
+            ----------------------------------------- */
+
+            createSession(
+                res,
+                user
+            );
+
+            return res.json({
+
+                success: true,
+
+                registered: true,
+
+                message:
+                    'تم تسجيل الدخول بنجاح',
+
+                user: {
+
+                    id:
+                        user._id.toString(),
+
+                    email:
+                        user.email
+                }
+            });
+
+        } catch (error) {
+
+            console.error(
+                'Login Error:',
+                error
+            );
+
+            return res.status(500).json({
+
+                success: false,
+
+                message:
+                    'خطأ داخلي في الخادم'
+            });
+        }
+    }
+);
+
+/* =========================================================
+   SESSION VERIFICATION MIDDLEWARE
+========================================================= */
+
+const verifySession =
+    (
+        req,
+        res,
+        next
+    ) => {
+
+        const token =
+            req.cookies[
+                SESSION_COOKIE
+            ];
+
+        if (!token) {
+
+            return res.status(401).json({
+
+                success: false,
+
+                loggedIn: false,
+
+                message:
+                    'مطلوب تسجيل الدخول'
+            });
+        }
+
+        jwt.verify(
+            token,
+            JWT_SECRET,
+            async (
+                error,
+                decoded
+            ) => {
+
+                if (error) {
+
+                    res.clearCookie(
+                        SESSION_COOKIE,
+                        {
+                            httpOnly: true,
+
+                            sameSite: 'none',
+
+                            secure: true,
+
+                            path: '/'
+                        }
+                    );
+
+                    return res.status(401).json({
+
+                        success: false,
+
+                        loggedIn: false,
+
+                        message:
+                            'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى'
+                    });
+                }
+
+                try {
+
+                    const user =
+                        await UserModel.findById(
+                            decoded.userId
+                        ).select(
+                            '_id email emailVerified'
+                        );
+
+                    if (!user) {
+
+                        res.clearCookie(
+                            SESSION_COOKIE,
+                            {
+                                httpOnly: true,
+
+                                sameSite: 'none',
+
+                                secure: true,
+
+                                path: '/'
+                            }
+                        );
+
+                        return res.status(401).json({
+
+                            success: false,
+
+                            loggedIn: false,
+
+                            message:
+                                'الحساب غير موجود'
+                        });
+                    }
+
+                    req.user =
+                        user;
+
+                    next();
+
+                } catch (
+                    databaseError
+                ) {
+
+                    console.error(
+                        'Session DB Error:',
+                        databaseError
+                    );
+
+                    return res.status(500).json({
+
+                        success: false,
+
+                        message:
+                            'خطأ داخلي في الخادم'
+                    });
+                }
+            }
+        );
+    };
+
+/* =========================================================
+   5. PROFILE / SESSION CHECK
 ========================================================= */
 
 app.get(
@@ -523,6 +1213,7 @@ app.get(
     (req, res) => {
 
         return res.json({
+
             success: true,
 
             loggedIn: true,
@@ -531,14 +1222,22 @@ app.get(
                 'الجلسة فعالة',
 
             user: {
-                email: req.user.email
+
+                id:
+                    req.user._id.toString(),
+
+                email:
+                    req.user.email,
+
+                emailVerified:
+                    req.user.emailVerified
             }
         });
     }
 );
 
 /* =========================================================
-   4. LOGOUT
+   6. LOGOUT
 ========================================================= */
 
 app.post(
@@ -549,14 +1248,21 @@ app.post(
             SESSION_COOKIE,
             {
                 httpOnly: true,
+
                 sameSite: 'none',
+
                 secure: true,
+
                 path: '/'
             }
         );
 
         return res.json({
+
             success: true,
+
+            loggedIn: false,
+
             message:
                 'تم تسجيل الخروج بنجاح'
         });
@@ -572,9 +1278,14 @@ app.get(
     (req, res) => {
 
         return res.json({
+
             success: true,
-            status: 'online',
-            service: 'Routix Authentication'
+
+            status:
+                'online',
+
+            service:
+                'Routix Authentication'
         });
     }
 );
@@ -584,7 +1295,12 @@ app.get(
 ========================================================= */
 
 app.use(
-    (err, req, res, next) => {
+    (
+        err,
+        req,
+        res,
+        next
+    ) => {
 
         console.error(
             'Server Error:',
@@ -596,15 +1312,20 @@ app.use(
             err.message ===
                 'Blocked by CORS policy'
         ) {
+
             return res.status(403).json({
+
                 success: false,
+
                 message:
                     'هذا المصدر غير مسموح له بالاتصال بالسيرفر'
             });
         }
 
         return res.status(500).json({
+
             success: false,
+
             message:
                 'خطأ داخلي في الخادم'
         });
@@ -621,6 +1342,7 @@ const PORT =
 app.listen(
     PORT,
     () => {
+
         console.log(
             `Authentication server is running on port ${PORT}`
         );
