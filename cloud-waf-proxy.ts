@@ -96,13 +96,19 @@ const ConfigSchema = z.object({
   JWT_SECRET: z.string().min(32),
 
   BREVO_API_KEY: z.string().optional(),
-  SENDER_EMAIL: z.string().email().default('ttbnatlh@gmail.com'),
+
+  SENDER_EMAIL: z
+    .string()
+    .email()
+    .default('ttbnatlh@gmail.com'),
 });
 
 const config = ConfigSchema.parse({
   PORT: process.env.PORT,
+
   ADMIN_USER: process.env.ADMIN_USER,
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
+
   MONGO_URI: process.env.MONGO_URI,
 
   DATA_FILE: process.env.DATA_FILE || 'sites-db.json',
@@ -148,6 +154,7 @@ const config = ConfigSchema.parse({
   JWT_SECRET: process.env.JWT_SECRET,
 
   BREVO_API_KEY: process.env.BREVO_API_KEY,
+
   SENDER_EMAIL:
     process.env.SENDER_EMAIL || 'ttbnatlh@gmail.com',
 });
@@ -200,6 +207,7 @@ interface SiteStats {
   blockedRequests: number;
   honeypotRequests: number;
   attacks: number;
+
   lastRequestAt?: string;
   lastAttackAt?: string;
 }
@@ -388,9 +396,10 @@ function base64UrlEncode(
 function base64UrlDecode(
   value: string,
 ): Buffer {
-  const normalized = value
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
+  const normalized =
+    value
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
 
   return Buffer.from(
     normalized +
@@ -418,7 +427,9 @@ for (
   const host of [
     process.env.RENDER_EXTERNAL_HOSTNAME,
     process.env.PUBLIC_HOST,
+
     'production-1-54qv.onrender.com',
+
     'www.routix.nx.kg',
     'routix.nx.kg',
   ]
@@ -441,10 +452,6 @@ app.disable('x-powered-by');
 if (config.TRUST_PROXY) {
   app.set('trust proxy', true);
 } else {
-  /*
-   Render and common reverse-proxy deployments
-   normally provide one proxy hop.
-  */
   app.set('trust proxy', 1);
 }
 
@@ -510,11 +517,13 @@ app.use(
    CORS
 ============================================================ */
 
-const allowedOrigins = [
-  'https://production-1-54qv.onrender.com',
-  'https://www.routix.nx.kg',
-  'https://routix.nx.kg',
-];
+const allowedOrigins = new Set(
+  [
+    'https://production-1-54qv.onrender.com',
+    'https://www.routix.nx.kg',
+    'https://routix.nx.kg',
+  ].map((value) => value.toLowerCase()),
+);
 
 app.use(
   cors({
@@ -522,9 +531,15 @@ app.use(
       origin,
       callback,
     ) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
       if (
-        !origin ||
-        allowedOrigins.includes(origin)
+        allowedOrigins.has(
+          origin.toLowerCase(),
+        )
       ) {
         callback(null, true);
         return;
@@ -561,18 +576,20 @@ app.use(
    AUTH RATE LIMIT
 ============================================================ */
 
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 30,
-  standardHeaders: true,
-  legacyHeaders: false,
+const authLimiter =
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
 
-  message: {
-    success: false,
-    message:
-      'تم تجاوز الحد المسموح من الطلبات، يرجى المحاولة لاحقاً.',
-  },
-});
+    standardHeaders: true,
+    legacyHeaders: false,
+
+    message: {
+      success: false,
+      message:
+        'تم تجاوز الحد المسموح من الطلبات، يرجى المحاولة لاحقاً.',
+    },
+  });
 
 app.use(
   '/api/',
@@ -640,11 +657,11 @@ function migrateSite(
   const domains =
     normalizeDomains([
       primary,
-      ...(Array.isArray(
-        site?.domains,
-      )
-        ? site.domains
-        : []),
+      ...(
+        Array.isArray(site?.domains)
+          ? site.domains
+          : []
+      ),
     ]);
 
   return {
@@ -726,10 +743,6 @@ async function connectDatabase(): Promise<void> {
       siteId: 1,
     },
   );
-
-  console.log(
-    '[MongoDB] WAF database connected',
-  );
 }
 
 async function loadDb(): Promise<DbSchema> {
@@ -767,9 +780,7 @@ async function loadDb(): Promise<DbSchema> {
 
   return {
     sites:
-      Array.isArray(
-        data.sites,
-      )
+      Array.isArray(data.sites)
         ? data.sites.map(
             migrateSite,
           )
@@ -790,9 +801,7 @@ async function loadDb(): Promise<DbSchema> {
         : {},
 
     alerts:
-      Array.isArray(
-        data.alerts,
-      )
+      Array.isArray(data.alerts)
         ? data.alerts
         : [],
   };
@@ -824,8 +833,7 @@ async function saveDb(): Promise<void> {
       )
     ) {
       if (
-        value.expiresAt <
-        now
+        value.expiresAt < now
       ) {
         delete db.blacklists[
           key
@@ -842,8 +850,7 @@ async function saveDb(): Promise<void> {
       )
     ) {
       if (
-        value.expiresAt <
-        now
+        value.expiresAt < now
       ) {
         delete db.risks[
           key
@@ -934,22 +941,18 @@ async function registerVisitor(
 
     await visitorsCollection.updateOne(
       {
-        siteId:
-          site.id,
+        siteId: site.id,
         visitorHash,
       },
       {
         $set: {
-          lastSeenAt:
-            now,
+          lastSeenAt: now,
         },
 
         $setOnInsert: {
-          siteId:
-            site.id,
+          siteId: site.id,
           visitorHash,
-          firstSeenAt:
-            now,
+          firstSeenAt: now,
         },
       },
       {
@@ -1013,8 +1016,7 @@ function getSiteByHost(
       (site) =>
         normalizeDomains([
           site.client_domain,
-          ...(site.domains ||
-            []),
+          ...(site.domains || []),
         ]).includes(
           normalized,
         ),
@@ -1023,9 +1025,7 @@ function getSiteByHost(
 }
 
 const getSiteById =
-  (
-    id: string,
-  ): Site | null =>
+  (id: string): Site | null =>
     db.sites.find(
       (site) =>
         site.id === id,
@@ -1085,8 +1085,7 @@ const concurrentBySite =
     number
   >();
 
-let globalConcurrent =
-  0;
+let globalConcurrent = 0;
 
 /* ============================================================
    ALERTS
@@ -1105,44 +1104,43 @@ function addAlert(
     reasons: string[];
   },
 ): void {
-  const alert:
-    WafAlert = {
-      id:
-        crypto.randomUUID(),
+  const alert: WafAlert = {
+    id:
+      crypto.randomUUID(),
 
-      siteId:
-        data.site.id,
+    siteId:
+      data.site.id,
 
-      ownerId:
-        data.site.owner_id,
+    ownerId:
+      data.site.owner_id,
 
-      domain:
-        data.site.client_domain,
+    domain:
+      data.site.client_domain,
 
-      time:
-        new Date().toISOString(),
+    time:
+      new Date().toISOString(),
 
-      ip:
-        data.ip,
+    ip:
+      data.ip,
 
-      path:
-        truncate(
-          data.path,
-          500,
-        ),
+    path:
+      truncate(
+        data.path,
+        500,
+      ),
 
-      risk:
-        data.risk,
+    risk:
+      data.risk,
 
-      action:
-        data.action,
+    action:
+      data.action,
 
-      reasons:
-        data.reasons.slice(
-          0,
-          20,
-        ),
-    };
+    reasons:
+      data.reasons.slice(
+        0,
+        20,
+      ),
+  };
 
   db.alerts.unshift(
     alert,
@@ -1252,12 +1250,13 @@ function settingNumber(
   const value =
     site.settings[key];
 
-  return typeof value ===
-    'number' &&
+  return
+    typeof value ===
+      'number' &&
     Number.isFinite(value) &&
     value > 0
-    ? value
-    : fallback;
+      ? value
+      : fallback;
 }
 
 function settingBoolean(
@@ -1268,21 +1267,23 @@ function settingBoolean(
   const value =
     site.settings[key];
 
-  return typeof value ===
-    'boolean'
-    ? value
-    : fallback;
+  return
+    typeof value ===
+      'boolean'
+      ? value
+      : fallback;
 }
 
 /* ============================================================
    BLACKLIST / RISK
 ============================================================ */
 
-const blacklistKey = (
-  siteId: string,
-  ip: string,
-): string =>
-  `${siteId}:${ip}`;
+const blacklistKey =
+  (
+    siteId: string,
+    ip: string,
+  ): string =>
+    `${siteId}:${ip}`;
 
 function isBlacklisted(
   site: Site,
@@ -1355,11 +1356,12 @@ function blacklist(
   dbDirty = true;
 }
 
-const riskKey = (
-  siteId: string,
-  ip: string,
-): string =>
-  `${siteId}:${ip}`;
+const riskKey =
+  (
+    siteId: string,
+    ip: string,
+  ): string =>
+    `${siteId}:${ip}`;
 
 function getRisk(
   site: Site,
@@ -1718,7 +1720,7 @@ const PATH_PATTERNS: RegExp[] = [
 ];
 
 const RCE_PATTERNS: RegExp[] = [
-  /\$[^)]{1,200}/,
+  /\$\([^)]{1,200}\)/,
   /`[^`]{1,200}`/,
   /(?:^|[;&|])\s*(?:curl|wget)\s+/i,
   /(?:^|[;&|])\s*(?:bash|sh|cmd|powershell)\b/i,
@@ -1738,8 +1740,7 @@ function inspectString(
 
   let score = 0;
 
-  const reasons: string[] =
-    [];
+  const reasons: string[] = [];
 
   const rules: Array<
     [
@@ -1802,9 +1803,7 @@ function inspectString(
       enabled &&
       patterns.some(
         (pattern) =>
-          pattern.test(
-            input,
-          ),
+          pattern.test(input),
       )
     ) {
       score += points;
@@ -1830,8 +1829,7 @@ function inspectRequest(
 } {
   let score = 0;
 
-  const reasons: string[] =
-    [];
+  const reasons: string[] = [];
 
   const values: Array<
     [unknown, string]
@@ -2018,24 +2016,20 @@ const CHALLENGE_WAIT_MS =
   config.CHALLENGE_WAIT_SECONDS *
   1000;
 
-const hmacSign = (
-  value: string,
-): string =>
-  base64UrlEncode(
-    crypto
-      .createHmac(
-        'sha256',
-        challengeHmacKey,
-      )
-      .update(value)
-      .digest(),
-  );
+const hmacSign =
+  (
+    value: string,
+  ): string =>
+    base64UrlEncode(
+      crypto
+        .createHmac(
+          'sha256',
+          challengeHmacKey,
+        )
+        .update(value)
+        .digest(),
+    );
 
-/*
-  The challenge ticket is intentionally NOT bound
-  to the client IP. This avoids false failures when
-  a proxy/load-balancer changes the apparent IP.
-*/
 function createChallengeTicket(
   host: string,
 ): string {
@@ -2122,7 +2116,9 @@ function verifyChallengeTicket(
       JSON.parse(
         base64UrlDecode(
           body,
-        ).toString('utf8'),
+        ).toString(
+          'utf8',
+        ),
       ) as {
         v?: unknown;
         host?: unknown;
@@ -2222,7 +2218,6 @@ function encryptChallengeCookie(
         JSON.stringify(data),
         'utf8',
       ),
-
       cipher.final(),
     ]);
 
@@ -2318,7 +2313,6 @@ function decryptChallengeCookie(
             encryptedEncoded,
           ),
         ),
-
         decipher.final(),
       ]).toString(
         'utf8',
@@ -2376,9 +2370,7 @@ function getCookie(
   }
 
   for (
-    const cookie of header.split(
-      ';',
-    )
+    const cookie of header.split(';')
   ) {
     const index =
       cookie.indexOf('=');
@@ -2392,7 +2384,9 @@ function getCookie(
         .slice(0, index)
         .trim();
 
-    if (key !== name) {
+    if (
+      key !== name
+    ) {
       continue;
     }
 
@@ -2520,79 +2514,37 @@ function sendChallengePage(
 
   res.type('html');
 
-  /*
-    The browser page automatically waits and then
-    sends the signed ticket to the verification endpoint.
-  */
   res.send(`
 <!doctype html>
-<html lang="ar">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Checking your browser...</title>
-<style>
-body{
-  margin:0;
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-family:Arial,sans-serif;
-  background:#f5f7fa;
-  color:#222;
-}
-.box{
-  width:min(92%,480px);
-  padding:32px;
-  background:white;
-  border-radius:16px;
-  box-shadow:0 10px 35px rgba(0,0,0,.08);
-  text-align:center;
-}
-.loader{
-  width:38px;
-  height:38px;
-  margin:0 auto 20px;
-  border:4px solid #ddd;
-  border-top-color:#222;
-  border-radius:50%;
-  animation:spin 1s linear infinite;
-}
-@keyframes spin{
-  to{transform:rotate(360deg)}
-}
-</style>
 </head>
 <body>
-<div class="box">
-  <div class="loader"></div>
-  <h2>Checking your browser...</h2>
-  <p>Please wait ${wait} seconds.</p>
-  <p>Protected by Routix</p>
-</div>
+<h2>Checking your browser...</h2>
+<p>Please wait ${wait} seconds.</p>
+<p>Protected by Routix</p>
 
 <script>
-(() => {
-  const ticket = ${JSON.stringify(
-    ticket,
-  )};
-
+(function () {
+  const ticket = ${JSON.stringify(ticket)};
   const waitMs = ${wait * 1000};
 
-  setTimeout(async () => {
+  setTimeout(async function () {
     try {
       const response = await fetch(
         '/__waf/challenge/verify',
         {
           method: 'POST',
-          credentials: 'same-origin',
+          credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
             'x-routix-challenge': ticket
           },
           body: JSON.stringify({
-            ticket
+            ticket: ticket
           })
         }
       );
@@ -2603,10 +2555,12 @@ body{
       }
 
       document.body.innerHTML =
-        '<div class="box"><h2>تعذر التحقق</h2><p>يرجى تحديث الصفحة والمحاولة مرة أخرى.</p></div>';
-    } catch {
+        '<h2>Security check failed</h2>' +
+        '<p>Please refresh the page and try again.</p>';
+    } catch (error) {
       document.body.innerHTML =
-        '<div class="box"><h2>تعذر الاتصال</h2><p>يرجى تحديث الصفحة والمحاولة مرة أخرى.</p></div>';
+        '<h2>Security check failed</h2>' +
+        '<p>Please refresh the page and try again.</p>';
     }
   }, waitMs);
 })();
@@ -2621,7 +2575,7 @@ body{
 ============================================================ */
 
 const userSchema =
-  new Schema<IUser>({
+  new Schema({
     email: {
       type: String,
       required: true,
@@ -2653,13 +2607,19 @@ const userSchema =
   });
 
 const UserModel =
-  mongoose.model<IUser>(
+  mongoose.model(
     'User',
     userSchema,
   );
 
+/*
+  OTP:
+  - One OTP per email.
+  - Automatically expires after 5 minutes.
+*/
+
 const otpSchema =
-  new Schema<IOTP>({
+  new Schema({
     email: {
       type: String,
       required: true,
@@ -2681,17 +2641,12 @@ const otpSchema =
     createdAt: {
       type: Date,
       default: Date.now,
-
-      /*
-        MongoDB TTL:
-        OTP is automatically deleted after 5 minutes.
-      */
       expires: 300,
     },
   });
 
 const OTPModel =
-  mongoose.model<IOTP>(
+  mongoose.model(
     'OTPVerification',
     otpSchema,
   );
@@ -2744,10 +2699,6 @@ function normalizeOtp(
     .replace(/\s+/g, '');
 }
 
-/*
-  Supports the existing "otp" field and common
-  frontend names without changing the endpoint.
-*/
 function getOtpFromRequest(
   req: Request,
 ): string {
@@ -2866,6 +2817,10 @@ app.post(
   },
 );
 
+/* ============================================================
+   REGISTER
+============================================================ */
+
 app.post(
   '/api/register',
   async (
@@ -2960,11 +2915,8 @@ app.post(
           .toString();
 
       /*
-        IMPORTANT:
-        Send the email first.
-        Only save the OTP when Brevo accepts it.
-        This prevents an invalid/old OTP from remaining
-        after a failed email request.
+        مهم:
+        لا نحفظ OTP إلا بعد قبول Brevo للرسالة.
       */
 
       const response =
@@ -3005,17 +2957,15 @@ app.post(
               htmlContent: `
 <!doctype html>
 <html lang="ar">
-<head>
-<meta charset="utf-8">
-</head>
 <body dir="rtl">
+
 <h2>إنشاء حساب Routix</h2>
 
 <p>مرحباً بك في Routix.</p>
 
 <p>رمز التحقق الخاص بك هو:</p>
 
-<h1 style="letter-spacing:8px">
+<h1 style="letter-spacing:8px;">
 ${otpCode}
 </h1>
 
@@ -3026,6 +2976,7 @@ ${otpCode}
 <p>
 لا تشارك الرمز مع أي شخص.
 </p>
+
 </body>
 </html>
               `,
@@ -3061,10 +3012,6 @@ ${otpCode}
           });
       }
 
-      /*
-        Delete any previous OTP and create the new one
-        only after Brevo accepted the message.
-      */
       await OTPModel.deleteMany({
         email,
       });
@@ -3124,9 +3071,7 @@ app.post(
 
       if (
         !isValidEmail(email) ||
-        !/^\d{6}$/.test(
-          otp,
-        )
+        !/^\d{6}$/.test(otp)
       ) {
         return res
           .status(400)
@@ -3136,6 +3081,10 @@ app.post(
               'البريد الإلكتروني ورمز التحقق مطلوبان',
           });
       }
+
+      /*
+        أولاً نتأكد أن الحساب لم يتم إنشاؤه مسبقاً.
+      */
 
       const existingUser =
         await UserModel.findOne({
@@ -3157,6 +3106,10 @@ app.post(
           });
       }
 
+      /*
+        جلب آخر OTP فقط.
+      */
+
       const record =
         await OTPModel.findOne({
           email,
@@ -3175,8 +3128,37 @@ app.post(
       }
 
       /*
-        Constant-time comparison.
+        تحقق إضافي من عمر الرمز.
+        TTL في MongoDB قد يتأخر قليلاً،
+        لذلك نتحقق يدوياً أيضاً.
       */
+
+      const otpAge =
+        Date.now() -
+        record.createdAt.getTime();
+
+      if (
+        otpAge >
+        5 * 60 * 1000
+      ) {
+        await OTPModel.deleteOne({
+          _id:
+            record._id,
+        });
+
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message:
+              'انتهت صلاحية رمز التحقق، اطلب رمزاً جديداً',
+          });
+      }
+
+      /*
+        مقارنة آمنة للرمز.
+      */
+
       if (
         !secureCompare(
           record.otp,
@@ -3193,13 +3175,18 @@ app.post(
       }
 
       /*
-        Delete OTP before creating the account.
-        This prevents the same code from being reused.
+        حذف OTP قبل إنشاء الحساب
+        لمنع إعادة استخدامه.
       */
+
       await OTPModel.deleteOne({
         _id:
           record._id,
       });
+
+      /*
+        إنشاء الحساب.
+      */
 
       const user =
         await UserModel.create({
@@ -3219,6 +3206,10 @@ app.post(
             new Date(),
         });
 
+      /*
+        تسجيل الدخول مباشرة بعد نجاح التحقق.
+      */
+
       createSession(
         res,
         user,
@@ -3228,7 +3219,10 @@ app.post(
         .status(201)
         .json({
           success: true,
+
           registered: true,
+
+          loggedIn: true,
 
           message:
             'تم إنشاء الحساب وتسجيل الدخول بنجاح',
@@ -3239,6 +3233,9 @@ app.post(
 
             email:
               user.email,
+
+            emailVerified:
+              user.emailVerified,
           },
         });
     } catch (
@@ -3381,6 +3378,8 @@ app.post(
       return res.json({
         success: true,
         registered: true,
+        loggedIn: true,
+
         message:
           'تم تسجيل الدخول بنجاح',
 
@@ -3390,6 +3389,9 @@ app.post(
 
           email:
             user.email,
+
+          emailVerified:
+            user.emailVerified,
         },
       });
     } catch (error) {
@@ -3413,43 +3415,107 @@ app.post(
    SESSION VERIFICATION
 ============================================================ */
 
-const verifySession = async (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction,
-): Promise<
-  Response | void
-> => {
-  const token =
-    req.cookies[
-      SESSION_COOKIE
-    ] as
-      | string
-      | undefined;
+const verifySession =
+  async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ): Promise<
+    Response | void
+  > => {
+    const token =
+      req.cookies[
+        SESSION_COOKIE
+      ] as
+        | string
+        | undefined;
 
-  if (!token) {
-    return res
-      .status(401)
-      .json({
-        success: false,
-        loggedIn: false,
-        message:
-          'مطلوب تسجيل الدخول',
-      });
-  }
+    if (!token) {
+      return res
+        .status(401)
+        .json({
+          success: false,
+          loggedIn: false,
+          message:
+            'مطلوب تسجيل الدخول',
+        });
+    }
 
-  try {
-    const decoded =
-      jwt.verify(
-        token,
-        config.JWT_SECRET,
+    try {
+      const decoded =
+        jwt.verify(
+          token,
+          config.JWT_SECRET,
+        );
+
+      if (
+        typeof decoded ===
+          'string' ||
+        !decoded.userId
+      ) {
+        res.clearCookie(
+          SESSION_COOKIE,
+          {
+            httpOnly: true,
+            sameSite:
+              'none',
+            secure: true,
+            path: '/',
+          },
+        );
+
+        return res
+          .status(401)
+          .json({
+            success: false,
+            loggedIn: false,
+            message:
+              'جلسة غير صالحة',
+          });
+      }
+
+      const payload =
+        decoded as AuthJwtPayload;
+
+      const user =
+        await UserModel.findById(
+          payload.userId,
+        ).select(
+          '_id email emailVerified passwordHash createdAt lastLoginAt',
+        );
+
+      if (!user) {
+        res.clearCookie(
+          SESSION_COOKIE,
+          {
+            httpOnly: true,
+            sameSite:
+              'none',
+            secure: true,
+            path: '/',
+          },
+        );
+
+        return res
+          .status(401)
+          .json({
+            success: false,
+            loggedIn: false,
+            message:
+              'الحساب غير موجود',
+          });
+      }
+
+      req.user =
+        user;
+
+      return next();
+    } catch (error) {
+      console.error(
+        'Session Verification Error:',
+        error,
       );
 
-    if (
-      typeof decoded ===
-        'string' ||
-      !decoded.userId
-    ) {
       res.clearCookie(
         SESSION_COOKIE,
         {
@@ -3467,74 +3533,10 @@ const verifySession = async (
           success: false,
           loggedIn: false,
           message:
-            'جلسة غير صالحة',
+            'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى',
         });
     }
-
-    const payload =
-      decoded as
-        AuthJwtPayload;
-
-    const user =
-      await UserModel.findById(
-        payload.userId,
-      ).select(
-        '_id email emailVerified passwordHash createdAt lastLoginAt',
-      );
-
-    if (!user) {
-      res.clearCookie(
-        SESSION_COOKIE,
-        {
-          httpOnly: true,
-          sameSite:
-            'none',
-          secure: true,
-          path: '/',
-        },
-      );
-
-      return res
-        .status(401)
-        .json({
-          success: false,
-          loggedIn: false,
-          message:
-            'الحساب غير موجود',
-        });
-    }
-
-    req.user =
-      user;
-
-    return next();
-  } catch (error) {
-    console.error(
-      'Session Verification Error:',
-      error,
-    );
-
-    res.clearCookie(
-      SESSION_COOKIE,
-      {
-        httpOnly: true,
-        sameSite:
-          'none',
-        secure: true,
-        path: '/',
-      },
-    );
-
-    return res
-      .status(401)
-      .json({
-        success: false,
-        loggedIn: false,
-        message:
-          'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى',
-      });
-  }
-};
+  };
 
 /* ============================================================
    PROFILE
@@ -3561,8 +3563,47 @@ app.get(
     return res.json({
       success: true,
       loggedIn: true,
+
       message:
         'الجلسة فعالة',
+
+      user: {
+        id:
+          req.user._id.toString(),
+
+        email:
+          req.user.email,
+
+        emailVerified:
+          req.user.emailVerified,
+      },
+    });
+  },
+);
+
+/* Alias مفيد إذا كان index.html يستخدم /api/me */
+
+app.get(
+  '/api/me',
+  verifySession,
+  (
+    req: AuthenticatedRequest,
+    res: Response,
+  ) => {
+    if (!req.user) {
+      return res
+        .status(401)
+        .json({
+          success: false,
+          loggedIn: false,
+          message:
+            'مطلوب تسجيل الدخول',
+        });
+    }
+
+    return res.json({
+      success: true,
+      loggedIn: true,
 
       user: {
         id:
@@ -3620,8 +3661,7 @@ app.get(
   ) => {
     return res.json({
       success: true,
-      status:
-        'online',
+      status: 'online',
       service:
         'Routix Authentication',
     });
@@ -3653,9 +3693,7 @@ function adminAuth(
     getClientIp(req);
 
   const failure =
-    adminFailures.get(
-      ip,
-    );
+    adminFailures.get(ip);
 
   if (
     failure &&
@@ -3707,9 +3745,7 @@ function adminAuth(
     scheme,
     encoded,
   ] =
-    authorization.split(
-      ' ',
-    );
+    authorization.split(' ');
 
   if (
     scheme !== 'Basic' ||
@@ -3758,9 +3794,7 @@ function adminAuth(
   }
 
   const separator =
-    decoded.indexOf(
-      ':',
-    );
+    decoded.indexOf(':');
 
   if (
     separator < 0
@@ -3869,7 +3903,8 @@ function siteApiAuth(
   }
 
   if (
-    key.length > 512
+    key.length >
+    512
   ) {
     res
       .status(401)
@@ -3882,9 +3917,7 @@ function siteApiAuth(
   }
 
   const site =
-    getSiteByApiKey(
-      key,
-    );
+    getSiteByApiKey(key);
 
   if (!site) {
     res
@@ -3899,8 +3932,7 @@ function siteApiAuth(
 
   (
     req as WafRequest
-  ).wafSite =
-    site;
+  ).wafSite = site;
 
   next();
 }
@@ -3995,9 +4027,7 @@ function challengeVerification(
 
       nonce:
         crypto
-          .randomBytes(
-            32,
-          )
+          .randomBytes(32)
           .toString('hex'),
     });
 
@@ -4166,16 +4196,19 @@ app.post(
 
     const incomingDomains =
       normalizeDomains([
-        ...(parsed.data
-          .client_domain
-          ? [
-              parsed.data
-                .client_domain,
-            ]
-          : []),
+        ...(
+          parsed.data.client_domain
+            ? [
+                parsed.data
+                  .client_domain,
+              ]
+            : []
+        ),
 
-        ...(parsed.data
-          .domains || []),
+        ...(
+          parsed.data.domains ||
+          []
+        ),
       ]);
 
     if (
@@ -4196,8 +4229,7 @@ app.post(
     try {
       targetUrl =
         new URL(
-          parsed.data
-            .target_url,
+          parsed.data.target_url,
         );
     } catch {
       res
@@ -4230,9 +4262,13 @@ app.post(
 
     const conflict =
       incomingDomains.find(
-        (domain) =>
+        (
+          domain,
+        ) =>
           db.sites.some(
-            (site) =>
+            (
+              site,
+            ) =>
               normalizeDomains([
                 site.client_domain,
                 ...(site.domains ||
@@ -4259,7 +4295,8 @@ app.post(
 
     const settings =
       parsed.data
-        .settings as SiteSettings;
+        .settings as
+        SiteSettings;
 
     if (
       typeof settings.enableChallenge !==
@@ -4269,35 +4306,33 @@ app.post(
         true;
     }
 
-    const site: Site =
-      {
-        id:
-          crypto.randomUUID(),
+    const site: Site = {
+      id:
+        crypto.randomUUID(),
 
-        owner_id:
-          parsed.data.owner_id,
+      owner_id:
+        parsed.data.owner_id,
 
-        client_domain:
-          incomingDomains[0],
+      client_domain:
+        incomingDomains[0],
 
-        domains:
-          incomingDomains,
+      domains:
+        incomingDomains,
 
-        target_url:
-          targetUrl.toString(),
+      target_url:
+        targetUrl.toString(),
 
-        api_key:
-          parsed.data
-            .api_key ||
-          crypto
-            .randomBytes(32)
-            .toString('hex'),
+      api_key:
+        parsed.data.api_key ||
+        crypto
+          .randomBytes(32)
+          .toString('hex'),
 
-        settings,
+      settings,
 
-        stats:
-          createSiteStats(),
-      };
+      stats:
+        createSiteStats(),
+    };
 
     db.sites.push(
       site,
@@ -4375,8 +4410,7 @@ app.post(
 
     const newDomains =
       normalizeDomains(
-        parsed.data
-          .domains,
+        parsed.data.domains,
       );
 
     const existing =
@@ -4388,9 +4422,13 @@ app.post(
 
     const conflicts =
       newDomains.filter(
-        (domain) =>
+        (
+          domain,
+        ) =>
           db.sites.some(
-            (other) =>
+            (
+              other,
+            ) =>
               other.id !==
                 site.id &&
               normalizeDomains([
@@ -4536,8 +4574,7 @@ app.delete(
       domain
     ) {
       site.client_domain =
-        remaining[0] ||
-        '';
+        remaining[0] || '';
     }
 
     dbDirty = true;
@@ -4569,7 +4606,9 @@ app.delete(
           req.params.id,
       );
 
-    if (index < 0) {
+    if (
+      index < 0
+    ) {
       res
         .status(404)
         .json({
@@ -4919,6 +4958,7 @@ app.get(
 
           return result;
         },
+
         {
           requests: 0,
           allowed: 0,
@@ -5007,9 +5047,7 @@ app.get(
             entry,
           ]) => {
             const separator =
-              key.indexOf(
-                ':',
-              );
+              key.indexOf(':');
 
             if (
               separator < 0
@@ -5067,8 +5105,7 @@ app.get(
                   ),
                 ),
 
-              temporary:
-                true,
+              temporary: true,
             };
           },
         )
@@ -5174,7 +5211,8 @@ app.get(
 
     res.write(
       `data: ${JSON.stringify({
-        type: 'connected',
+        type:
+          'connected',
       })}\n\n`,
     );
 
@@ -5239,7 +5277,7 @@ function escapeHtml(
     )
     .replace(
       /'/g,
-      '&#039;',
+      '&#39;',
     );
 }
 
@@ -5250,323 +5288,140 @@ app.get(
     _req,
     res,
   ) => {
-    res.type('html').send(`
+    res
+      .type('html')
+      .send(`
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Routix — WAF Admin</title>
-
 <style>
-*{
-  box-sizing:border-box;
+body {
+  font-family: Arial, sans-serif;
+  margin: 30px;
+  background: #f5f5f5;
 }
 
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#f4f6f8;
-  color:#222;
+.card {
+  background: white;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 12px;
 }
 
-header{
-  padding:24px;
-  background:#111;
-  color:#fff;
+input, button {
+  padding: 10px;
+  margin: 5px;
 }
 
-main{
-  max-width:1400px;
-  margin:auto;
-  padding:24px;
+table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:16px;
-  margin-bottom:30px;
-}
-
-.card{
-  background:#fff;
-  border-radius:14px;
-  padding:20px;
-  box-shadow:0 3px 15px rgba(0,0,0,.06);
-}
-
-.number{
-  font-size:30px;
-  font-weight:bold;
-  margin-top:8px;
-}
-
-.status{
-  margin-top:12px;
-}
-
-form{
-  display:grid;
-  gap:12px;
-  max-width:700px;
-  margin-bottom:30px;
-}
-
-input,button{
-  padding:12px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  font:inherit;
-}
-
-button{
-  cursor:pointer;
-  background:#111;
-  color:#fff;
-}
-
-.table-wrap{
-  overflow:auto;
-  background:#fff;
-  border-radius:14px;
-  margin-bottom:30px;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  min-width:900px;
-}
-
-th,td{
-  padding:12px;
-  border-bottom:1px solid #eee;
-  text-align:right;
-  vertical-align:top;
-}
-
-th{
-  background:#fafafa;
-}
-
-code{
-  word-break:break-all;
+th, td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  text-align: right;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <h1>🛡️ Routix Multi-Site WAF Admin</h1>
-  <p>
-    إدارة المواقع المحمية ومراقبة الطلبات والزوار والتنبيهات.
-  </p>
-  <div class="status">
-    🟢 Routix WAF Online
-  </div>
-</header>
-
-<main>
-
-<section class="grid">
-
 <div class="card">
-  <div>المواقع</div>
-  <div class="number" id="sitesCount">0</div>
+
+<h1>🛡️ Routix Multi-Site WAF Admin</h1>
+
+<p>
+إدارة المواقع المحمية ومراقبة الطلبات والزوار والتنبيهات.
+</p>
+
+<p>
+🟢 Routix WAF Online
+</p>
+
 </div>
 
 <div class="card">
-  <div>الزوار الفريدون</div>
-  <div class="number" id="visitorsCount">0</div>
-</div>
-
-<div class="card">
-  <div>الطلبات</div>
-  <div class="number" id="requestsCount">0</div>
-</div>
-
-<div class="card">
-  <div>الهجمات</div>
-  <div class="number" id="attacksCount">0</div>
-</div>
-
-<div class="card">
-  <div>IPs المحظورة</div>
-  <div class="number" id="blacklistedCount">0</div>
-</div>
-
-<div class="card">
-  <div>الاتصالات الحالية</div>
-  <div class="number" id="concurrentCount">0</div>
-</div>
-
-</section>
-
-<section class="card">
 
 <h2>➕ إضافة موقع للحماية</h2>
 
-<p>
-أضف الدومين والوجهة التي تريد حمايتها.
-</p>
-
-<form id="siteForm">
+<form id="addSiteForm">
 
 <input
-  name="owner_id"
-  placeholder="Owner ID"
-  required
+name="owner_id"
+placeholder="Owner ID"
+required
 >
 
 <input
-  name="client_domain"
-  placeholder="example.com"
+name="client_domain"
+placeholder="example.com"
 >
 
 <input
-  name="domains"
-  placeholder="example.com,www.example.com"
+name="domains"
+placeholder="example.com,www.example.com"
 >
 
 <input
-  name="target_url"
-  placeholder="https://origin.example.com"
-  required
+name="target_url"
+placeholder="https://origin.example.com"
+required
 >
 
 <button type="submit">
-  إضافة الموقع
+إضافة الموقع
 </button>
 
 </form>
 
-</section>
+</div>
 
-<section class="card">
+<div class="card">
 
 <h2>🌐 المواقع المحمية</h2>
 
-<button id="refreshSites">
-  🔄 تحديث
+<button onclick="loadSites()">
+🔄 تحديث
 </button>
 
-<div class="table-wrap">
-
-<table>
-
-<thead>
-<tr>
-<th>ID</th>
-<th>Owner</th>
-<th>الدومينات</th>
-<th>Target</th>
-<th>الزوار</th>
-<th>الطلبات</th>
-<th>الهجمات</th>
-<th>API Key</th>
-</tr>
-</thead>
-
-<tbody id="sitesBody">
-<tr>
-<td colspan="8">
+<div id="sites">
 جاري التحميل...
-</td>
-</tr>
-</tbody>
-
-</table>
+</div>
 
 </div>
 
-</section>
-
-<section class="card">
+<div class="card">
 
 <h2>🚫 IPs المحظورة</h2>
 
-<div class="table-wrap">
-
-<table>
-
-<thead>
-<tr>
-<th>IP</th>
-<th>الدومين</th>
-<th>السبب</th>
-<th>ينتهي</th>
-<th>المتبقي</th>
-</tr>
-</thead>
-
-<tbody id="blacklistBody">
-<tr>
-<td colspan="5">
+<div id="blacklists">
 جاري التحميل...
-</td>
-</tr>
-</tbody>
-
-</table>
+</div>
 
 </div>
 
-</section>
-
-<section class="card">
+<div class="card">
 
 <h2>🚨 التنبيهات</h2>
 
-<div class="table-wrap">
-
-<table>
-
-<thead>
-<tr>
-<th>الوقت</th>
-<th>IP</th>
-<th>الدومين</th>
-<th>المسار</th>
-<th>Risk</th>
-<th>Action</th>
-<th>الأسباب</th>
-</tr>
-</thead>
-
-<tbody id="alertsBody">
-<tr>
-<td colspan="7">
+<div id="alerts">
 جاري التحميل...
-</td>
-</tr>
-</tbody>
-
-</table>
+</div>
 
 </div>
 
-</section>
-
-</main>
-
 <script>
-'use strict';
 
-const esc = (value) =>
-  String(value ?? '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#039;');
-
-async function api(url, options = {}) {
-  const response = await fetch(url, {
-    credentials: 'same-origin',
-    ...options
-  });
+async function api(url, options) {
+  const response = await fetch(
+    url,
+    options || {}
+  );
 
   if (!response.ok) {
     throw new Error(
@@ -5577,231 +5432,118 @@ async function api(url, options = {}) {
   return response.json();
 }
 
-async function loadStats() {
-  const data =
-    await api('/__waf/admin/stats');
-
-  document.getElementById(
-    'sitesCount'
-  ).textContent =
-    data.sites ?? 0;
-
-  document.getElementById(
-    'visitorsCount'
-  ).textContent =
-    data.visitors ?? 0;
-
-  document.getElementById(
-    'requestsCount'
-  ).textContent =
-    data.totals?.requests ?? 0;
-
-  document.getElementById(
-    'attacksCount'
-  ).textContent =
-    data.totals?.attacks ?? 0;
-
-  document.getElementById(
-    'blacklistedCount'
-  ).textContent =
-    data.blacklisted ?? 0;
-
-  document.getElementById(
-    'concurrentCount'
-  ).textContent =
-    data.globalConcurrent ?? 0;
-}
-
 async function loadSites() {
-  const data =
-    await api('/__waf/admin/sites');
-
-  const body =
-    document.getElementById(
-      'sitesBody'
-    );
-
-  body.innerHTML =
-    data.sites.map(
-      site => \`
-<tr>
-<td><code>\${esc(site.id)}</code></td>
-
-<td>
-\${esc(site.owner_id)}
-</td>
-
-<td>
-\${esc(
-  (site.domains || []).join(', ')
-)}
-</td>
-
-<td>
-\${esc(site.target_url)}
-</td>
-
-<td>
-\${esc(site.visitors)}
-</td>
-
-<td>
-\${esc(site.stats?.totalRequests)}
-</td>
-
-<td>
-\${esc(site.stats?.attacks)}
-</td>
-
-<td>
-<code>\${esc(site.api_key)}</code>
-</td>
-</tr>
-\`
-    ).join('') ||
-    '<tr><td colspan="8">لا توجد مواقع</td></tr>';
-}
-
-async function loadBlacklists() {
-  const data =
-    await api(
-      '/__waf/admin/blacklists'
-    );
-
-  const body =
-    document.getElementById(
-      'blacklistBody'
-    );
-
-  body.innerHTML =
-    data.blacklists.map(
-      item => \`
-<tr>
-
-<td>
-\${esc(item.ip)}
-</td>
-
-<td>
-\${esc(item.domain)}
-</td>
-
-<td>
-\${esc(item.reason)}
-</td>
-
-<td>
-\${esc(
-  new Date(
-    item.expiresAt
-  ).toLocaleString()
-)}
-</td>
-
-<td>
-\${esc(item.remainingSeconds)}s
-</td>
-
-</tr>
-\`
-    ).join('') ||
-    '<tr><td colspan="5">لا توجد عناوين محظورة</td></tr>';
-}
-
-async function loadAlerts() {
-  const data =
-    await api(
-      '/__waf/admin/alerts'
-    );
-
-  const body =
-    document.getElementById(
-      'alertsBody'
-    );
-
-  body.innerHTML =
-    data.alerts.map(
-      alert => \`
-<tr>
-
-<td>
-\${esc(
-  new Date(
-    alert.time
-  ).toLocaleString()
-)}
-</td>
-
-<td>
-\${esc(alert.ip)}
-</td>
-
-<td>
-\${esc(alert.domain)}
-</td>
-
-<td>
-\${esc(alert.path)}
-</td>
-
-<td>
-\${esc(alert.risk)}
-</td>
-
-<td>
-\${esc(alert.action)}
-</td>
-
-<td>
-\${esc(
-  (alert.reasons || []).join(', ')
-)}
-</td>
-
-</tr>
-\`
-    ).join('') ||
-    '<tr><td colspan="7">لا توجد تنبيهات</td></tr>';
-}
-
-async function refreshAll() {
   try {
-    await Promise.all([
-      loadStats(),
-      loadSites(),
-      loadBlacklists(),
-      loadAlerts()
-    ]);
+    const data =
+      await api(
+        '/__waf/admin/sites'
+      );
+
+    document.getElementById(
+      'sites'
+    ).innerHTML =
+      '<pre>' +
+      escapeHtml(
+        JSON.stringify(
+          data,
+          null,
+          2
+        )
+      ) +
+      '</pre>';
+
   } catch (error) {
-    console.error(error);
+    document.getElementById(
+      'sites'
+    ).textContent =
+      String(error);
   }
 }
 
-document
-  .getElementById('refreshSites')
-  .addEventListener(
-    'click',
-    refreshAll
-  );
+async function loadBlacklists() {
+  try {
+    const data =
+      await api(
+        '/__waf/admin/blacklists'
+      );
+
+    document.getElementById(
+      'blacklists'
+    ).innerHTML =
+      '<pre>' +
+      escapeHtml(
+        JSON.stringify(
+          data,
+          null,
+          2
+        )
+      ) +
+      '</pre>';
+
+  } catch (error) {
+    document.getElementById(
+      'blacklists'
+    ).textContent =
+      String(error);
+  }
+}
+
+async function loadAlerts() {
+  try {
+    const data =
+      await api(
+        '/__waf/admin/alerts'
+      );
+
+    document.getElementById(
+      'alerts'
+    ).innerHTML =
+      '<pre>' +
+      escapeHtml(
+        JSON.stringify(
+          data,
+          null,
+          2
+        )
+      ) +
+      '</pre>';
+
+  } catch (error) {
+    document.getElementById(
+      'alerts'
+    ).textContent =
+      String(error);
+  }
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 document
-  .getElementById('siteForm')
+  .getElementById(
+    'addSiteForm'
+  )
   .addEventListener(
     'submit',
-    async event => {
+    async function(event) {
+
       event.preventDefault();
 
       const form =
-        event.currentTarget;
-
-      const formData =
-        new FormData(form);
+        new FormData(
+          event.target
+        );
 
       const domains =
         String(
-          formData.get(
-            'domains'
-          ) || ''
+          form.get('domains') ||
+          ''
         )
           .split(',')
           .map(
@@ -5810,36 +5552,8 @@ document
           )
           .filter(Boolean);
 
-      const payload = {
-        owner_id:
-          String(
-            formData.get(
-              'owner_id'
-            ) || ''
-          ),
-
-        client_domain:
-          String(
-            formData.get(
-              'client_domain'
-            ) || ''
-          ) || undefined,
-
-        domains,
-
-        target_url:
-          String(
-            formData.get(
-              'target_url'
-            ) || ''
-          ),
-
-        settings: {
-          enableChallenge: true
-        }
-      };
-
       try {
+
         await api(
           '/__waf/admin/sites',
           {
@@ -5851,50 +5565,57 @@ document
             },
 
             body:
-              JSON.stringify(
-                payload
-              )
+              JSON.stringify({
+                owner_id:
+                  form.get(
+                    'owner_id'
+                  ),
+
+                client_domain:
+                  form.get(
+                    'client_domain'
+                  ) || undefined,
+
+                domains,
+
+                target_url:
+                  form.get(
+                    'target_url'
+                  ),
+
+                settings: {
+                  enableChallenge:
+                    true
+                }
+              })
           }
         );
 
-        form.reset();
-
-        await refreshAll();
-
         alert(
-          'تمت إضافة الموقع بنجاح'
+          'تمت إضافة الموقع'
         );
-      } catch (error) {
-        console.error(error);
 
+        event.target.reset();
+
+        loadSites();
+
+      } catch (error) {
         alert(
-          'تعذر إضافة الموقع'
+          String(error)
         );
       }
     }
   );
 
-const eventSource =
-  new EventSource(
-    '/__waf/admin/events'
-  );
+loadSites();
+loadBlacklists();
+loadAlerts();
 
-eventSource.onmessage =
-  () => {
-    refreshAll();
-  };
-
-refreshAll();
-
-setInterval(
-  refreshAll,
-  10000
-);
 </script>
 
 </body>
 </html>
-    `);
+      `);
   },
 );
 
@@ -6418,10 +6139,14 @@ function violationDecision(
   addAlert({
     site,
     ip,
+
     path: '',
+
     risk:
       score,
+
     action,
+
     reasons: [
       reason,
     ],
@@ -6431,9 +6156,11 @@ function violationDecision(
     action,
     riskScore:
       score,
+
     reasons: [
       reason,
     ],
+
     requestId,
     site,
   };
@@ -6837,6 +6564,7 @@ async function evaluate(
     blacklist(
       site,
       ip,
+
       inspection.reasons.join(
         ',',
       ) ||
@@ -6850,8 +6578,7 @@ async function evaluate(
     );
 
     const reasons =
-      inspection
-        .reasons.length
+      inspection.reasons.length
         ? inspection.reasons
         : [
             'risk_threshold',
@@ -6942,8 +6669,7 @@ async function evaluate(
   registerSiteAction(
     site,
     'allow',
-    inspection.score >
-      0,
+    inspection.score > 0,
   );
 
   return {
@@ -7129,10 +6855,6 @@ app.use(
       return;
     }
 
-    /*
-      The release middleware is installed before proxy.
-      The actual finish/close listeners are registered here.
-    */
     let released =
       false;
 
@@ -7240,7 +6962,9 @@ const proxy =
 
         proxyReq.setHeader(
           'x-forwarded-for',
-          getClientIp(req),
+          getClientIp(
+            req,
+          ),
         );
 
         proxyReq.setHeader(
@@ -7468,10 +7192,6 @@ async function start(): Promise<void> {
       '[MongoDB] Authentication database connected',
     );
 
-    /*
-      Make sure the OTP TTL index is created.
-      This is especially useful after deploying to a fresh DB.
-    */
     await OTPModel.createIndexes();
 
     console.log(
