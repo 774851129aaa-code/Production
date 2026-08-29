@@ -4821,16 +4821,8 @@ async function loadBlacklists() {
 
     if (!list.length) {
 
-      body.innerHTML = `
-        <tr>
-          <td
-            colspan="8"
-            class="empty"
-          >
-            لا توجد IPs محظورة حاليًا.
-          </td>
-        </tr>
-      `;
+      body.innerHTML =
+  '<tr><td colspan="8" class="empty">لا توجد IPs محظورة حاليًا.</td></tr>';
 
       return;
 
