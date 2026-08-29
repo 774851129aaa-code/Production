@@ -1336,13 +1336,12 @@ app.use(
    START SERVER
 ========================================================= */
 
-const PORT =
-    process.env.PORT || 4000;
+const PORT = 10000;
 
 app.listen(
     PORT,
+    '127.0.0.1',
     () => {
-
         console.log(
             `Authentication server is running on port ${PORT}`
         );
