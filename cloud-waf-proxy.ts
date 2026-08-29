@@ -6452,7 +6452,7 @@ async function loadAlerts(){
     return;
   }
 
-  tbody.innerHTML =
+tbody.innerHTML =
     data.alerts.map(
       alert => `
 
@@ -6497,6 +6497,7 @@ ${(alert.reasons || [])
 `
     ).join('');
 }
+
 
 
 async function loadAll(){
