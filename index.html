@@ -1,4 +1,6 @@
-<!DOCTYPE html><html lang="ar" dir="rtl">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -173,12 +175,15 @@
         transform:translateY(20px);
         opacity:0;
       }
+
       20% {
         opacity:1;
       }
+
       80% {
         opacity:.8;
       }
+
       to {
         transform:translateY(-180px);
         opacity:0;
@@ -386,6 +391,7 @@
         opacity:0;
         transform:translateY(18px);
       }
+
       to {
         opacity:1;
         transform:translateY(0);
@@ -397,6 +403,7 @@
         opacity:0;
         transform:rotate(45deg) scale(.6);
       }
+
       to {
         opacity:1;
         transform:rotate(45deg) scale(1);
@@ -1300,6 +1307,7 @@
     /* RESPONSIVE */
 
     @media (max-width:1050px) {
+
       nav a {
         padding:8px;
       }
@@ -1326,6 +1334,7 @@
     }
 
     @media (max-width:760px) {
+
       header {
         padding:0 5%;
       }
@@ -1404,6 +1413,7 @@
     }
 
     @media (max-width:500px) {
+
       .features,
       .settings-grid,
       .stats {
@@ -1446,6 +1456,7 @@
     }
 
     @media (prefers-reduced-motion:reduce) {
+
       *,
       *::before,
       *::after {
@@ -1454,665 +1465,686 @@
         scroll-behavior:auto!important;
       }
     }
+
   </style>
 </head>
 
 <body class="locked">
 
-<div class="cyber-bg"></div>
-<div class="orb one"></div>
-<div class="orb two"></div>
-<div class="particles" id="particles"></div>
-<div class="scanlines"></div>
+  <div class="cyber-bg"></div>
+  <div class="orb one"></div>
+  <div class="orb two"></div>
+  <div class="particles" id="particles"></div>
+  <div class="scanlines"></div>
 
-<!-- INTRO -->
+  <!-- INTRO -->
 
-<section class="intro" id="intro">
+  <section class="intro" id="intro">
 
-  <div class="intro-tech">
-    <div class="intro-grid"></div>
-  </div>
-
-  <div class="intro-content">
-
-    <div class="intro-status">
-      <span class="live-dot"></span>
-      ROUTIX WAF SYSTEM • PROTECTION LAYER READY
+    <div class="intro-tech">
+      <div class="intro-grid"></div>
     </div>
 
-    <div class="intro-logo"></div>
+    <div class="intro-content">
 
-    <h1>
-      Routix<span>.</span>
-    </h1>
+      <div class="intro-status">
+        <span class="live-dot"></span>
+        ROUTIX WAF SYSTEM • PROTECTION LAYER READY
+      </div>
 
-    <p>
-      Web Application Firewall مصمم لمراقبة وحماية
-      تطبيقات الويب من الترافيك المشبوه، الهجمات
-      على مستوى L7، تجاوز المعدلات، والمصادر عالية الخطورة.
-    </p>
+      <div class="intro-logo"></div>
 
-    <button class="enter-btn" onclick="enterPlatform()">
-      دخول إلى المنصة
-      <span>←</span>
-    </button>
+      <h1>
+        Routix<span>.</span>
+      </h1>
 
-  </div>
-
-  <div class="intro-corner">
-    ROUTIX / SECURITY INFRASTRUCTURE / 2026
-  </div>
-
-</section>
-
-<!-- AUTH -->
-
-<div
-  class="auth-overlay"
-  id="authOverlay"
-  aria-hidden="true"
->
-
-  <div
-    class="auth-box"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="authTitle"
-  >
-
-    <button
-      class="auth-close"
-      type="button"
-      onclick="closeAuth()"
-      aria-label="إغلاق"
-    >
-      ×
-    </button>
-
-    <div class="auth-logo"></div>
-
-    <div class="auth-header">
-
-      <span class="eyebrow">
-        ROUTIX AUTHENTICATION
-      </span>
-
-      <h2 id="authTitle">
-        تسجيل الدخول
-      </h2>
-
-      <p id="authDescription">
-        أدخل بريدك الإلكتروني وكلمة المرور لإرسال رمز تحقق آمن.
+      <p>
+        Web Application Firewall مصمم لمراقبة وحماية
+        تطبيقات الويب من الترافيك المشبوه، الهجمات
+        على مستوى L7، تجاوز المعدلات، والمصادر عالية الخطورة.
       </p>
 
+      <button class="enter-btn" onclick="enterPlatform()">
+        دخول إلى المنصة
+        <span>←</span>
+      </button>
+
     </div>
 
-    <!-- STEP 1 -->
+    <div class="intro-corner">
+      ROUTIX / SECURITY INFRASTRUCTURE / 2026
+    </div>
+
+  </section>
+
+
+  <!-- AUTH -->
+
+  <div
+    class="auth-overlay"
+    id="authOverlay"
+    aria-hidden="true"
+  >
 
     <div
-      class="auth-step active"
-      id="emailStep"
+      class="auth-box"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="authTitle"
     >
 
-      <label
-        class="auth-label"
-        for="loginEmail"
+      <button
+        class="auth-close"
+        type="button"
+        onclick="closeAuth()"
+        aria-label="إغلاق"
       >
-        البريد الإلكتروني
-      </label>
+        ×
+      </button>
 
-      <input
-        class="auth-input"
-        id="loginEmail"
-        type="email"
-        inputmode="email"
-        autocomplete="email"
-        placeholder="example@email.com"
-        maxlength="150"
+      <div class="auth-logo"></div>
+
+      <div class="auth-header">
+
+        <span class="eyebrow">
+          ROUTIX AUTHENTICATION
+        </span>
+
+        <h2 id="authTitle">
+          تسجيل الدخول
+        </h2>
+
+        <p id="authDescription">
+          أدخل بريدك الإلكتروني وكلمة المرور لإرسال رمز تحقق آمن.
+        </p>
+
+      </div>
+
+
+      <!-- STEP 1 -->
+
+      <div
+        class="auth-step active"
+        id="emailStep"
       >
 
-      <label
-        class="auth-label"
-        for="loginPassword"
-        style="margin-top:13px;"
-      >
-        كلمة المرور
-      </label>
-
-      <div class="password-wrap">
+        <label
+          class="auth-label"
+          for="loginEmail"
+        >
+          البريد الإلكتروني
+        </label>
 
         <input
           class="auth-input"
-          id="loginPassword"
-          type="password"
-          autocomplete="current-password"
-          placeholder="أدخل كلمة المرور"
-          maxlength="128"
+          id="loginEmail"
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          placeholder="example@email.com"
+          maxlength="150"
+        >
+
+        <label
+          class="auth-label"
+          for="loginPassword"
+          style="margin-top:13px;"
+        >
+          كلمة المرور
+        </label>
+
+        <div class="password-wrap">
+
+          <input
+            class="auth-input"
+            id="loginPassword"
+            type="password"
+            autocomplete="current-password"
+            placeholder="أدخل كلمة المرور"
+            maxlength="128"
+          >
+
+          <button
+            class="password-toggle"
+            type="button"
+            onclick="togglePassword()"
+            id="passwordToggle"
+            aria-label="إظهار كلمة المرور"
+          >
+            ◉
+          </button>
+
+        </div>
+
+        <button
+          class="auth-btn"
+          id="sendOtpBtn"
+          type="button"
+          onclick="sendOTP()"
+        >
+          إرسال كود التحقق
+        </button>
+
+        <div
+          class="auth-message"
+          id="emailMessage"
+        ></div>
+
+        <div class="auth-note">
+          سيتم التحقق من البريد وكلمة المرور ثم إنشاء
+          رمز تحقق مؤقت وإرساله إلى بريدك الإلكتروني.
+        </div>
+
+      </div>
+
+
+      <!-- STEP 2 -->
+
+      <div
+        class="auth-step"
+        id="otpStep"
+      >
+
+        <div
+          class="auth-email-display"
+          id="authEmailDisplay"
+        ></div>
+
+        <label
+          class="auth-label"
+          for="loginOtp"
+        >
+          رمز التحقق
+        </label>
+
+        <input
+          class="auth-input otp-input"
+          id="loginOtp"
+          type="text"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          maxlength="6"
+          placeholder="000000"
         >
 
         <button
-          class="password-toggle"
+          class="auth-btn"
+          id="verifyOtpBtn"
           type="button"
-          onclick="togglePassword()"
-          id="passwordToggle"
-          aria-label="إظهار كلمة المرور"
+          onclick="verifyOTP()"
         >
-          ◉
+          تأكيد تسجيل الدخول
         </button>
 
-      </div>
+        <button
+          class="auth-secondary"
+          id="backToEmailBtn"
+          type="button"
+          onclick="backToEmail()"
+        >
+          تغيير البريد أو كلمة المرور
+        </button>
 
-      <button
-        class="auth-btn"
-        id="sendOtpBtn"
-        type="button"
-        onclick="sendOTP()"
-      >
-        إرسال كود التحقق
-      </button>
+        <div
+          class="auth-message"
+          id="otpMessage"
+        ></div>
 
-      <div
-        class="auth-message"
-        id="emailMessage"
-      ></div>
+        <div class="auth-note">
+          الرمز صالح لمدة 5 دقائق فقط.
+        </div>
 
-      <div class="auth-note">
-        سيتم التحقق من البريد وكلمة المرور ثم إرسال
-        رمز تحقق مؤقت إلى بريدك الإلكتروني.
-      </div>
-
-    </div>
-
-    <!-- STEP 2 -->
-
-    <div
-      class="auth-step"
-      id="otpStep"
-    >
-
-      <div
-        class="auth-email-display"
-        id="authEmailDisplay"
-      ></div>
-
-      <label
-        class="auth-label"
-        for="loginOtp"
-      >
-        رمز التحقق
-      </label>
-
-      <input
-        class="auth-input otp-input"
-        id="loginOtp"
-        type="text"
-        inputmode="numeric"
-        autocomplete="one-time-code"
-        maxlength="6"
-        placeholder="000000"
-      >
-
-      <button
-        class="auth-btn"
-        id="verifyOtpBtn"
-        type="button"
-        onclick="verifyOTP()"
-      >
-        تأكيد تسجيل الدخول
-      </button>
-
-      <button
-        class="auth-secondary"
-        id="backToEmailBtn"
-        type="button"
-        onclick="backToEmail()"
-      >
-        تغيير البريد أو كلمة المرور
-      </button>
-
-      <div
-        class="auth-message"
-        id="otpMessage"
-      ></div>
-
-      <div class="auth-note">
-        الرمز صالح لمدة 5 دقائق فقط.
       </div>
 
     </div>
 
   </div>
-</div>
 
-<!-- HEADER -->
 
-<header>
+  <!-- HEADER -->
 
-  <a href="#home" class="brand">
-    <span class="brand-logo"></span>
-    <span class="brand-name">Routix</span>
-  </a>
+  <header>
 
-  <nav id="nav">
+    <a href="#home" class="brand">
+      <span class="brand-logo"></span>
+      <span class="brand-name">Routix</span>
+    </a>
 
-    <a href="#home">الرئيسية</a>
-    <a href="#features">المميزات</a>
-    <a href="#api">API</a>
-    <a href="#integration">طريقة الربط</a>
-    <a href="#settings">الإعدادات</a>
-    <a href="#about">من نحن</a>
+    <nav id="nav">
 
-  </nav>
+      <a href="#home">الرئيسية</a>
+      <a href="#features">المميزات</a>
+      <a href="#api">API</a>
+      <a href="#integration">طريقة الربط</a>
+      <a href="#settings">الإعدادات</a>
+      <a href="#about">من نحن</a>
 
-  <div class="header-actions">
+    </nav>
 
-    <!-- تسجيل الدخول العلوي يبقى كما هو -->
+    <div class="header-actions">
+
+      <button
+        class="header-login"
+        id="headerLoginBtn"
+        type="button"
+        onclick="openAuth()"
+      >
+        <span>◉</span>
+        تسجيل الدخول
+      </button>
+
+      <span
+        class="header-user"
+        id="headerUser"
+        style="display:none;"
+      >
+        <span>●</span>
+        <span id="headerUserEmail"></span>
+      </span>
+
+      <button
+        class="header-logout"
+        id="headerLogoutBtn"
+        type="button"
+        onclick="logout()"
+        style="display:none;"
+      >
+        خروج
+      </button>
+
+    </div>
 
     <button
-      class="header-login"
-      id="headerLoginBtn"
+      class="mobile-menu"
+      onclick="toggleMenu()"
       type="button"
-      onclick="openAuth()"
+      aria-label="القائمة"
     >
-      <span>◉</span>
-      تسجيل الدخول
+      ☰
     </button>
 
-    <span
-      class="header-user"
-      id="headerUser"
-      style="display:none;"
-    >
-      <span>●</span>
-      <span id="headerUserEmail"></span>
-    </span>
+  </header>
 
-    <button
-      class="header-logout"
-      id="headerLogoutBtn"
-      type="button"
-      onclick="logout()"
-      style="display:none;"
-    >
-      خروج
-    </button>
 
-  </div>
+  <!-- MAIN -->
 
-  <button
-    class="mobile-menu"
-    onclick="toggleMenu()"
-    type="button"
-    aria-label="القائمة"
-  >
-    ☰
-  </button>
+  <main id="home">
 
-</header>
+    <!-- DASHBOARD -->
 
-<!-- MAIN -->
+    <section class="section dashboard">
 
-<main id="home">
+      <div class="dashboard-copy">
 
-<section class="section dashboard">
+        <span class="eyebrow">
+          ROUTIX / CLOUD WAF
+        </span>
 
-  <div class="dashboard-copy">
+        <h1>
+          حماية موقعك تبدأ<br>
+          من أول <span>Request.</span>
+        </h1>
 
-    <span class="eyebrow">
-      ROUTIX / CLOUD WAF
-    </span>
+        <p>
+          Routix يعمل كطبقة حماية أمام تطبيقك،
+          يراقب الترافيك وطلبات HTTP، يحد من
+          المعدلات المرتفعة، يكتشف أنماط الهجمات
+          ويمنحك رؤية مباشرة لما يحدث على مستوى
+          البنية التحتية والتطبيق.
+        </p>
 
-    <h1>
-      حماية موقعك تبدأ<br>
-      من أول <span>Request.</span>
-    </h1>
+        <div class="dashboard-actions">
 
-    <p>
-      Routix يعمل كطبقة حماية أمام تطبيقك،
-      يراقب الترافيك وطلبات HTTP، يحد من
-      المعدلات المرتفعة، يكتشف أنماط الهجمات
-      ويمنحك رؤية مباشرة لما يحدث على مستوى
-      البنية التحتية والتطبيق.
-    </p>
+          <a href="#features" class="btn">
+            استكشف المميزات
+          </a>
 
-    <!-- تم حذف زر تسجيل الدخول الموجود هنا فقط -->
-
-    <div class="dashboard-actions">
-
-      <a href="#features" class="btn">
-        استكشف المميزات
-      </a>
-
-    </div>
-
-    <div class="stats">
-
-      <div class="stat">
-        <div class="stat-label">WAF STATUS</div>
-        <div class="stat-value green">ACTIVE</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">LAYER</div>
-        <div class="stat-value cyan">L7</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">RATE CONTROL</div>
-        <div class="stat-value">ON</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">LIVE EVENTS</div>
-        <div class="stat-value green">READY</div>
-      </div>
-
-    </div>
-
-  </div>
-
-  <div class="radar-card">
-
-    <div class="radar">
-      <div class="radar-ring"></div>
-      <div class="radar-sweep"></div>
-    </div>
-
-    <div class="radar-label">
-      <span>TRAFFIC_MONITOR</span>
-      <strong>● PROTECTED</strong>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- FEATURES -->
-
-<section id="features" class="section">
-
-  <div class="section-title">
-
-    <span class="eyebrow">
-      SECURITY ENGINE
-    </span>
-
-    <h2>
-      حماية متعددة الطبقات للترافيك
-    </h2>
-
-    <p>
-      Routix يجمع بين التحكم بالترافيك،
-      تحليل الطلبات، تقييم المخاطر وآليات
-      الحماية المختلفة داخل طبقة واحدة.
-    </p>
-
-  </div>
-
-  <div class="features">
-
-    <article class="feature">
-      <div class="feature-icon">◈</div>
-      <h3>Rate Limiting</h3>
-      <p>
-        تحديد عدد الطلبات المسموح بها لكل IP
-        خلال نافذة زمنية وتقليل إساءة استخدام الموارد.
-      </p>
-      <span class="tag">TRAFFIC_CONTROL</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">⚡</div>
-      <h3>Burst Protection</h3>
-      <p>
-        التعامل مع الارتفاعات المفاجئة والسريعة
-        في الطلبات قبل انتقال الضغط إلى التطبيق الأصلي.
-      </p>
-      <span class="tag">BURST_DETECTION</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">L7</div>
-      <h3>Layer 7 Protection</h3>
-      <p>
-        فحص طلبات HTTP على مستوى التطبيق
-        وتحليل المسارات والرؤوس والبيانات.
-      </p>
-      <span class="tag">HTTP_INSPECTION</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">SQL</div>
-      <h3>SQLi Detection</h3>
-      <p>
-        كشف أنماط شائعة مرتبطة بمحاولات
-        SQL Injection داخل الطلبات.
-      </p>
-      <span class="tag">ATTACK_DETECTION</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">X</div>
-      <h3>XSS Detection</h3>
-      <p>
-        فحص الأنماط المعروفة المرتبطة بمحاولات
-        Cross-Site Scripting.
-      </p>
-      <span class="tag">WEB_SECURITY</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">R</div>
-      <h3>Risk Scoring</h3>
-      <p>
-        بناء درجة خطورة للمصادر والطلبات
-        للمساعدة في اتخاذ قرار الحظر أو التقييد.
-      </p>
-      <span class="tag">RISK_ENGINE</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">H</div>
-      <h3>Honeypot</h3>
-      <p>
-        مسارات طُعم يمكن استخدامها لرصد
-        المصادر التي تتفاعل مع نقاط غير طبيعية.
-      </p>
-      <span class="tag">THREAT_INTELLIGENCE</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">⊘</div>
-      <h3>Blacklist</h3>
-      <p>
-        التعامل مع المصادر التي تتجاوز سياسات
-        الحماية وإبقاؤها ضمن قائمة الحظر.
-      </p>
-      <span class="tag">IP_CONTROL</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">↯</div>
-      <h3>Concurrency Control</h3>
-      <p>
-        التحكم في عدد الاتصالات المتزامنة
-        لكل IP وعلى مستوى الخدمة.
-      </p>
-      <span class="tag">CONNECTION_LIMIT</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">◌</div>
-      <h3>Live Alerts</h3>
-      <p>
-        مراقبة الأحداث والتنبيهات بشكل مباشر
-        من خلال قناة الأحداث الخاصة بالـWAF.
-      </p>
-      <span class="tag">REAL_TIME</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">▣</div>
-      <h3>Security Headers</h3>
-      <p>
-        تحسين طبقة HTTP الأمنية باستخدام
-        إعدادات Security Headers المناسبة للسيرفر.
-      </p>
-      <span class="tag">HTTP_SECURITY</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">↗</div>
-      <h3>Reverse Proxy</h3>
-      <p>
-        تمرير الطلبات الطبيعية إلى التطبيق الأصلي
-        مع إبقاء التطبيق خلف طبقة Routix.
-      </p>
-      <span class="tag">PROXY_LAYER</span>
-    </article>
-
-  </div>
-</section>
-
-<!-- API -->
-
-<section id="api" class="section">
-
-  <div class="section-title">
-
-    <span class="eyebrow">
-      REQUEST PIPELINE
-    </span>
-
-    <h2>
-      كيف يمر الطلب داخل Routix؟
-    </h2>
-
-    <p>
-      الفكرة الأساسية هي أن Routix يصبح نقطة
-      الدخول العامة، بينما يبقى التطبيق الأصلي خلفه.
-    </p>
-
-  </div>
-
-  <div class="flow">
-
-    <div class="flow-node">
-      <b>CLIENT</b>
-      <span>المستخدم يرسل HTTP Request</span>
-    </div>
-
-    <div class="flow-arrow">→</div>
-
-    <div class="flow-node">
-      <b>ROUTIX</b>
-      <span>استقبال وفحص الطلب</span>
-    </div>
-
-    <div class="flow-arrow">→</div>
-
-    <div class="flow-node">
-      <b>WAF ENGINE</b>
-      <span>Rate / L7 / Risk / Rules</span>
-    </div>
-
-    <div class="flow-arrow">→</div>
-
-    <div class="flow-node">
-      <b>DECISION</b>
-      <span>Allow / Block / Limit</span>
-    </div>
-
-    <div class="flow-arrow">→</div>
-
-    <div class="flow-node">
-      <b>TARGET</b>
-      <span>تمرير الطلب الطبيعي للتطبيق</span>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- INTEGRATION -->
-
-<section id="integration" class="section">
-
-  <div class="section-title">
-
-    <span class="eyebrow">
-      API & INTEGRATION
-    </span>
-
-    <h2>
-      اربط Routix بموقع العميل
-    </h2>
-
-    <p>
-      Routix يعمل كطبقة حماية أمام تطبيق العميل،
-      بحيث تمر الطلبات عبر طبقة الحماية أولًا.
-    </p>
-
-  </div>
-
-  <div class="integration">
-
-    <div class="steps">
-
-      <div class="step">
-        <b class="step-number">01</b>
-        <div>
-          <strong>أضف موقعك إلى Routix</strong>
-          <span>
-            أنشئ إعداد الموقع من خلال لوحة الإدارة
-            وحدد النطاق والتطبيق المرتبط به.
-          </span>
         </div>
-      </div>
 
-      <div class="step">
-        <b class="step-number">02</b>
-        <div>
-          <strong>التحقق من حالة الربط</strong>
-          <span>
-            تحديد رابط موقع العميل في ملف البيئة،
-            ثم توجيه الدومين إلى سيرفرك.
-          </span>
+        <div class="stats">
+
+          <div class="stat">
+            <div class="stat-label">WAF STATUS</div>
+            <div class="stat-value green">ACTIVE</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">LAYER</div>
+            <div class="stat-value cyan">L7</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">RATE CONTROL</div>
+            <div class="stat-value">ON</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">LIVE EVENTS</div>
+            <div class="stat-value green">READY</div>
+          </div>
+
         </div>
+
       </div>
 
-      <div class="step">
-        <b class="step-number">03</b>
-        <div>
-          <strong>وجّه الدومين إلى Routix</strong>
-          <span>
-            بعد إعداد الموقع، وجّه حركة المرور
-            الخاصة بالدومين إلى نقطة الدخول.
-          </span>
+      <div class="radar-card">
+
+        <div class="radar">
+          <div class="radar-ring"></div>
+          <div class="radar-sweep"></div>
         </div>
-      </div>
 
-      <div class="step">
-        <b class="step-number">04</b>
-        <div>
-          <strong>احتفظ بإعدادات السيرفر بشكل آمن</strong>
-          <span>
-            مفاتيح النظام وبيانات الإدارة والإعدادات
-            الداخلية تبقى على السيرفر.
-          </span>
+        <div class="radar-label">
+          <span>TRAFFIC_MONITOR</span>
+          <strong>● PROTECTED</strong>
         </div>
+
       </div>
 
-    </div>
+    </section>
 
-    <div class="code-card">
 
-      <div class="code-title">
-        <span class="code-dot"></span>
-        ROUTIX / SITE CONFIGURATION
+    <!-- FEATURES -->
+
+    <section id="features" class="section">
+
+      <div class="section-title">
+
+        <span class="eyebrow">
+          SECURITY ENGINE
+        </span>
+
+        <h2>
+          حماية متعددة الطبقات للترافيك
+        </h2>
+
+        <p>
+          Routix يجمع بين التحكم بالترافيك،
+          تحليل الطلبات، تقييم المخاطر وآليات
+          الحماية المختلفة داخل طبقة واحدة.
+        </p>
+
       </div>
 
-      <pre># Routix Site Configuration
+      <div class="features">
+
+        <article class="feature">
+          <div class="feature-icon">◈</div>
+          <h3>Rate Limiting</h3>
+          <p>
+            تحديد عدد الطلبات المسموح بها لكل IP
+            خلال نافذة زمنية وتقليل إساءة استخدام الموارد.
+          </p>
+          <span class="tag">TRAFFIC_CONTROL</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">⚡</div>
+          <h3>Burst Protection</h3>
+          <p>
+            التعامل مع الارتفاعات المفاجئة والسريعة
+            في الطلبات قبل انتقال الضغط إلى التطبيق الأصلي.
+          </p>
+          <span class="tag">BURST_DETECTION</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">L7</div>
+          <h3>Layer 7 Protection</h3>
+          <p>
+            فحص طلبات HTTP على مستوى التطبيق
+            وتحليل المسارات والرؤوس والبيانات.
+          </p>
+          <span class="tag">HTTP_INSPECTION</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">SQL</div>
+          <h3>SQLi Detection</h3>
+          <p>
+            كشف أنماط شائعة مرتبطة بمحاولات
+            SQL Injection داخل الطلبات.
+          </p>
+          <span class="tag">ATTACK_DETECTION</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">X</div>
+          <h3>XSS Detection</h3>
+          <p>
+            فحص الأنماط المعروفة المرتبطة بمحاولات
+            Cross-Site Scripting.
+          </p>
+          <span class="tag">WEB_SECURITY</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">R</div>
+          <h3>Risk Scoring</h3>
+          <p>
+            بناء درجة خطورة للمصادر والطلبات
+            للمساعدة في اتخاذ قرار الحظر أو التقييد.
+          </p>
+          <span class="tag">RISK_ENGINE</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">H</div>
+          <h3>Honeypot</h3>
+          <p>
+            مسارات طُعم يمكن استخدامها لرصد
+            المصادر التي تتفاعل مع نقاط غير طبيعية.
+          </p>
+          <span class="tag">THREAT_INTELLIGENCE</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">⊘</div>
+          <h3>Blacklist</h3>
+          <p>
+            التعامل مع المصادر التي تتجاوز سياسات
+            الحماية وإبقاؤها ضمن قائمة الحظر.
+          </p>
+          <span class="tag">IP_CONTROL</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">↯</div>
+          <h3>Concurrency Control</h3>
+          <p>
+            التحكم في عدد الاتصالات المتزامنة
+            لكل IP وعلى مستوى الخدمة.
+          </p>
+          <span class="tag">CONNECTION_LIMIT</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">◌</div>
+          <h3>Live Alerts</h3>
+          <p>
+            مراقبة الأحداث والتنبيهات بشكل مباشر
+            من خلال قناة الأحداث الخاصة بالـWAF.
+          </p>
+          <span class="tag">REAL_TIME</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">▣</div>
+          <h3>Security Headers</h3>
+          <p>
+            تحسين طبقة HTTP الأمنية باستخدام
+            إعدادات Security Headers المناسبة للسيرفر.
+          </p>
+          <span class="tag">HTTP_SECURITY</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">↗</div>
+          <h3>Reverse Proxy</h3>
+          <p>
+            تمرير الطلبات الطبيعية إلى التطبيق الأصلي
+            مع إبقاء التطبيق خلف طبقة Routix.
+          </p>
+          <span class="tag">PROXY_LAYER</span>
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- API -->
+
+    <section id="api" class="section">
+
+      <div class="section-title">
+
+        <span class="eyebrow">
+          REQUEST PIPELINE
+        </span>
+
+        <h2>
+          كيف يمر الطلب داخل Routix؟
+        </h2>
+
+        <p>
+          الفكرة الأساسية هي أن Routix يصبح نقطة
+          الدخول العامة، بينما يبقى التطبيق الأصلي خلفه.
+        </p>
+
+      </div>
+
+      <div class="flow">
+
+        <div class="flow-node">
+          <b>CLIENT</b>
+          <span>المستخدم يرسل HTTP Request</span>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+          <b>ROUTIX</b>
+          <span>استقبال وفحص الطلب</span>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+          <b>WAF ENGINE</b>
+          <span>Rate / L7 / Risk / Rules</span>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+          <b>DECISION</b>
+          <span>Allow / Block / Limit</span>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+          <b>TARGET</b>
+          <span>تمرير الطلب الطبيعي للتطبيق</span>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- INTEGRATION -->
+
+    <section id="integration" class="section">
+
+      <div class="section-title">
+
+        <span class="eyebrow">
+          API & INTEGRATION
+        </span>
+
+        <h2>
+          اربط Routix بموقع العميل
+        </h2>
+
+        <p>
+          Routix يعمل كطبقة حماية أمام تطبيق العميل،
+          بحيث تمر الطلبات عبر طبقة الحماية أولًا.
+        </p>
+
+      </div>
+
+      <div class="integration">
+
+        <div class="steps">
+
+          <div class="step">
+
+            <b class="step-number">01</b>
+
+            <div>
+              <strong>أضف موقعك إلى Routix</strong>
+              <span>
+                أنشئ إعداد الموقع من خلال لوحة الإدارة
+                وحدد النطاق والتطبيق المرتبط به.
+              </span>
+            </div>
+
+          </div>
+
+          <div class="step">
+
+            <b class="step-number">02</b>
+
+            <div>
+              <strong>التحقق من حالة الربط</strong>
+              <span>
+                تحديد رابط موقع العميل في ملف البيئة،
+                ثم توجيه الدومين إلى سيرفرك.
+              </span>
+            </div>
+
+          </div>
+
+          <div class="step">
+
+            <b class="step-number">03</b>
+
+            <div>
+              <strong>وجّه الدومين إلى Routix</strong>
+              <span>
+                بعد إعداد الموقع، وجّه حركة المرور
+                الخاصة بالدومين إلى نقطة الدخول.
+              </span>
+            </div>
+
+          </div>
+
+          <div class="step">
+
+            <b class="step-number">04</b>
+
+            <div>
+              <strong>احتفظ بإعدادات السيرفر بشكل آمن</strong>
+              <span>
+                مفاتيح النظام وبيانات الإدارة والإعدادات
+                الداخلية تبقى على السيرفر.
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="code-card">
+
+          <div class="code-title">
+            <span class="code-dot"></span>
+            ROUTIX / SITE CONFIGURATION
+          </div>
+
+          <pre># Routix Site Configuration
 
 SITE_DOMAIN=your-domain.com
 
@@ -2130,984 +2162,1216 @@ TARGET_URL الداخلي
 أو أي أسرار خاصة بالسيرفر
 داخل كود الواجهة العامة.</pre>
 
-      <div class="warning">
-        لأسباب أمنية، لا يتم عرض مفاتيح النظام أو بيانات
-        الإدارة أو إعدادات البنية الداخلية في الصفحة العامة.
+          <div class="warning">
+            لأسباب أمنية، لا يتم عرض مفاتيح النظام أو بيانات
+            الإدارة أو إعدادات البنية الداخلية في الصفحة العامة.
+          </div>
+
+        </div>
+
       </div>
 
-    </div>
+    </section>
 
-  </div>
 
-</section>
+    <!-- SETTINGS -->
 
-<!-- SETTINGS -->
-
-<section id="settings" class="section">
-
-  <div class="section-title">
-
-    <span class="eyebrow">
-      WAF CONFIGURATION
-    </span>
-
-    <h2>
-      الإعدادات التشغيلية
-    </h2>
-
-    <p>
-      يتم التحكم في السلوك التشغيلي للـWAF
-      من خلال إعدادات البيئة الموجودة على السيرفر.
-    </p>
-
-  </div>
-
-  <div class="settings-grid">
-
-    <article class="setting">
-      <h3>Traffic Control</h3>
-      <p>
-        التحكم في معدل الطلبات والحدود العامة
-        وحدود الـBurst.
-      </p>
-      <code>
-        RATE LIMITING<br>
-        BURST PROTECTION<br>
-        GLOBAL TRAFFIC
-      </code>
-    </article>
-
-    <article class="setting">
-      <h3>Risk Engine</h3>
-      <p>
-        تقييم مستوى خطورة الطلبات والمصادر
-        واتخاذ الإجراء المناسب.
-      </p>
-      <code>
-        RISK ENGINE<br>
-        THREAT DETECTION<br>
-        SECURITY RULES
-      </code>
-    </article>
-
-    <article class="setting">
-      <h3>Concurrency</h3>
-      <p>
-        التحكم في عدد الاتصالات المتزامنة لكل
-        مصدر وعلى مستوى الخدمة.
-      </p>
-      <code>
-        PER-IP LIMIT<br>
-        GLOBAL LIMIT<br>
-        CONNECTION CONTROL
-      </code>
-    </article>
-
-    <article class="setting">
-      <h3>Proxy</h3>
-      <p>
-        إدارة الاتصال بين Routix والتطبيق الأصلي.
-      </p>
-      <code>
-        REVERSE PROXY<br>
-        UPSTREAM<br>
-        CONNECTION ROUTING
-      </code>
-    </article>
-
-    <article class="setting">
-      <h3>Request Limits</h3>
-      <p>
-        التحكم في حدود ومهلات الطلبات والاتصال.
-      </p>
-      <code>
-        REQUEST LIMITS<br>
-        TIMEOUT CONTROL<br>
-        HEADER LIMITS
-      </code>
-    </article>
-
-    <article class="setting">
-      <h3>Security</h3>
-      <p>
-        مفاتيح النظام وبيانات الإدارة والإعدادات
-        الحساسة تتم إدارتها داخليًا على السيرفر.
-      </p>
-      <code>
-        SERVER SIDE ONLY<br>
-        PRIVATE CONFIGURATION<br>
-        SECRET STORAGE
-      </code>
-    </article>
-
-  </div>
-
-</section>
-
-<!-- ABOUT -->
-
-<section id="about" class="section">
-
-  <div class="about">
-
-    <div class="about-copy">
-
-      <span class="eyebrow">
-        ABOUT ROUTIX
-      </span>
+    <section id="settings" class="section">
 
       <div class="section-title">
 
+        <span class="eyebrow">
+          WAF CONFIGURATION
+        </span>
+
         <h2>
-          نبني الحماية بعقلية
-          البنية التحتية.
+          الإعدادات التشغيلية
         </h2>
 
         <p>
-          Routix مشروع تقني طوره مطورون شغوفون
-          بالأمن السيبراني، البنية التحتية وتطوير الأنظمة.
-          <br><br>
-          نؤمن أن طبقة الحماية الجيدة يجب أن تكون
-          عملية، واضحة وقابلة للمراقبة.
-          <br><br>
-          هدف Routix هو توفير طبقة WAF قابلة للدمج
-          مع المواقع والتطبيقات، مع أدوات للتحكم
-          بالترافيك ومراقبة الأحداث الأمنية.
+          يتم التحكم في السلوك التشغيلي للـWAF
+          من خلال إعدادات البيئة الموجودة على السيرفر.
         </p>
 
       </div>
 
-      <a href="#features" class="btn btn-primary">
-        استكشف Routix ←
-      </a>
+      <div class="settings-grid">
 
-    </div>
+        <article class="setting">
 
-    <div class="terminal">
+          <h3>Traffic Control</h3>
 
-      <div>
-        <span class="white">$</span>
-        routix start
+          <p>
+            التحكم في معدل الطلبات والحدود العامة
+            وحدود الـBurst.
+          </p>
+
+          <code>
+            RATE LIMITING<br>
+            BURST PROTECTION<br>
+            GLOBAL TRAFFIC
+          </code>
+
+        </article>
+
+        <article class="setting">
+
+          <h3>Risk Engine</h3>
+
+          <p>
+            تقييم مستوى خطورة الطلبات والمصادر
+            واتخاذ الإجراء المناسب.
+          </p>
+
+          <code>
+            RISK ENGINE<br>
+            THREAT DETECTION<br>
+            SECURITY RULES
+          </code>
+
+        </article>
+
+        <article class="setting">
+
+          <h3>Concurrency</h3>
+
+          <p>
+            التحكم في عدد الاتصالات المتزامنة لكل
+            مصدر وعلى مستوى الخدمة.
+          </p>
+
+          <code>
+            PER-IP LIMIT<br>
+            GLOBAL LIMIT<br>
+            CONNECTION CONTROL
+          </code>
+
+        </article>
+
+        <article class="setting">
+
+          <h3>Proxy</h3>
+
+          <p>
+            إدارة الاتصال بين Routix والتطبيق الأصلي.
+          </p>
+
+          <code>
+            REVERSE PROXY<br>
+            UPSTREAM<br>
+            CONNECTION ROUTING
+          </code>
+
+        </article>
+
+        <article class="setting">
+
+          <h3>Request Limits</h3>
+
+          <p>
+            التحكم في حدود ومهلات الطلبات والاتصال.
+          </p>
+
+          <code>
+            REQUEST LIMITS<br>
+            TIMEOUT CONTROL<br>
+            HEADER LIMITS
+          </code>
+
+        </article>
+
+        <article class="setting">
+
+          <h3>Security</h3>
+
+          <p>
+            مفاتيح النظام وبيانات الإدارة والإعدادات
+            الحساسة تتم إدارتها داخليًا على السيرفر.
+          </p>
+
+          <code>
+            SERVER SIDE ONLY<br>
+            PRIVATE CONFIGURATION<br>
+            SECRET STORAGE
+          </code>
+
+        </article>
+
       </div>
 
-      <div class="green">
-        ✓ WAF protection enabled
+    </section>
+
+
+    <!-- ABOUT -->
+
+    <section id="about" class="section">
+
+      <div class="about">
+
+        <div class="about-copy">
+
+          <span class="eyebrow">
+            ABOUT ROUTIX
+          </span>
+
+          <div class="section-title">
+
+            <h2>
+              نبني الحماية بعقلية
+              البنية التحتية.
+            </h2>
+
+            <p>
+              Routix مشروع تقني طوره مطورون شغوفون
+              بالأمن السيبراني، البنية التحتية وتطوير الأنظمة.
+              <br><br>
+              نؤمن أن طبقة الحماية الجيدة يجب أن تكون
+              عملية، واضحة وقابلة للمراقبة.
+              <br><br>
+              هدف Routix هو توفير طبقة WAF قابلة للدمج
+              مع المواقع والتطبيقات، مع أدوات للتحكم
+              بالترافيك ومراقبة الأحداث الأمنية.
+            </p>
+
+          </div>
+
+          <a href="#features" class="btn btn-primary">
+            استكشف Routix ←
+          </a>
+
+        </div>
+
+        <div class="terminal">
+
+          <div>
+            <span class="white">$</span>
+            routix start
+          </div>
+
+          <div class="green">
+            ✓ WAF protection enabled
+          </div>
+
+          <div class="green">
+            ✓ L7 inspection enabled
+          </div>
+
+          <div class="green">
+            ✓ Rate limiting enabled
+          </div>
+
+          <div class="green">
+            ✓ Risk engine enabled
+          </div>
+
+          <div class="green">
+            ✓ Honeypot monitoring enabled
+          </div>
+
+          <div class="green">
+            ✓ Blacklist engine enabled
+          </div>
+
+          <div class="green">
+            ✓ Live admin events enabled
+          </div>
+
+          <div>
+            <span class="cyan">→</span>
+            proxying through Routix
+          </div>
+
+          <div>
+            <span class="cyan">→</span>
+            protection layer active
+          </div>
+
+        </div>
+
       </div>
 
-      <div class="green">
-        ✓ L7 inspection enabled
-      </div>
+    </section>
 
-      <div class="green">
-        ✓ Rate limiting enabled
-      </div>
-
-      <div class="green">
-        ✓ Risk engine enabled
-      </div>
-
-      <div class="green">
-        ✓ Honeypot monitoring enabled
-      </div>
-
-      <div class="green">
-        ✓ Blacklist engine enabled
-      </div>
-
-      <div class="green">
-        ✓ Live admin events enabled
-      </div>
-
-      <div>
-        <span class="cyan">→</span>
-        proxying through Routix
-      </div>
-
-      <div>
-        <span class="cyan">→</span>
-        protection layer active
-      </div>
-
-    </div>
-
-  </div>
-
-</section>
-
-</main>
-
-<!-- FOOTER -->
-
-<footer>
-  © 2026 <span>Routix</span> — Cloud WAF & Application Protection
-</footer>
-
-<script>
-
-  /* =========================================================
-     AUTH SERVER
-  ========================================================== */
-
-  const AUTH_SERVER =
-    "https://production-1-54qv.onrender.com";
-
-  let currentEmail = "";
-  let currentPassword = "";
-  let isLoggedIn = false;
-  let currentUser = null;
+  </main>
 
 
-  /* =========================================================
-     API REQUEST
-  ========================================================== */
+  <!-- FOOTER -->
 
-  async function authRequest(endpoint, options = {}) {
+  <footer>
+    © 2026 <span>Routix</span> — Cloud WAF & Application Protection
+  </footer>
 
-    const config = {
-      ...options,
 
-      credentials: "include",
+  <script>
 
-      headers: {
-        ...(options.headers || {})
+    /* =========================================================
+       AUTH SERVER
+    ========================================================== */
+
+    const AUTH_SERVER =
+      "https://production-1-54qv.onrender.com";
+
+    let currentEmail = "";
+    let currentPassword = "";
+    let isLoggedIn = false;
+    let currentUser = null;
+
+
+    /* =========================================================
+       API REQUEST
+    ========================================================== */
+
+    async function authRequest(endpoint, options = {}) {
+
+      const config = {
+        ...options,
+
+        credentials: "include",
+
+        headers: {
+          ...(options.headers || {})
+        }
+      };
+
+      const response = await fetch(
+        AUTH_SERVER + endpoint,
+        config
+      );
+
+      let data = {};
+
+      try {
+
+        data = await response.json();
+
+      } catch {
+
+        data = {};
+
       }
-    };
 
-    const response = await fetch(
-      AUTH_SERVER + endpoint,
-      config
-    );
+      return {
+        response,
+        data
+      };
 
-    let data = {};
-
-    try {
-      data = await response.json();
-    } catch {
-      data = {};
     }
 
-    return {
-      response,
-      data
-    };
-  }
 
+    /* =========================================================
+       AUTH MODAL
+    ========================================================== */
 
-  /* =========================================================
-     AUTH MODAL
-  ========================================================== */
+    function openAuth() {
 
-  function openAuth() {
+      const overlay =
+        document.getElementById("authOverlay");
 
-    const overlay =
-      document.getElementById("authOverlay");
+      overlay.classList.add("show");
 
-    overlay.classList.add("show");
+      overlay.setAttribute(
+        "aria-hidden",
+        "false"
+      );
 
-    overlay.setAttribute(
-      "aria-hidden",
-      "false"
-    );
+      document.body.classList.add(
+        "auth-open"
+      );
 
-    document.body.classList.add(
-      "auth-open"
-    );
+      clearAuthMessages();
 
-    clearAuthMessages();
-
-    setAuthStep("email");
-
-    setTimeout(() => {
-
-      document
-        .getElementById("loginEmail")
-        .focus();
-
-    }, 100);
-  }
-
-
-  function closeAuth() {
-
-    const overlay =
-      document.getElementById("authOverlay");
-
-    overlay.classList.remove("show");
-
-    overlay.setAttribute(
-      "aria-hidden",
-      "true"
-    );
-
-    document.body.classList.remove(
-      "auth-open"
-    );
-  }
-
-
-  function setAuthStep(step) {
-
-    const emailStep =
-      document.getElementById("emailStep");
-
-    const otpStep =
-      document.getElementById("otpStep");
-
-    if (step === "otp") {
-
-      emailStep.classList.remove("active");
-      otpStep.classList.add("active");
-
-      document
-        .getElementById("authTitle")
-        .textContent =
-        "تأكيد تسجيل الدخول";
-
-      document
-        .getElementById("authDescription")
-        .textContent =
-        "أدخل رمز التحقق الذي وصل إلى بريدك الإلكتروني.";
+      setAuthStep("email");
 
       setTimeout(() => {
 
         document
-          .getElementById("loginOtp")
+          .getElementById("loginEmail")
           .focus();
 
       }, 100);
 
-    } else {
-
-      otpStep.classList.remove("active");
-      emailStep.classList.add("active");
-
-      document
-        .getElementById("authTitle")
-        .textContent =
-        "تسجيل الدخول";
-
-      document
-        .getElementById("authDescription")
-        .textContent =
-        "أدخل بريدك الإلكتروني وكلمة المرور لإرسال رمز تحقق آمن.";
     }
-  }
 
 
-  function backToEmail() {
+    function closeAuth() {
 
-    setAuthStep("email");
+      const overlay =
+        document.getElementById("authOverlay");
 
-    clearAuthMessages();
+      overlay.classList.remove("show");
 
-    document
-      .getElementById("loginOtp")
-      .value = "";
-  }
+      overlay.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      document.body.classList.remove(
+        "auth-open"
+      );
+
+    }
 
 
-  /* =========================================================
-     PASSWORD VISIBILITY
-  ========================================================== */
+    function setAuthStep(step) {
 
-  function togglePassword() {
+      const emailStep =
+        document.getElementById("emailStep");
 
-    const passwordInput =
-      document.getElementById("loginPassword");
+      const otpStep =
+        document.getElementById("otpStep");
 
-    const toggle =
-      document.getElementById("passwordToggle");
+      if (step === "otp") {
 
-    if (
-      passwordInput.type === "password"
+        emailStep.classList.remove("active");
+
+        otpStep.classList.add("active");
+
+        document
+          .getElementById("authTitle")
+          .textContent =
+          "تأكيد تسجيل الدخول";
+
+        document
+          .getElementById("authDescription")
+          .textContent =
+          "أدخل رمز التحقق الذي وصل إلى بريدك الإلكتروني.";
+
+        setTimeout(() => {
+
+          document
+            .getElementById("loginOtp")
+            .focus();
+
+        }, 100);
+
+      } else {
+
+        otpStep.classList.remove("active");
+
+        emailStep.classList.add("active");
+
+        document
+          .getElementById("authTitle")
+          .textContent =
+          "تسجيل الدخول";
+
+        document
+          .getElementById("authDescription")
+          .textContent =
+          "أدخل بريدك الإلكتروني وكلمة المرور لإرسال رمز تحقق آمن.";
+
+      }
+
+    }
+
+
+    function backToEmail() {
+
+      setAuthStep("email");
+
+      clearAuthMessages();
+
+      document
+        .getElementById("loginOtp")
+        .value = "";
+
+    }
+
+
+    /* =========================================================
+       PASSWORD VISIBILITY
+    ========================================================== */
+
+    function togglePassword() {
+
+      const passwordInput =
+        document.getElementById("loginPassword");
+
+      const toggle =
+        document.getElementById("passwordToggle");
+
+      if (
+        passwordInput.type === "password"
+      ) {
+
+        passwordInput.type = "text";
+
+        toggle.textContent = "◉";
+
+        toggle.setAttribute(
+          "aria-label",
+          "إخفاء كلمة المرور"
+        );
+
+      } else {
+
+        passwordInput.type = "password";
+
+        toggle.textContent = "◉";
+
+        toggle.setAttribute(
+          "aria-label",
+          "إظهار كلمة المرور"
+        );
+
+      }
+
+    }
+
+
+    /* =========================================================
+       AUTH MESSAGES
+    ========================================================== */
+
+    function showMessage(
+      elementId,
+      message,
+      type = "error"
     ) {
 
-      passwordInput.type = "text";
-
-      toggle.textContent = "◉";
-
-      toggle.setAttribute(
-        "aria-label",
-        "إخفاء كلمة المرور"
-      );
-
-    } else {
-
-      passwordInput.type = "password";
-
-      toggle.textContent = "◉";
-
-      toggle.setAttribute(
-        "aria-label",
-        "إظهار كلمة المرور"
-      );
-    }
-  }
-
-
-  /* =========================================================
-     AUTH MESSAGES
-  ========================================================== */
-
-  function showMessage(
-    elementId,
-    message,
-    type = "error"
-  ) {
-
-    const element =
-      document.getElementById(elementId);
-
-    element.textContent = message;
-
-    element.className =
-      "auth-message show " + type;
-  }
-
-
-  function clearAuthMessages() {
-
-    [
-      "emailMessage",
-      "otpMessage"
-    ].forEach(id => {
-
       const element =
-        document.getElementById(id);
+        document.getElementById(elementId);
 
-      element.textContent = "";
+      element.textContent = message;
 
       element.className =
-        "auth-message";
+        "auth-message show " + type;
 
-    });
-  }
-
-
-  /* =========================================================
-     BUTTON LOADING
-  ========================================================== */
-
-  function setButtonLoading(
-    button,
-    loading,
-    text
-  ) {
-
-    if (loading) {
-
-      button.disabled = true;
-
-      button.dataset.originalText =
-        button.innerHTML;
-
-      button.innerHTML =
-        text +
-        '<span class="auth-loading"></span>';
-
-    } else {
-
-      button.disabled = false;
-
-      button.innerHTML =
-        button.dataset.originalText ||
-        text;
     }
-  }
 
 
-  /* =========================================================
-     SEND OTP
-  ========================================================== */
+    function clearAuthMessages() {
 
-  async function sendOTP() {
-
-    const emailInput =
-      document.getElementById("loginEmail");
-
-    const passwordInput =
-      document.getElementById("loginPassword");
-
-    const button =
-      document.getElementById("sendOtpBtn");
-
-    const email =
-      emailInput.value.trim().toLowerCase();
-
-    const password =
-      passwordInput.value;
-
-    clearAuthMessages();
-
-    if (!email) {
-
-      showMessage(
+      [
         "emailMessage",
-        "أدخل بريدك الإلكتروني أولاً."
-      );
+        "otpMessage"
+      ].forEach(id => {
 
-      emailInput.focus();
+        const element =
+          document.getElementById(id);
 
-      return;
+        element.textContent = "";
+
+        element.className =
+          "auth-message";
+
+      });
+
     }
 
-    const emailPattern =
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!emailPattern.test(email)) {
+    /* =========================================================
+       BUTTON LOADING
+    ========================================================== */
 
-      showMessage(
-        "emailMessage",
-        "البريد الإلكتروني غير صالح."
-      );
-
-      emailInput.focus();
-
-      return;
-    }
-
-    if (!password) {
-
-      showMessage(
-        "emailMessage",
-        "أدخل كلمة المرور أولاً."
-      );
-
-      passwordInput.focus();
-
-      return;
-    }
-
-    if (password.length < 8) {
-
-      showMessage(
-        "emailMessage",
-        "كلمة المرور يجب أن تكون 8 أحرف أو أكثر."
-      );
-
-      passwordInput.focus();
-
-      return;
-    }
-
-    currentEmail = email;
-    currentPassword = password;
-
-    setButtonLoading(
+    function setButtonLoading(
       button,
-      true,
-      "جاري إرسال الكود"
-    );
+      loading,
+      text
+    ) {
 
-    try {
+      if (loading) {
 
-      const {
-        response,
-        data
-      } = await authRequest(
-        "/api/send-otp",
-        {
-          method:"POST",
+        button.disabled = true;
 
-          headers:{
-            "Content-Type":
-              "application/json"
-          },
+        button.dataset.originalText =
+          button.innerHTML;
 
-          body:JSON.stringify({
-            email:email,
-            password:password
-          })
-        }
+        button.innerHTML =
+          text +
+          '<span class="auth-loading"></span>';
+
+      } else {
+
+        button.disabled = false;
+
+        button.innerHTML =
+          button.dataset.originalText ||
+          text;
+
+      }
+
+    }
+
+
+    /* =========================================================
+       REGISTER + SEND OTP
+       
+       FLOW:
+
+       POST /api/register
+       email + password
+
+       SERVER
+          ↓
+       Generate OTP
+          ↓
+       Brevo
+          ↓
+       Email OTP
+    ========================================================== */
+
+    async function sendOTP() {
+
+      const emailInput =
+        document.getElementById("loginEmail");
+
+      const passwordInput =
+        document.getElementById("loginPassword");
+
+      const button =
+        document.getElementById("sendOtpBtn");
+
+      const email =
+        emailInput.value.trim().toLowerCase();
+
+      const password =
+        passwordInput.value;
+
+      clearAuthMessages();
+
+
+      /* EMAIL */
+
+      if (!email) {
+
+        showMessage(
+          "emailMessage",
+          "أدخل بريدك الإلكتروني أولاً."
+        );
+
+        emailInput.focus();
+
+        return;
+
+      }
+
+
+      const emailPattern =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailPattern.test(email)) {
+
+        showMessage(
+          "emailMessage",
+          "البريد الإلكتروني غير صالح."
+        );
+
+        emailInput.focus();
+
+        return;
+
+      }
+
+
+      /* PASSWORD */
+
+      if (!password) {
+
+        showMessage(
+          "emailMessage",
+          "أدخل كلمة المرور أولاً."
+        );
+
+        passwordInput.focus();
+
+        return;
+
+      }
+
+
+      if (password.length < 8) {
+
+        showMessage(
+          "emailMessage",
+          "كلمة المرور يجب أن تكون 8 أحرف أو أكثر."
+        );
+
+        passwordInput.focus();
+
+        return;
+
+      }
+
+
+      /*
+       * نحفظ البيانات مؤقتًا حتى نرسلها
+       * مرة أخرى مع OTP إلى /api/verify-otp
+       */
+
+      currentEmail = email;
+      currentPassword = password;
+
+
+      setButtonLoading(
+        button,
+        true,
+        "جاري إرسال الكود"
       );
 
-      if (!response.ok || !data.success) {
+
+      try {
+
+        /*
+         * IMPORTANT:
+         *
+         * هنا تم تغيير endpoint من:
+         *
+         * /api/send-otp
+         *
+         * إلى:
+         *
+         * /api/register
+         *
+         * حسب التدفق المطلوب.
+         */
+
+        const {
+          response,
+          data
+        } = await authRequest(
+          "/api/register",
+          {
+            method:"POST",
+
+            headers:{
+              "Content-Type":
+                "application/json"
+            },
+
+            body:JSON.stringify({
+              email:email,
+              password:password
+            })
+          }
+        );
+
+
+        if (
+          !response.ok ||
+          !data.success
+        ) {
+
+          showMessage(
+            "emailMessage",
+            data.message ||
+            "تعذر إرسال كود التحقق."
+          );
+
+          return;
+
+        }
+
+
+        /*
+         * عرض البريد في شاشة OTP
+         */
+
+        document
+          .getElementById("authEmailDisplay")
+          .textContent = email;
+
 
         showMessage(
           "emailMessage",
           data.message ||
-          "تعذر إرسال كود التحقق."
+          "تم إرسال كود التحقق إلى بريدك الإلكتروني.",
+          "success"
+        );
+
+
+        /*
+         * الانتقال إلى شاشة OTP
+         */
+
+        setAuthStep("otp");
+
+
+      } catch (error) {
+
+        console.error(
+          "Register / Send OTP Error:",
+          error
+        );
+
+        showMessage(
+          "emailMessage",
+          "تعذر الاتصال بسيرفر تسجيل الدخول. تحقق من اتصال الإنترنت."
+        );
+
+      } finally {
+
+        setButtonLoading(
+          button,
+          false,
+          "إرسال كود التحقق"
+        );
+
+      }
+
+    }
+
+
+    /* =========================================================
+       VERIFY OTP
+       
+       POST /api/verify-otp
+
+       email + password + otp
+
+       SERVER
+          ↓
+       Verify OTP
+          ↓
+       Confirm Registration
+          ↓
+       Login Session
+    ========================================================== */
+
+    async function verifyOTP() {
+
+      const otpInput =
+        document.getElementById("loginOtp");
+
+      const button =
+        document.getElementById("verifyOtpBtn");
+
+      const otp =
+        otpInput.value.trim();
+
+      clearAuthMessages();
+
+
+      if (!currentEmail) {
+
+        backToEmail();
+
+        return;
+
+      }
+
+
+      if (!currentPassword) {
+
+        backToEmail();
+
+        showMessage(
+          "emailMessage",
+          "أدخل البريد الإلكتروني وكلمة المرور مرة أخرى."
         );
 
         return;
+
       }
 
-      document
-        .getElementById("authEmailDisplay")
-        .textContent = email;
 
-      showMessage(
-        "emailMessage",
-        "تم إرسال كود التحقق إلى بريدك الإلكتروني.",
-        "success"
-      );
-
-      setAuthStep("otp");
-
-    } catch (error) {
-
-      console.error(
-        "Send OTP Error:",
-        error
-      );
-
-      showMessage(
-        "emailMessage",
-        "تعذر الاتصال بسيرفر تسجيل الدخول. تحقق من اتصال الإنترنت."
-      );
-
-    } finally {
-
-      setButtonLoading(
-        button,
-        false,
-        "إرسال كود التحقق"
-      );
-    }
-  }
-
-
-  /* =========================================================
-     VERIFY OTP
-  ========================================================== */
-
-  async function verifyOTP() {
-
-    const otpInput =
-      document.getElementById("loginOtp");
-
-    const button =
-      document.getElementById("verifyOtpBtn");
-
-    const otp =
-      otpInput.value.trim();
-
-    clearAuthMessages();
-
-    if (!currentEmail) {
-
-      backToEmail();
-
-      return;
-    }
-
-    if (!currentPassword) {
-
-      backToEmail();
-
-      showMessage(
-        "emailMessage",
-        "أدخل البريد الإلكتروني وكلمة المرور مرة أخرى."
-      );
-
-      return;
-    }
-
-    if (!/^\d{6}$/.test(otp)) {
-
-      showMessage(
-        "otpMessage",
-        "أدخل كود التحقق المكون من 6 أرقام."
-      );
-
-      otpInput.focus();
-
-      return;
-    }
-
-    setButtonLoading(
-      button,
-      true,
-      "جاري التحقق"
-    );
-
-    try {
-
-      const {
-        response,
-        data
-      } = await authRequest(
-        "/api/verify-otp",
-        {
-          method:"POST",
-
-          headers:{
-            "Content-Type":
-              "application/json"
-          },
-
-          body:JSON.stringify({
-            email:currentEmail,
-            password:currentPassword,
-            otp:otp
-          })
-        }
-      );
-
-      if (!response.ok || !data.success) {
+      if (!/^\d{6}$/.test(otp)) {
 
         showMessage(
           "otpMessage",
-          data.message ||
-          "كود التحقق أو بيانات الدخول غير صحيحة."
+          "أدخل كود التحقق المكون من 6 أرقام."
         );
 
+        otpInput.focus();
+
         return;
+
       }
 
-      isLoggedIn = true;
-
-      currentUser =
-        data.user || {
-          email:currentEmail
-        };
-
-      currentPassword = "";
-
-      updateAuthUI();
-
-      showMessage(
-        "otpMessage",
-        "تم تسجيل الدخول بنجاح.",
-        "success"
-      );
-
-      setTimeout(() => {
-
-        closeAuth();
-
-      },700);
-
-    } catch (error) {
-
-      console.error(
-        "Verify OTP Error:",
-        error
-      );
-
-      showMessage(
-        "otpMessage",
-        "تعذر الاتصال بسيرفر تسجيل الدخول."
-      );
-
-    } finally {
 
       setButtonLoading(
         button,
-        false,
-        "تأكيد تسجيل الدخول"
+        true,
+        "جاري التحقق"
       );
-    }
-  }
 
 
-  /* =========================================================
-     CHECK EXISTING SESSION
-  ========================================================== */
+      try {
 
-  async function checkSession() {
+        /*
+         * إرسال:
+         *
+         * email
+         * password
+         * otp
+         *
+         * إلى السيرفر
+         */
 
-    try {
+        const {
+          response,
+          data
+        } = await authRequest(
+          "/api/verify-otp",
+          {
+            method:"POST",
 
-      const {
-        response,
-        data
-      } = await authRequest(
-        "/api/profile",
-        {
-          method:"GET"
+            headers:{
+              "Content-Type":
+                "application/json"
+            },
+
+            body:JSON.stringify({
+              email:currentEmail,
+              password:currentPassword,
+              otp:otp
+            })
+          }
+        );
+
+
+        if (
+          !response.ok ||
+          !data.success
+        ) {
+
+          showMessage(
+            "otpMessage",
+            data.message ||
+            "كود التحقق أو بيانات الدخول غير صحيحة."
+          );
+
+          return;
+
         }
-      );
 
-      if (
-        response.ok &&
-        data.success &&
-        data.loggedIn
-      ) {
+
+        /*
+         * تم تأكيد التسجيل / تسجيل الدخول
+         */
 
         isLoggedIn = true;
 
         currentUser =
-          data.user || null;
+          data.user || {
+            email:currentEmail
+          };
 
-        currentEmail =
-          currentUser?.email || "";
+
+        /*
+         * لا نحتاج الاحتفاظ بكلمة المرور
+         * بعد نجاح التحقق.
+         */
+
+        currentPassword = "";
+
+
+        updateAuthUI();
+
+
+        showMessage(
+          "otpMessage",
+          data.message ||
+          "تم تسجيل الدخول بنجاح.",
+          "success"
+        );
+
+
+        setTimeout(() => {
+
+          closeAuth();
+
+        },700);
+
+
+      } catch (error) {
+
+        console.error(
+          "Verify OTP Error:",
+          error
+        );
+
+        showMessage(
+          "otpMessage",
+          "تعذر الاتصال بسيرفر تسجيل الدخول."
+        );
+
+      } finally {
+
+        setButtonLoading(
+          button,
+          false,
+          "تأكيد تسجيل الدخول"
+        );
+
+      }
+
+    }
+
+
+    /* =========================================================
+       CHECK EXISTING SESSION
+    ========================================================== */
+
+    async function checkSession() {
+
+      try {
+
+        const {
+          response,
+          data
+        } = await authRequest(
+          "/api/profile",
+          {
+            method:"GET"
+          }
+        );
+
+
+        if (
+          response.ok &&
+          data.success &&
+          data.loggedIn
+        ) {
+
+          isLoggedIn = true;
+
+          currentUser =
+            data.user || null;
+
+          currentEmail =
+            currentUser?.email || "";
+
+        } else {
+
+          isLoggedIn = false;
+
+          currentUser = null;
+
+          currentEmail = "";
+
+        }
+
+
+        updateAuthUI();
+
+
+      } catch (error) {
+
+        console.warn(
+          "Session check failed:",
+          error
+        );
+
+        isLoggedIn = false;
+
+        updateAuthUI();
+
+      }
+
+    }
+
+
+    /* =========================================================
+       UPDATE AUTH UI
+    ========================================================== */
+
+    function updateAuthUI() {
+
+      const loginButton =
+        document.getElementById(
+          "headerLoginBtn"
+        );
+
+      const userElement =
+        document.getElementById(
+          "headerUser"
+        );
+
+      const logoutButton =
+        document.getElementById(
+          "headerLogoutBtn"
+        );
+
+      const userEmail =
+        document.getElementById(
+          "headerUserEmail"
+        );
+
+
+      if (isLoggedIn) {
+
+        loginButton.style.display =
+          "none";
+
+        userElement.style.display =
+          "inline-flex";
+
+        logoutButton.style.display =
+          "inline-flex";
+
+        userEmail.textContent =
+          currentUser?.email ||
+          currentEmail ||
+          "USER";
 
       } else {
 
-        isLoggedIn = false;
-        currentUser = null;
-        currentEmail = "";
+        loginButton.style.display =
+          "inline-flex";
+
+        userElement.style.display =
+          "none";
+
+        logoutButton.style.display =
+          "none";
+
+        userEmail.textContent = "";
 
       }
 
-      updateAuthUI();
-
-    } catch (error) {
-
-      console.warn(
-        "Session check failed:",
-        error
-      );
-
-      isLoggedIn = false;
-
-      updateAuthUI();
     }
-  }
 
 
-  /* =========================================================
-     UPDATE AUTH UI
-  ========================================================== */
+    /* =========================================================
+       LOGOUT
+    ========================================================== */
 
-  function updateAuthUI() {
+    async function logout() {
 
-    const loginButton =
-      document.getElementById(
-        "headerLoginBtn"
-      );
+      try {
 
-    const userElement =
-      document.getElementById(
-        "headerUser"
-      );
+        const {
+          response,
+          data
+        } = await authRequest(
+          "/api/logout",
+          {
+            method:"POST"
+          }
+        );
 
-    const logoutButton =
-      document.getElementById(
-        "headerLogoutBtn"
-      );
 
-    const userEmail =
-      document.getElementById(
-        "headerUserEmail"
-      );
+        if (
+          !response.ok ||
+          !data.success
+        ) {
 
-    if (isLoggedIn) {
+          console.warn(
+            "Logout response:",
+            data
+          );
 
-      loginButton.style.display =
-        "none";
+        }
 
-      userElement.style.display =
-        "inline-flex";
 
-      logoutButton.style.display =
-        "inline-flex";
+      } catch (error) {
 
-      userEmail.textContent =
-        currentUser?.email ||
-        currentEmail ||
-        "USER";
+        console.error(
+          "Logout Error:",
+          error
+        );
 
-    } else {
 
-      loginButton.style.display =
-        "inline-flex";
+      } finally {
 
-      userElement.style.display =
-        "none";
+        isLoggedIn = false;
 
-      logoutButton.style.display =
-        "none";
+        currentUser = null;
 
-      userEmail.textContent = "";
+        currentEmail = "";
+
+        currentPassword = "";
+
+        updateAuthUI();
+
+      }
+
     }
-  }
 
 
-  /* =========================================================
-     LOGOUT
-  ========================================================== */
+    /* =========================================================
+       INTRO
+    ========================================================== */
 
-  async function logout() {
+    function enterPlatform() {
 
-    try {
+      const intro =
+        document.getElementById("intro");
 
-      const {
-        response,
-        data
-      } = await authRequest(
-        "/api/logout",
-        {
-          method:"POST"
+      intro.classList.add("hidden");
+
+      document.body.classList.remove(
+        "locked"
+      );
+
+      setTimeout(() => {
+
+        intro.style.display = "none";
+
+      },750);
+
+    }
+
+
+    /* =========================================================
+       MOBILE MENU
+    ========================================================== */
+
+    function toggleMenu() {
+
+      const nav =
+        document.getElementById("nav");
+
+      nav.classList.toggle(
+        "mobile-open"
+      );
+
+    }
+
+
+    document
+      .querySelectorAll("#nav a")
+      .forEach(link => {
+
+        link.addEventListener(
+          "click",
+          () => {
+
+            document
+              .getElementById("nav")
+              .classList.remove(
+                "mobile-open"
+              );
+
+          }
+        );
+
+      });
+
+
+    /* =========================================================
+       CLOSE AUTH OUTSIDE
+    ========================================================== */
+
+    document
+      .getElementById("authOverlay")
+      .addEventListener(
+        "click",
+        event => {
+
+          if (
+            event.target.id ===
+            "authOverlay"
+          ) {
+
+            closeAuth();
+
+          }
+
         }
       );
 
-      if (!response.ok || !data.success) {
 
-        console.warn(
-          "Logout response:",
-          data
-        );
-      }
+    /* =========================================================
+       ESCAPE
+    ========================================================== */
 
-    } catch (error) {
+    document.addEventListener(
+      "keydown",
+      event => {
 
-      console.error(
-        "Logout Error:",
-        error
-      );
-
-    } finally {
-
-      isLoggedIn = false;
-
-      currentUser = null;
-
-      currentEmail = "";
-
-      currentPassword = "";
-
-      updateAuthUI();
-    }
-  }
-
-
-  /* =========================================================
-     INTRO
-  ========================================================== */
-
-  function enterPlatform() {
-
-    const intro =
-      document.getElementById("intro");
-
-    intro.classList.add("hidden");
-
-    document.body.classList.remove(
-      "locked"
-    );
-
-    setTimeout(() => {
-
-      intro.style.display = "none";
-
-    },750);
-  }
-
-
-  /* =========================================================
-     MOBILE MENU
-  ========================================================== */
-
-  function toggleMenu() {
-
-    const nav =
-      document.getElementById("nav");
-
-    nav.classList.toggle(
-      "mobile-open"
-    );
-  }
-
-
-  document
-    .querySelectorAll("#nav a")
-    .forEach(link => {
-
-      link.addEventListener(
-        "click",
-        () => {
+        if (event.key === "Escape") {
 
           document
             .getElementById("nav")
@@ -3115,185 +3379,148 @@ TARGET_URL الداخلي
               "mobile-open"
             );
 
-        }
-      );
-
-    });
-
-
-  /* =========================================================
-     CLOSE AUTH OUTSIDE
-  ========================================================== */
-
-  document
-    .getElementById("authOverlay")
-    .addEventListener(
-      "click",
-      event => {
-
-        if (
-          event.target.id ===
-          "authOverlay"
-        ) {
-
           closeAuth();
+
         }
 
       }
     );
 
 
-  /* =========================================================
-     ESCAPE
-  ========================================================== */
+    /* =========================================================
+       OTP INPUT
+    ========================================================== */
 
-  document.addEventListener(
-    "keydown",
-    event => {
+    document
+      .getElementById("loginOtp")
+      .addEventListener(
+        "input",
+        event => {
 
-      if (event.key === "Escape") {
+          event.target.value =
+            event.target.value
+              .replace(/\D/g,"")
+              .slice(0,6);
 
-        document
-          .getElementById("nav")
-          .classList.remove(
-            "mobile-open"
-          );
+        }
+      );
 
-        closeAuth();
-      }
+
+    /* =========================================================
+       EMAIL ENTER
+    ========================================================== */
+
+    document
+      .getElementById("loginEmail")
+      .addEventListener(
+        "keydown",
+        event => {
+
+          if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            sendOTP();
+
+          }
+
+        }
+      );
+
+
+    /* =========================================================
+       PASSWORD ENTER
+    ========================================================== */
+
+    document
+      .getElementById("loginPassword")
+      .addEventListener(
+        "keydown",
+        event => {
+
+          if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            sendOTP();
+
+          }
+
+        }
+      );
+
+
+    /* =========================================================
+       OTP ENTER
+    ========================================================== */
+
+    document
+      .getElementById("loginOtp")
+      .addEventListener(
+        "keydown",
+        event => {
+
+          if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            verifyOTP();
+
+          }
+
+        }
+      );
+
+
+    /* =========================================================
+       CYBER PARTICLES
+    ========================================================== */
+
+    const particles =
+      document.getElementById(
+        "particles"
+      );
+
+
+    for (
+      let i = 0;
+      i < 32;
+      i++
+    ) {
+
+      const p =
+        document.createElement(
+          "span"
+        );
+
+      p.className =
+        "particle";
+
+      p.style.left =
+        Math.random() * 100 + "%";
+
+      p.style.top =
+        (40 + Math.random() * 60) + "%";
+
+      p.style.animationDelay =
+        (Math.random() * 8) + "s";
+
+      p.style.animationDuration =
+        (5 + Math.random() * 7) + "s";
+
+      particles.appendChild(p);
 
     }
-  );
 
 
-  /* =========================================================
-     OTP INPUT
-  ========================================================== */
+    /* =========================================================
+       INITIAL SESSION CHECK
+    ========================================================== */
 
-  document
-    .getElementById("loginOtp")
-    .addEventListener(
-      "input",
-      event => {
+    checkSession();
 
-        event.target.value =
-          event.target.value
-            .replace(/\D/g,"")
-            .slice(0,6);
-
-      }
-    );
-
-
-  /* =========================================================
-     EMAIL ENTER
-  ========================================================== */
-
-  document
-    .getElementById("loginEmail")
-    .addEventListener(
-      "keydown",
-      event => {
-
-        if (event.key === "Enter") {
-
-          event.preventDefault();
-
-          sendOTP();
-        }
-
-      }
-    );
-
-
-  /* =========================================================
-     PASSWORD ENTER
-  ========================================================== */
-
-  document
-    .getElementById("loginPassword")
-    .addEventListener(
-      "keydown",
-      event => {
-
-        if (event.key === "Enter") {
-
-          event.preventDefault();
-
-          sendOTP();
-        }
-
-      }
-    );
-
-
-  /* =========================================================
-     OTP ENTER
-  ========================================================== */
-
-  document
-    .getElementById("loginOtp")
-    .addEventListener(
-      "keydown",
-      event => {
-
-        if (event.key === "Enter") {
-
-          event.preventDefault();
-
-          verifyOTP();
-        }
-
-      }
-    );
-
-
-  /* =========================================================
-     CYBER PARTICLES
-  ========================================================== */
-
-  const particles =
-    document.getElementById(
-      "particles"
-    );
-
-  for (
-    let i = 0;
-    i < 32;
-    i++
-  ) {
-
-    const p =
-      document.createElement(
-        "span"
-      );
-
-    p.className =
-      "particle";
-
-    p.style.left =
-      Math.random() * 100 + "%";
-
-    p.style.top =
-      (40 + Math.random() * 60) + "%";
-
-    p.style.animationDelay =
-      (Math.random() * 8) + "s";
-
-    p.style.animationDuration =
-      (5 + Math.random() * 7) + "s";
-
-    particles.appendChild(p);
-  }
-
-
-  /* =========================================================
-     INITIAL SESSION CHECK
-  ========================================================== */
-
-  checkSession();
-
-</script>
+  </script>
 
 </body>
+
 </html>
