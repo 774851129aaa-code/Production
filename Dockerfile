@@ -6,7 +6,7 @@ COPY package*.json ./
 
 RUN npm install
 
-# نسخ كافة الملفات الضرورية (بما فيها server.js والملفات الأخرى)
+# نسخ كافة الملفات الضرورية بما فيها server.js
 COPY cloud-waf-proxy.ts ./
 COPY server.js ./
 COPY index.html ./
@@ -27,5 +27,5 @@ EXPOSE 8080
 
 USER node
 
-# استخدام أمر البدء الجديد لتشغيل الملفين بالتوازي عبر concurrently
+# استخدام npm start لتشغيل الملفين بالتوازي عبر concurrently
 CMD ["npm", "start"]
