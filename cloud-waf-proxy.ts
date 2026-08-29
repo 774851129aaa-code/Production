@@ -4781,21 +4781,18 @@ async function loadStats() {
 
 async function loadBlacklists() {
 
-  const body =
-    document.getElementById(
-      "blacklistsBody"
-    );
+      const body =
+      document.getElementById(
+        "blacklistsBody"
+      );
 
-  body.innerHTML = `
-    <tr>
-      <td
-        colspan="8"
-        class="empty"
-      >
-        جاري التحميل...
-      </td>
-    </tr>
-  `;
+    body.innerHTML = `
+      <tr>
+        <td colspan="8" class="empty">
+          جاري التحميل...
+        </td>
+      </tr>
+    `;
 
   try {
 
