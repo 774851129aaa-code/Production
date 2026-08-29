@@ -1,5 +1,4 @@
-<!DOCTYPE html><html lang="ar" dir="rtl">
-<head>
+<!DOCTYPE html><html lang="ar" dir="rtl"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#02060b">
@@ -48,18 +47,27 @@
       overflow: hidden;
     }
 
+    body.auth-open {
+      overflow: hidden;
+    }
+
     a {
       color: inherit;
       text-decoration: none;
     }
 
-    button {
+    button,
+    input {
       font-family: inherit;
+    }
+
+    button {
+      cursor: pointer;
     }
 
     /* =========================================================
        CYBER BACKGROUND
-    ========================================================= */
+    ========================================================== */
 
     .cyber-bg {
       position: fixed;
@@ -168,12 +176,15 @@
         transform: translateY(20px);
         opacity: 0;
       }
+
       20% {
         opacity: 1;
       }
+
       80% {
         opacity: .8;
       }
+
       to {
         transform: translateY(-180px);
         opacity: 0;
@@ -182,7 +193,7 @@
 
     /* =========================================================
        INTRO SCREEN
-    ========================================================= */
+    ========================================================== */
 
     .intro {
       position: fixed;
@@ -223,8 +234,7 @@
       top: 50%;
       transform: translate(-50%, -50%);
       border-radius: 50%;
-      border:
-        1px solid rgba(54,230,255,.16);
+      border: 1px solid rgba(54,230,255,.16);
       box-shadow:
         0 0 100px rgba(54,230,255,.08),
         inset 0 0 100px rgba(54,230,255,.05);
@@ -378,6 +388,7 @@
         opacity: 0;
         transform: translateY(18px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -389,6 +400,7 @@
         opacity: 0;
         transform: rotate(45deg) scale(.6);
       }
+
       to {
         opacity: 1;
         transform: rotate(45deg) scale(1);
@@ -477,7 +489,15 @@
       background: rgba(54,230,255,.065);
     }
 
-    .header-admin {
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-admin,
+    .header-login,
+    .header-user {
       display: inline-flex;
       align-items: center;
       gap: 7px;
@@ -487,11 +507,24 @@
       color: var(--cyan);
       font-size: 11px;
       transition: .2s;
+      background: transparent;
     }
 
-    .header-admin:hover {
+    .header-admin:hover,
+    .header-login:hover,
+    .header-user:hover {
       border-color: var(--border-hover);
       background: rgba(54,230,255,.06);
+    }
+
+    .header-user {
+      color: var(--green);
+      cursor: default;
+    }
+
+    .header-logout {
+      color: var(--red);
+      cursor: pointer;
     }
 
     .mobile-menu {
@@ -503,6 +536,270 @@
       color: white;
       cursor: pointer;
       font-size: 18px;
+    }
+
+    /* =========================================================
+       AUTH MODAL
+    ========================================================== */
+
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background:
+        radial-gradient(
+          circle at center,
+          rgba(54,230,255,.06),
+          rgba(2,5,10,.94) 55%
+        );
+      backdrop-filter: blur(14px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: .25s ease;
+    }
+
+    .auth-overlay.show {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .auth-box {
+      position: relative;
+      width: min(440px, 100%);
+      padding: 30px;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background:
+        radial-gradient(
+          circle at 80% 0%,
+          rgba(57,124,255,.13),
+          transparent 35%
+        ),
+        linear-gradient(
+          145deg,
+          rgba(8,19,31,.98),
+          rgba(3,8,14,.98)
+        );
+      box-shadow:
+        0 30px 100px rgba(0,0,0,.65),
+        0 0 50px rgba(54,230,255,.06);
+      transform: translateY(18px) scale(.97);
+      transition: .25s ease;
+    }
+
+    .auth-overlay.show .auth-box {
+      transform: translateY(0) scale(1);
+    }
+
+    .auth-close {
+      position: absolute;
+      top: 13px;
+      left: 13px;
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.025);
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .auth-close:hover {
+      color: white;
+      border-color: var(--border-hover);
+    }
+
+    .auth-logo {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 22px;
+      position: relative;
+      transform: rotate(45deg);
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 28px rgba(54,230,255,.13);
+    }
+
+    .auth-logo::before {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      border: 1px solid rgba(54,230,255,.6);
+    }
+
+    .auth-logo::after {
+      content: "";
+      position: absolute;
+      inset: 18px;
+      border: 1px solid var(--cyan);
+      background: rgba(54,230,255,.12);
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .auth-header .eyebrow {
+      margin-bottom: 8px;
+    }
+
+    .auth-header h2 {
+      font-size: 25px;
+      margin-bottom: 9px;
+    }
+
+    .auth-header p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.8;
+    }
+
+    .auth-step {
+      display: none;
+    }
+
+    .auth-step.active {
+      display: block;
+    }
+
+    .auth-label {
+      display: block;
+      margin-bottom: 8px;
+      color: #b8cbd8;
+      font-size: 11px;
+    }
+
+    .auth-input {
+      width: 100%;
+      height: 48px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      outline: none;
+      color: white;
+      background: rgba(1,5,9,.8);
+      direction: ltr;
+      text-align: left;
+      transition: .2s;
+    }
+
+    .auth-input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(54,230,255,.07);
+    }
+
+    .otp-input {
+      text-align: center;
+      letter-spacing: 8px;
+      font: 900 22px Consolas, monospace;
+    }
+
+    .auth-btn {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 13px;
+      border: 0;
+      border-radius: 11px;
+      color: #021018;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      transition: .2s;
+    }
+
+    .auth-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .auth-btn:disabled {
+      opacity: .55;
+      cursor: wait;
+      transform: none;
+    }
+
+    .auth-secondary {
+      width: 100%;
+      min-height: 44px;
+      margin-top: 9px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      color: var(--muted);
+      background: rgba(255,255,255,.025);
+    }
+
+    .auth-secondary:hover {
+      color: white;
+      border-color: var(--border-hover);
+    }
+
+    .auth-message {
+      display: none;
+      margin-top: 13px;
+      padding: 11px;
+      border-radius: 9px;
+      font-size: 11px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .auth-message.show {
+      display: block;
+    }
+
+    .auth-message.error {
+      color: #ff9aaa;
+      border: 1px solid rgba(255,82,109,.2);
+      background: rgba(255,82,109,.055);
+    }
+
+    .auth-message.success {
+      color: #8cf3c5;
+      border: 1px solid rgba(67,230,167,.2);
+      background: rgba(67,230,167,.055);
+    }
+
+    .auth-email-display {
+      margin: 12px 0 16px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--cyan);
+      background: rgba(54,230,255,.035);
+      direction: ltr;
+      text-align: center;
+      font: 11px Consolas, monospace;
+      word-break: break-all;
+    }
+
+    .auth-note {
+      margin-top: 13px;
+      color: var(--muted2);
+      font-size: 10px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .auth-loading {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      margin-left: 7px;
+      border: 2px solid rgba(2,16,24,.25);
+      border-top-color: #021018;
+      border-radius: 50%;
+      vertical-align: -2px;
+      animation: authSpin .7s linear infinite;
+    }
+
+    @keyframes authSpin {
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     /* =========================================================
@@ -925,7 +1222,7 @@
 
     .flow {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(9, 1fr);
       gap: 10px;
       align-items: center;
     }
@@ -1134,9 +1431,7 @@
         grid-template-columns: 1fr 30px 1fr;
       }
 
-      .flow-node:nth-of-type(1),
-      .flow-node:nth-of-type(3),
-      .flow-node:nth-of-type(5) {
+      .flow-node {
         grid-column: span 1;
       }
     }
@@ -1147,7 +1442,9 @@
       }
 
       nav,
-      .header-admin {
+      .header-admin,
+      .header-user,
+      .header-logout {
         display: none;
       }
 
@@ -1207,6 +1504,15 @@
       .intro p {
         font-size: 14px;
       }
+
+      .header-actions {
+        margin-right: auto;
+        margin-left: 10px;
+      }
+
+      .header-login {
+        display: inline-flex;
+      }
     }
 
     @media (max-width: 500px) {
@@ -1244,6 +1550,14 @@
 
       .intro-corner {
         display: none;
+      }
+
+      .auth-box {
+        padding: 25px 20px;
+      }
+
+      .header-login {
+        padding: 8px 10px;
       }
     }
 
@@ -1299,6 +1613,153 @@
 </div>
 
   </section>  <!-- =========================================================
+       AUTH MODAL
+  ========================================================== -->  <div
+    class="auth-overlay"
+    id="authOverlay"
+    aria-hidden="true"
+  ><div
+  class="auth-box"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="authTitle"
+>
+
+  <button
+    class="auth-close"
+    type="button"
+    onclick="closeAuth()"
+    aria-label="إغلاق"
+  >
+    ×
+  </button>
+
+  <div class="auth-logo"></div>
+
+  <div class="auth-header">
+
+    <span class="eyebrow">
+      ROUTIX AUTHENTICATION
+    </span>
+
+    <h2 id="authTitle">
+      تسجيل الدخول
+    </h2>
+
+    <p id="authDescription">
+      أدخل بريدك الإلكتروني لإرسال رمز تحقق آمن.
+    </p>
+
+  </div>
+
+  <!-- =====================================================
+       STEP 1 — EMAIL
+  ====================================================== -->
+
+  <div
+    class="auth-step active"
+    id="emailStep"
+  >
+
+    <label
+      class="auth-label"
+      for="loginEmail"
+    >
+      البريد الإلكتروني
+    </label>
+
+    <input
+      class="auth-input"
+      id="loginEmail"
+      type="email"
+      inputmode="email"
+      autocomplete="email"
+      placeholder="example@email.com"
+      maxlength="150"
+    >
+
+    <button
+      class="auth-btn"
+      id="sendOtpBtn"
+      type="button"
+      onclick="sendOTP()"
+    >
+      إرسال كود التحقق
+    </button>
+
+    <div
+      class="auth-message"
+      id="emailMessage"
+    ></div>
+
+    <div class="auth-note">
+      سيتم إرسال رمز تحقق مؤقت إلى بريدك الإلكتروني.
+      لا تتم مشاركة الرمز مع أي شخص.
+    </div>
+
+  </div>
+
+  <!-- =====================================================
+       STEP 2 — OTP
+  ====================================================== -->
+
+  <div
+    class="auth-step"
+    id="otpStep"
+  >
+
+    <div class="auth-email-display" id="authEmailDisplay">
+    </div>
+
+    <label
+      class="auth-label"
+      for="loginOtp"
+    >
+      رمز التحقق
+    </label>
+
+    <input
+      class="auth-input otp-input"
+      id="loginOtp"
+      type="text"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      maxlength="6"
+      placeholder="000000"
+    >
+
+    <button
+      class="auth-btn"
+      id="verifyOtpBtn"
+      type="button"
+      onclick="verifyOTP()"
+    >
+      تأكيد تسجيل الدخول
+    </button>
+
+    <button
+      class="auth-secondary"
+      id="backToEmailBtn"
+      type="button"
+      onclick="backToEmail()"
+    >
+      تغيير البريد الإلكتروني
+    </button>
+
+    <div
+      class="auth-message"
+      id="otpMessage"
+    ></div>
+
+    <div class="auth-note">
+      الرمز صالح لمدة 5 دقائق فقط.
+    </div>
+
+  </div>
+
+</div>
+
+  </div>  <!-- =========================================================
        HEADER
   ========================================================== -->  <header><a href="#home" class="brand">
   <span class="brand-logo"></span>
@@ -1317,12 +1778,55 @@
 
 </nav>
 
-<a href="/admin" class="header-admin">
-  <span>▣</span>
-  لوحة الإدارة
-</a>
+<div class="header-actions">
 
-<button class="mobile-menu" onclick="toggleMenu()">
+  <!-- يظهر عندما لا توجد جلسة -->
+  <button
+    class="header-login"
+    id="headerLoginBtn"
+    type="button"
+    onclick="openAuth()"
+  >
+    <span>◉</span>
+    تسجيل الدخول
+  </button>
+
+  <!-- يظهر عندما توجد جلسة -->
+  <span
+    class="header-user"
+    id="headerUser"
+    style="display:none;"
+  >
+    <span>●</span>
+    <span id="headerUserEmail"></span>
+  </span>
+
+  <button
+    class="header-logout"
+    id="headerLogoutBtn"
+    type="button"
+    onclick="logout()"
+    style="display:none;"
+  >
+    خروج
+  </button>
+
+  <button
+    class="header-admin"
+    type="button"
+    onclick="openAdmin()"
+  >
+    <span>▣</span>
+    لوحة الإدارة
+  </button>
+
+</div>
+
+<button
+  class="mobile-menu"
+  onclick="toggleMenu()"
+  type="button"
+>
   ☰
 </button>
 
@@ -1353,9 +1857,13 @@
 
     <div class="dashboard-actions">
 
-      <a href="/admin" class="btn btn-primary">
+      <button
+        class="btn btn-primary"
+        type="button"
+        onclick="openAdmin()"
+      >
         فتح لوحة الإدارة ←
-      </a>
+      </button>
 
       <a href="#features" class="btn">
         استكشف المميزات
@@ -1676,7 +2184,9 @@
         <b class="step-number">02</b>
         <div>
           <strong>التحقق من حالة الربط</strong>
-          <span>تحديد رابط موقع العميل في ملف البيئة، ثم توجيه الدومين إلى سيرفرك.
+          <span>
+            تحديد رابط موقع العميل في ملف البيئة،
+            ثم توجيه الدومين إلى سيرفرك.
           </span>
         </div>
       </div>
@@ -1713,21 +2223,29 @@
         ROUTIX / SITE CONFIGURATION
       </div>
 
-<pre># Routix Site Configuration
+      <pre># Routix Site Configuration
 
 SITE_DOMAIN=your-domain.com
 
 SITE_TOKEN=YOUR_SITE_TOKEN
 
-# يتم إنشاء القيم الحساسة
-# وإدارتها من خلال السيرفر
+يتم إنشاء القيم الحساسة
 
-# لا تضع:
-# WAF_API_KEY
-# ADMIN_PASSWORD
-# TARGET_URL الداخلي
-# أو أي أسرار خاصة بالسيرفر
-# داخل كود الواجهة العامة.</pre>      <div class="warning">
+وإدارتها من خلال السيرفر
+
+لا تضع:
+
+WAF_API_KEY
+
+ADMIN_PASSWORD
+
+TARGET_URL الداخلي
+
+أو أي أسرار خاصة بالسيرفر
+
+داخل كود الواجهة العامة.</pre>
+
+      <div class="warning">
         لأسباب أمنية، لا يتم عرض مفاتيح النظام أو بيانات
         الإدارة أو إعدادات البنية الداخلية في الصفحة العامة.
         استخدم Token الموقع الذي يتم إنشاؤه من لوحة الإدارة
@@ -1752,7 +2270,7 @@ SITE_TOKEN=YOUR_SITE_TOKEN
     </div>
 
     <h2>
-    لوحة الإدارة .
+      لوحة الإدارة .
     </h2>
 
     <p>
@@ -1762,9 +2280,13 @@ SITE_TOKEN=YOUR_SITE_TOKEN
       الموجودة في السيرفر.
     </p>
 
-    <a href="/admin" class="btn btn-primary">
+    <button
+      type="button"
+      class="btn btn-primary"
+      onclick="openAdmin()"
+    >
       فتح لوحة الإدارة ←
-    </a>
+    </button>
 
   </div>
 
@@ -1973,65 +2495,961 @@ SITE_TOKEN=YOUR_SITE_TOKEN
        FOOTER
   ========================================================== -->  <footer>
     © 2026 <span>Routix</span> — Cloud WAF & Application Protection
-  </footer>  <script>
+  </footer>  <!-- =========================================================
+       JAVASCRIPT
+  ========================================================== -->  <script>
+
+    /* =========================================================
+       AUTH SERVER
+    ========================================================== */
+
+    const AUTH_SERVER =
+      "https://production-1-54qv.onrender.com";
+
+    /*
+     * مهم:
+     * لا يوجد هنا sessionStorage
+     * ولا يتم تخزين JWT في JavaScript.
+     *
+     * الجلسة محفوظة في HttpOnly Cookie
+     * ويقوم المتصفح بإرسالها تلقائياً
+     * مع credentials: "include".
+     */
+
+    let currentEmail = "";
+
+    let isLoggedIn = false;
+
+    let currentUser = null;
+
+
+    /* =========================================================
+       HELPER: API REQUEST
+    ========================================================== */
+
+    async function authRequest(
+      endpoint,
+      options = {}
+    ) {
+
+      const config = {
+        ...options,
+
+        credentials: "include",
+
+        headers: {
+          ...(options.headers || {})
+        }
+      };
+
+      const response = await fetch(
+        AUTH_SERVER + endpoint,
+        config
+      );
+
+      let data = {};
+
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
+
+      return {
+        response,
+        data
+      };
+    }
+
+
+    /* =========================================================
+       AUTH MODAL
+    ========================================================== */
+
+    function openAuth() {
+
+      const overlay =
+        document.getElementById("authOverlay");
+
+      overlay.classList.add("show");
+
+      overlay.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+
+      document.body.classList.add(
+        "auth-open"
+      );
+
+      clearAuthMessages();
+
+      setAuthStep("email");
+
+      setTimeout(() => {
+
+        document
+          .getElementById("loginEmail")
+          .focus();
+
+      }, 100);
+    }
+
+
+    function closeAuth() {
+
+      const overlay =
+        document.getElementById("authOverlay");
+
+      overlay.classList.remove("show");
+
+      overlay.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      document.body.classList.remove(
+        "auth-open"
+      );
+    }
+
+
+    function setAuthStep(step) {
+
+      const emailStep =
+        document.getElementById("emailStep");
+
+      const otpStep =
+        document.getElementById("otpStep");
+
+      if (step === "otp") {
+
+        emailStep.classList.remove("active");
+        otpStep.classList.add("active");
+
+        document
+          .getElementById("authTitle")
+          .textContent =
+          "تأكيد تسجيل الدخول";
+
+        document
+          .getElementById("authDescription")
+          .textContent =
+          "أدخل رمز التحقق الذي وصل إلى بريدك الإلكتروني.";
+
+        setTimeout(() => {
+
+          document
+            .getElementById("loginOtp")
+            .focus();
+
+        }, 100);
+
+      } else {
+
+        otpStep.classList.remove("active");
+        emailStep.classList.add("active");
+
+        document
+          .getElementById("authTitle")
+          .textContent =
+          "تسجيل الدخول";
+
+        document
+          .getElementById("authDescription")
+          .textContent =
+          "أدخل بريدك الإلكتروني لإرسال رمز تحقق آمن.";
+      }
+    }
+
+
+    function backToEmail() {
+
+      setAuthStep("email");
+
+      clearAuthMessages();
+
+      document
+        .getElementById("loginOtp")
+        .value = "";
+    }
+
+
+    /* =========================================================
+       AUTH MESSAGES
+    ========================================================== */
+
+    function showMessage(
+      elementId,
+      message,
+      type = "error"
+    ) {
+
+      const element =
+        document.getElementById(elementId);
+
+      element.textContent = message;
+
+      element.className =
+        "auth-message show " + type;
+    }
+
+
+    function clearAuthMessages() {
+
+      const messages = [
+        "emailMessage",
+        "otpMessage"
+      ];
+
+      messages.forEach(id => {
+
+        const element =
+          document.getElementById(id);
+
+        element.textContent = "";
+
+        element.className =
+          "auth-message";
+
+      });
+    }
+
+
+    /* =========================================================
+       BUTTON LOADING
+    ========================================================== */
+
+    function setButtonLoading(
+      button,
+      loading,
+      text
+    ) {
+
+      if (loading) {
+
+        button.disabled = true;
+
+        button.dataset.originalText =
+          button.innerHTML;
+
+        button.innerHTML =
+          text +
+          '<span class="auth-loading"></span>';
+
+      } else {
+
+        button.disabled = false;
+
+        button.innerHTML =
+          button.dataset.originalText ||
+          text;
+      }
+    }
+
+
+    /* =========================================================
+       SEND OTP
+    ========================================================== */
+
+    async function sendOTP() {
+
+      const emailInput =
+        document.getElementById("loginEmail");
+
+      const button =
+        document.getElementById("sendOtpBtn");
+
+      const email =
+        emailInput.value.trim().toLowerCase();
+
+      clearAuthMessages();
+
+      if (!email) {
+
+        showMessage(
+          "emailMessage",
+          "أدخل بريدك الإلكتروني أولاً."
+        );
+
+        emailInput.focus();
+
+        return;
+      }
+
+      /*
+       * تحقق بسيط من صيغة البريد
+       */
+      const emailPattern =
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailPattern.test(email)) {
+
+        showMessage(
+          "emailMessage",
+          "البريد الإلكتروني غير صالح."
+        );
+
+        emailInput.focus();
+
+        return;
+      }
+
+      currentEmail = email;
+
+      setButtonLoading(
+        button,
+        true,
+        "جاري إرسال الكود"
+      );
+
+      try {
+
+        const {
+          response,
+          data
+        } = await authRequest(
+          "/api/send-otp",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body: JSON.stringify({
+              email
+            })
+          }
+        );
+
+        if (!response.ok || !data.success) {
+
+          showMessage(
+            "emailMessage",
+            data.message ||
+            "تعذر إرسال كود التحقق."
+          );
+
+          return;
+        }
+
+        document
+          .getElementById("authEmailDisplay")
+          .textContent = email;
+
+        showMessage(
+          "emailMessage",
+          "تم إرسال كود التحقق إلى بريدك الإلكتروني.",
+          "success"
+        );
+
+        setAuthStep("otp");
+
+      } catch (error) {
+
+        console.error(
+          "Send OTP Error:",
+          error
+        );
+
+        showMessage(
+          "emailMessage",
+          "تعذر الاتصال بسيرفر تسجيل الدخول. تحقق من اتصال الإنترنت."
+        );
+
+      } finally {
+
+        setButtonLoading(
+          button,
+          false,
+          "إرسال كود التحقق"
+        );
+      }
+    }
+
+
+    /* =========================================================
+       VERIFY OTP
+    ========================================================== */
+
+    async function verifyOTP() {
+
+      const otpInput =
+        document.getElementById("loginOtp");
+
+      const button =
+        document.getElementById("verifyOtpBtn");
+
+      const otp =
+        otpInput.value.trim();
+
+      clearAuthMessages();
+
+      if (!currentEmail) {
+
+        backToEmail();
+
+        return;
+      }
+
+      if (!/^\d{6}$/.test(otp)) {
+
+        showMessage(
+          "otpMessage",
+          "أدخل كود التحقق المكون من 6 أرقام."
+        );
+
+        otpInput.focus();
+
+        return;
+      }
+
+      setButtonLoading(
+        button,
+        true,
+        "جاري التحقق"
+      );
+
+      try {
+
+        const {
+          response,
+          data
+        } = await authRequest(
+          "/api/verify-otp",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json"
+            },
+
+            body: JSON.stringify({
+              email: currentEmail,
+              otp
+            })
+          }
+        );
+
+        if (!response.ok || !data.success) {
+
+          showMessage(
+            "otpMessage",
+            data.message ||
+            "كود التحقق غير صحيح."
+          );
+
+          return;
+        }
+
+        /*
+         * السيرفر وضع JWT داخل HttpOnly Cookie.
+         *
+         * لا نقرأ token هنا.
+         * لا sessionStorage.
+         * لا localStorage.
+         */
+
+        isLoggedIn = true;
+
+        currentUser =
+          data.user || {
+            email: currentEmail
+          };
+
+        updateAuthUI();
+
+        showMessage(
+          "otpMessage",
+          "تم تسجيل الدخول بنجاح.",
+          "success"
+        );
+
+        setTimeout(() => {
+
+          closeAuth();
+
+        }, 700);
+
+      } catch (error) {
+
+        console.error(
+          "Verify OTP Error:",
+          error
+        );
+
+        showMessage(
+          "otpMessage",
+          "تعذر الاتصال بسيرفر تسجيل الدخول."
+        );
+
+      } finally {
+
+        setButtonLoading(
+          button,
+          false,
+          "تأكيد تسجيل الدخول"
+        );
+      }
+    }
+
+
+    /* =========================================================
+       CHECK EXISTING SESSION
+    ========================================================== */
+
+    async function checkSession() {
+
+      try {
+
+        const {
+          response,
+          data
+        } = await authRequest(
+          "/api/profile",
+          {
+            method: "GET"
+          }
+        );
+
+        if (
+          response.ok &&
+          data.success &&
+          data.loggedIn
+        ) {
+
+          isLoggedIn = true;
+
+          currentUser =
+            data.user || null;
+
+          currentEmail =
+            currentUser?.email || "";
+
+        } else {
+
+          isLoggedIn = false;
+          currentUser = null;
+          currentEmail = "";
+
+        }
+
+        updateAuthUI();
+
+      } catch (error) {
+
+        /*
+         * إذا السيرفر غير متاح لا نمنع المستخدم
+         * من تصفح الصفحة العامة.
+         */
+
+        console.warn(
+          "Session check failed:",
+          error
+        );
+
+        isLoggedIn = false;
+
+        updateAuthUI();
+      }
+    }
+
+
+    /* =========================================================
+       UPDATE AUTH UI
+    ========================================================== */
+
+    function updateAuthUI() {
+
+      const loginButton =
+        document.getElementById(
+          "headerLoginBtn"
+        );
+
+      const userElement =
+        document.getElementById(
+          "headerUser"
+        );
+
+      const logoutButton =
+        document.getElementById(
+          "headerLogoutBtn"
+        );
+
+      const userEmail =
+        document.getElementById(
+          "headerUserEmail"
+        );
+
+      if (isLoggedIn) {
+
+        loginButton.style.display =
+          "none";
+
+        userElement.style.display =
+          "inline-flex";
+
+        logoutButton.style.display =
+          "inline-flex";
+
+        userEmail.textContent =
+          currentUser?.email ||
+          currentEmail ||
+          "USER";
+
+      } else {
+
+        loginButton.style.display =
+          "inline-flex";
+
+        userElement.style.display =
+          "none";
+
+        logoutButton.style.display =
+          "none";
+
+        userEmail.textContent = "";
+      }
+    }
+
+
+    /* =========================================================
+       LOGOUT
+    ========================================================== */
+
+    async function logout() {
+
+      try {
+
+        const {
+          response,
+          data
+        } = await authRequest(
+          "/api/logout",
+          {
+            method: "POST"
+          }
+        );
+
+        if (!response.ok || !data.success) {
+
+          console.warn(
+            "Logout response:",
+            data
+          );
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Logout Error:",
+          error
+        );
+
+      } finally {
+
+        /*
+         * السيرفر يمسح HttpOnly Cookie.
+         */
+
+        isLoggedIn = false;
+
+        currentUser = null;
+
+        currentEmail = "";
+
+        updateAuthUI();
+      }
+    }
+
+
+    /* =========================================================
+       ADMIN ACCESS
+    ========================================================== */
+
+    async function openAdmin() {
+
+      /*
+       * إذا لدينا جلسة معروفة ننتقل مباشرة.
+       */
+      if (isLoggedIn) {
+
+        window.location.href =
+          "/admin";
+
+        return;
+      }
+
+      /*
+       * نتأكد من الجلسة من السيرفر قبل عرض تسجيل الدخول.
+       */
+      try {
+
+        const {
+          response,
+          data
+        } = await authRequest(
+          "/api/profile",
+          {
+            method: "GET"
+          }
+        );
+
+        if (
+          response.ok &&
+          data.success &&
+          data.loggedIn
+        ) {
+
+          isLoggedIn = true;
+
+          currentUser =
+            data.user || null;
+
+          currentEmail =
+            currentUser?.email || "";
+
+          updateAuthUI();
+
+          window.location.href =
+            "/admin";
+
+          return;
+        }
+
+      } catch (error) {
+
+        console.warn(
+          "Admin session check failed:",
+          error
+        );
+      }
+
+      /*
+       * لا توجد جلسة.
+       * نفتح نافذة تسجيل الدخول.
+       */
+      openAuth();
+    }
+
+
     /* =========================================================
        INTRO
     ========================================================== */
 
     function enterPlatform() {
-      const intro = document.getElementById("intro");
+
+      const intro =
+        document.getElementById("intro");
 
       intro.classList.add("hidden");
-      document.body.classList.remove("locked");
+
+      document.body.classList.remove(
+        "locked"
+      );
 
       setTimeout(() => {
+
         intro.style.display = "none";
+
       }, 750);
     }
+
 
     /* =========================================================
        MOBILE MENU
     ========================================================== */
 
     function toggleMenu() {
-      const nav = document.getElementById("nav");
-      nav.classList.toggle("mobile-open");
+
+      const nav =
+        document.getElementById("nav");
+
+      nav.classList.toggle(
+        "mobile-open"
+      );
     }
 
-    document.querySelectorAll("#nav a").forEach(link => {
-      link.addEventListener("click", () => {
-        document.getElementById("nav").classList.remove("mobile-open");
+
+    document
+      .querySelectorAll("#nav a")
+      .forEach(link => {
+
+        link.addEventListener(
+          "click",
+          () => {
+
+            document
+              .getElementById("nav")
+              .classList.remove(
+                "mobile-open"
+              );
+
+          }
+        );
+
       });
-    });
+
+
+    /* =========================================================
+       CLOSE AUTH WHEN CLICK OUTSIDE
+    ========================================================== */
+
+    document
+      .getElementById("authOverlay")
+      .addEventListener(
+        "click",
+        event => {
+
+          if (
+            event.target.id ===
+            "authOverlay"
+          ) {
+
+            closeAuth();
+          }
+
+        }
+      );
+
+
+    /* =========================================================
+       ESCAPE
+    ========================================================== */
+
+    document.addEventListener(
+      "keydown",
+      event => {
+
+        if (event.key === "Escape") {
+
+          document
+            .getElementById("nav")
+            .classList.remove(
+              "mobile-open"
+            );
+
+          closeAuth();
+        }
+
+      }
+    );
+
+
+    /* =========================================================
+       OTP INPUT
+    ========================================================== */
+
+    document
+      .getElementById("loginOtp")
+      .addEventListener(
+        "input",
+        event => {
+
+          event.target.value =
+            event.target.value
+              .replace(/\D/g, "")
+              .slice(0, 6);
+
+          /*
+           * عند اكتمال 6 أرقام يمكن الضغط Enter
+           */
+        }
+      );
+
+
+    /* =========================================================
+       ENTER KEY
+    ========================================================== */
+
+    document
+      .getElementById("loginEmail")
+      .addEventListener(
+        "keydown",
+        event => {
+
+          if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            sendOTP();
+          }
+
+        }
+      );
+
+
+    document
+      .getElementById("loginOtp")
+      .addEventListener(
+        "keydown",
+        event => {
+
+          if (event.key === "Enter") {
+
+            event.preventDefault();
+
+            verifyOTP();
+          }
+
+        }
+      );
+
 
     /* =========================================================
        CYBER PARTICLES
     ========================================================== */
 
-    const particles = document.getElementById("particles");
+    const particles =
+      document.getElementById(
+        "particles"
+      );
 
-    for (let i = 0; i < 32; i++) {
-      const p = document.createElement("span");
+    for (
+      let i = 0;
+      i < 32;
+      i++
+    ) {
 
-      p.className = "particle";
+      const p =
+        document.createElement(
+          "span"
+        );
 
-      p.style.left = Math.random() * 100 + "%";
-      p.style.top = (40 + Math.random() * 60) + "%";
-      p.style.animationDelay = (Math.random() * 8) + "s";
-      p.style.animationDuration = (5 + Math.random() * 7) + "s";
+      p.className =
+        "particle";
+
+      p.style.left =
+        Math.random() * 100 + "%";
+
+      p.style.top =
+        (40 + Math.random() * 60) + "%";
+
+      p.style.animationDelay =
+        (Math.random() * 8) + "s";
+
+      p.style.animationDuration =
+        (5 + Math.random() * 7) + "s";
 
       particles.appendChild(p);
     }
 
+
     /* =========================================================
-       ESCAPE = CLOSE MOBILE MENU
+       INITIAL SESSION CHECK
     ========================================================== */
 
-    document.addEventListener("keydown", event => {
-      if (event.key === "Escape") {
-        document.getElementById("nav").classList.remove("mobile-open");
-      }
-    });
+    /*
+     * فحص الجلسة عند فتح الصفحة.
+     *
+     * المتصفح يرسل HttpOnly Cookie تلقائياً
+     * بسبب credentials: "include".
+     */
+
+    checkSession();
 
   </script></body>
 </html>
