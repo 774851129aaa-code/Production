@@ -1,15 +1,64 @@
 'use strict';
 
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
-const helmet = require('helmet');
-const rateLimit = require('express-rate-limit');
-const cookieParser = require('cookie-parser');
-const argon2 = require('argon2');
+import express, {
+    Request,
+    Response,
+    NextFunction
+} from 'express';
 
-require('dotenv').config();
+import cors from 'cors';
+import mongoose, {
+    Document,
+    Model,
+    Schema
+} from 'mongoose';
+
+import jwt, {
+    JwtPayload
+} from 'jsonwebtoken';
+
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import cookieParser from 'cookie-parser';
+import argon2 from 'argon2';
+
+import 'dotenv/config';
+
+/* =========================================================
+   TYPES
+========================================================= */
+
+interface IUser extends Document {
+    email: string;
+    passwordHash: string;
+    emailVerified: boolean;
+    createdAt: Date;
+    lastLoginAt: Date | null;
+}
+
+interface IOTP extends Document {
+    email: string;
+    otp: string;
+    passwordHash: string;
+    createdAt: Date;
+}
+
+interface AuthJwtPayload extends JwtPayload {
+    userId: string;
+    email: string;
+}
+
+interface AuthenticatedRequest extends Request {
+    user?: IUser;
+}
+
+interface BrevoResponse {
+    [key: string]: unknown;
+}
+
+/* =========================================================
+   APP
+========================================================= */
 
 const app = express();
 
@@ -37,7 +86,7 @@ app.use(cookieParser());
    CORS
 ========================================================= */
 
-const allowedOrigins = [
+const allowedOrigins: string[] = [
     'https://production-1-54qv.onrender.com',
     'https://www.routix.nx.kg',
     'https://routix.nx.kg'
@@ -45,7 +94,13 @@ const allowedOrigins = [
 
 app.use(
     cors({
-        origin: function (origin, callback) {
+        origin: (
+            origin: string | undefined,
+            callback: (
+                error: Error | null,
+                success?: boolean
+            ) => void
+        ) => {
 
             if (
                 !origin ||
@@ -103,16 +158,16 @@ app.use(
    ENVIRONMENT VARIABLES
 ========================================================= */
 
-const JWT_SECRET =
+const JWT_SECRET: string | undefined =
     process.env.JWT_SECRET;
 
-const MONGO_URI =
+const MONGO_URI: string | undefined =
     process.env.MONGO_URI;
 
-const BREVO_API_KEY =
+const BREVO_API_KEY: string | undefined =
     process.env.BREVO_API_KEY;
 
-const SENDER_EMAIL =
+const SENDER_EMAIL: string =
     process.env.SENDER_EMAIL ||
     'ttbnatlh@gmail.com';
 
@@ -151,7 +206,7 @@ const SESSION_COOKIE_OPTIONS = {
 
     secure: true,
 
-    sameSite: 'none',
+    sameSite: 'none' as const,
 
     path: '/',
 
@@ -175,7 +230,7 @@ mongoose
             'Connected to MongoDB successfully!'
         );
     })
-    .catch((error) => {
+    .catch((error: unknown) => {
 
         console.error(
             'MongoDB connection error:',
@@ -190,7 +245,7 @@ mongoose
 ========================================================= */
 
 const userSchema =
-    new mongoose.Schema({
+    new Schema<IUser>({
 
         email: {
             type: String,
@@ -222,8 +277,8 @@ const userSchema =
         }
     });
 
-const UserModel =
-    mongoose.model(
+const UserModel: Model<IUser> =
+    mongoose.model<IUser>(
         'User',
         userSchema
     );
@@ -233,7 +288,7 @@ const UserModel =
 ========================================================= */
 
 const otpSchema =
-    new mongoose.Schema({
+    new Schema<IOTP>({
 
         email: {
             type: String,
@@ -254,6 +309,7 @@ const otpSchema =
          *
          * لا نحفظ كلمة المرور الأصلية.
          */
+
         passwordHash: {
             type: String,
             required: true
@@ -266,8 +322,8 @@ const otpSchema =
         }
     });
 
-const OTPModel =
-    mongoose.model(
+const OTPModel: Model<IOTP> =
+    mongoose.model<IOTP>(
         'OTPVerification',
         otpSchema
     );
@@ -276,14 +332,18 @@ const OTPModel =
    EMAIL HELPERS
 ========================================================= */
 
-function normalizeEmail(email) {
+function normalizeEmail(
+    email: unknown
+): string {
 
     return String(email || '')
         .trim()
         .toLowerCase();
 }
 
-function isValidEmail(email) {
+function isValidEmail(
+    email: string
+): boolean {
 
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
         email
@@ -294,7 +354,9 @@ function isValidEmail(email) {
    PASSWORD VALIDATION
 ========================================================= */
 
-function isValidPassword(password) {
+function isValidPassword(
+    password: unknown
+): password is string {
 
     if (
         typeof password !== 'string'
@@ -305,6 +367,7 @@ function isValidPassword(password) {
     /*
      * الحد الأدنى 8 أحرف
      */
+
     return (
         password.length >= 8 &&
         password.length <= 128
@@ -316,15 +379,18 @@ function isValidPassword(password) {
 ========================================================= */
 
 function createSession(
-    res,
-    user
-) {
+    res: Response,
+    user: IUser
+): void {
 
     const token =
         jwt.sign(
             {
-                userId: user._id.toString(),
-                email: user.email
+                userId:
+                    user._id.toString(),
+
+                email:
+                    user.email
             },
 
             JWT_SECRET,
@@ -347,7 +413,10 @@ function createSession(
 
 app.post(
     '/api/check-email',
-    async (req, res) => {
+    async (
+        req: Request,
+        res: Response
+    ) => {
 
         try {
 
@@ -382,7 +451,7 @@ app.post(
                     !!user
             });
 
-        } catch (error) {
+        } catch (error: unknown) {
 
             console.error(
                 'Check Email Error:',
@@ -406,7 +475,10 @@ app.post(
 
 app.post(
     '/api/register',
-    async (req, res) => {
+    async (
+        req: Request,
+        res: Response
+    ) => {
 
         try {
 
@@ -663,12 +735,14 @@ app.post(
                     }
                 );
 
-            let data = {};
+            let data: BrevoResponse = {};
 
             try {
 
                 data =
-                    await response.json();
+                    (
+                        await response.json()
+                    ) as BrevoResponse;
 
             } catch {
 
@@ -703,7 +777,7 @@ app.post(
                     'تم إرسال رمز التحقق إلى بريدك'
             });
 
-        } catch (error) {
+        } catch (error: unknown) {
 
             console.error(
                 'Register Error:',
@@ -727,7 +801,10 @@ app.post(
 
 app.post(
     '/api/verify-otp',
-    async (req, res) => {
+    async (
+        req: Request,
+        res: Response
+    ) => {
 
         try {
 
@@ -826,23 +903,18 @@ app.post(
                 await UserModel.create({
 
                     email:
-
                         record.email,
 
                     passwordHash:
-
                         record.passwordHash,
 
                     emailVerified:
-
                         true,
 
                     createdAt:
-
                         new Date(),
 
                     lastLoginAt:
-
                         new Date()
                 });
 
@@ -883,7 +955,7 @@ app.post(
                 }
             });
 
-        } catch (error) {
+        } catch (error: unknown) {
 
             console.error(
                 'Verify OTP Error:',
@@ -893,9 +965,12 @@ app.post(
             /*
              * منع مشكلة duplicate email
              */
+
             if (
-                error &&
-                error.code === 11000
+                typeof error === 'object' &&
+                error !== null &&
+                'code' in error &&
+                (error as { code?: unknown }).code === 11000
             ) {
 
                 return res.status(409).json({
@@ -926,7 +1001,10 @@ app.post(
 
 app.post(
     '/api/login',
-    async (req, res) => {
+    async (
+        req: Request,
+        res: Response
+    ) => {
 
         try {
 
@@ -1061,7 +1139,7 @@ app.post(
                 }
             });
 
-        } catch (error) {
+        } catch (error: unknown) {
 
             console.error(
                 'Login Error:',
@@ -1083,19 +1161,144 @@ app.post(
    SESSION VERIFICATION MIDDLEWARE
 ========================================================= */
 
-const verifySession =
+const verifySession = async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+): Promise<Response | void> => {
+
+    const token =
+        req.cookies[
+            SESSION_COOKIE
+        ] as string | undefined;
+
+    if (!token) {
+
+        return res.status(401).json({
+
+            success: false,
+
+            loggedIn: false,
+
+            message:
+                'مطلوب تسجيل الدخول'
+        });
+    }
+
+    try {
+
+        const decoded =
+            jwt.verify(
+                token,
+                JWT_SECRET
+            );
+
+        if (
+            typeof decoded === 'string' ||
+            !decoded.userId
+        ) {
+
+            res.clearCookie(
+                SESSION_COOKIE,
+                {
+                    httpOnly: true,
+                    sameSite: 'none',
+                    secure: true,
+                    path: '/'
+                }
+            );
+
+            return res.status(401).json({
+
+                success: false,
+
+                loggedIn: false,
+
+                message:
+                    'جلسة غير صالحة'
+            });
+        }
+
+        const payload =
+            decoded as AuthJwtPayload;
+
+        const user =
+            await UserModel.findById(
+                payload.userId
+            ).select(
+                '_id email emailVerified passwordHash createdAt lastLoginAt'
+            );
+
+        if (!user) {
+
+            res.clearCookie(
+                SESSION_COOKIE,
+                {
+                    httpOnly: true,
+                    sameSite: 'none',
+                    secure: true,
+                    path: '/'
+                }
+            );
+
+            return res.status(401).json({
+
+                success: false,
+
+                loggedIn: false,
+
+                message:
+                    'الحساب غير موجود'
+            });
+        }
+
+        req.user =
+            user;
+
+        return next();
+
+    } catch (error: unknown) {
+
+        console.error(
+            'Session Verification Error:',
+            error
+        );
+
+        res.clearCookie(
+            SESSION_COOKIE,
+            {
+                httpOnly: true,
+                sameSite: 'none',
+                secure: true,
+                path: '/'
+            }
+        );
+
+        return res.status(401).json({
+
+            success: false,
+
+            loggedIn: false,
+
+            message:
+                'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى'
+        });
+    }
+};
+
+/* =========================================================
+   5. PROFILE / SESSION CHECK
+========================================================= */
+
+app.get(
+    '/api/profile',
+    verifySession,
     (
-        req,
-        res,
-        next
+        req: AuthenticatedRequest,
+        res: Response
     ) => {
 
-        const token =
-            req.cookies[
-                SESSION_COOKIE
-            ];
-
-        if (!token) {
+        if (!req.user) {
 
             return res.status(401).json({
 
@@ -1107,110 +1310,6 @@ const verifySession =
                     'مطلوب تسجيل الدخول'
             });
         }
-
-        jwt.verify(
-            token,
-            JWT_SECRET,
-            async (
-                error,
-                decoded
-            ) => {
-
-                if (error) {
-
-                    res.clearCookie(
-                        SESSION_COOKIE,
-                        {
-                            httpOnly: true,
-
-                            sameSite: 'none',
-
-                            secure: true,
-
-                            path: '/'
-                        }
-                    );
-
-                    return res.status(401).json({
-
-                        success: false,
-
-                        loggedIn: false,
-
-                        message:
-                            'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى'
-                    });
-                }
-
-                try {
-
-                    const user =
-                        await UserModel.findById(
-                            decoded.userId
-                        ).select(
-                            '_id email emailVerified'
-                        );
-
-                    if (!user) {
-
-                        res.clearCookie(
-                            SESSION_COOKIE,
-                            {
-                                httpOnly: true,
-
-                                sameSite: 'none',
-
-                                secure: true,
-
-                                path: '/'
-                            }
-                        );
-
-                        return res.status(401).json({
-
-                            success: false,
-
-                            loggedIn: false,
-
-                            message:
-                                'الحساب غير موجود'
-                        });
-                    }
-
-                    req.user =
-                        user;
-
-                    next();
-
-                } catch (
-                    databaseError
-                ) {
-
-                    console.error(
-                        'Session DB Error:',
-                        databaseError
-                    );
-
-                    return res.status(500).json({
-
-                        success: false,
-
-                        message:
-                            'خطأ داخلي في الخادم'
-                    });
-                }
-            }
-        );
-    };
-
-/* =========================================================
-   5. PROFILE / SESSION CHECK
-========================================================= */
-
-app.get(
-    '/api/profile',
-    verifySession,
-    (req, res) => {
 
         return res.json({
 
@@ -1242,7 +1341,10 @@ app.get(
 
 app.post(
     '/api/logout',
-    (req, res) => {
+    (
+        req: Request,
+        res: Response
+    ) => {
 
         res.clearCookie(
             SESSION_COOKIE,
@@ -1275,7 +1377,10 @@ app.post(
 
 app.get(
     '/api/health',
-    (req, res) => {
+    (
+        req: Request,
+        res: Response
+    ) => {
 
         return res.json({
 
@@ -1296,10 +1401,10 @@ app.get(
 
 app.use(
     (
-        err,
-        req,
-        res,
-        next
+        err: unknown,
+        req: Request,
+        res: Response,
+        next: NextFunction
     ) => {
 
         console.error(
@@ -1308,7 +1413,7 @@ app.use(
         );
 
         if (
-            err &&
+            err instanceof Error &&
             err.message ===
                 'Blocked by CORS policy'
         ) {
@@ -1336,8 +1441,10 @@ app.use(
    START SERVER
 ========================================================= */
 
-const PORT =
-    process.env.PORT || 4000;
+const PORT: number =
+    Number(
+        process.env.PORT || 4000
+    );
 
 app.listen(
     PORT,
