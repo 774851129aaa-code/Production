@@ -18,28 +18,63 @@ const app = express();
    CONFIG
 ========================================================= */
 
-const PORT = Number(process.env.PORT || 4000);
+const PORT =
+    Number(process.env.PORT || 4000);
 
-const MONGO_URI = process.env.MONGO_URI;
+const MONGO_URI =
+    process.env.MONGO_URI;
 
-const BREVO_API_KEY = process.env.BREVO_API_KEY;
-const SENDER_EMAIL = process.env.SENDER_EMAIL;
-const SENDER_NAME = process.env.SENDER_NAME || 'Routix';
+const BREVO_API_KEY =
+    process.env.BREVO_API_KEY;
 
-const FRONTEND_ORIGIN =
-    process.env.FRONTEND_ORIGIN || 'http://localhost:3000';
+const SENDER_EMAIL =
+    process.env.SENDER_EMAIL;
 
-const SESSION_SECRET = process.env.SESSION_SECRET;
+const SENDER_NAME =
+    process.env.SENDER_NAME || 'Routix';
 
-const NODE_ENV = process.env.NODE_ENV || 'development';
+const SESSION_SECRET =
+    process.env.SESSION_SECRET;
 
-const IS_PRODUCTION = NODE_ENV === 'production';
+const NODE_ENV =
+    process.env.NODE_ENV || 'development';
+
+const IS_PRODUCTION =
+    NODE_ENV === 'production';
 
 const SESSION_TTL_DAYS =
-    Number(process.env.SESSION_TTL_DAYS || 7);
+    Number(
+        process.env.SESSION_TTL_DAYS || 7
+    );
 
 const SESSION_TTL_MS =
-    SESSION_TTL_DAYS * 24 * 60 * 60 * 1000;
+    SESSION_TTL_DAYS *
+    24 *
+    60 *
+    60 *
+    1000;
+
+/* =========================================================
+   FRONTEND DOMAINS
+========================================================= */
+
+const FRONTEND_ORIGINS = [
+    'https://www.routix.nx.kg',
+    'https://routix.nx.kg'
+];
+
+/*
+ * أثناء التطوير فقط نسمح بـ localhost.
+ *
+ * في الإنتاج لا يتم السماح به.
+ */
+
+if (!IS_PRODUCTION) {
+    FRONTEND_ORIGINS.push(
+        'http://localhost:3000',
+        'http://127.0.0.1:3000'
+    );
+}
 
 /* =========================================================
    SECURITY CONFIG
@@ -85,7 +120,10 @@ if (!SENDER_EMAIL) {
     process.exit(1);
 }
 
-if (!SESSION_SECRET || SESSION_SECRET.length < 32) {
+if (
+    !SESSION_SECRET ||
+    SESSION_SECRET.length < 32
+) {
     console.error(
         'ERROR: SESSION_SECRET must be at least 32 characters.'
     );
@@ -98,7 +136,10 @@ if (!SESSION_SECRET || SESSION_SECRET.length < 32) {
 ========================================================= */
 
 if (IS_PRODUCTION) {
-    app.set('trust proxy', 1);
+    app.set(
+        'trust proxy',
+        1
+    );
 }
 
 /* =========================================================
@@ -122,17 +163,73 @@ app.use(
     cookieParser()
 );
 
+/* =========================================================
+   CORS
+========================================================= */
+
 app.use(
     cors({
-        origin: FRONTEND_ORIGIN,
+        origin: function (
+            origin,
+            callback
+        ) {
+
+            /*
+             * بعض الطلبات لا تحتوي Origin.
+             * نسمح بها مثل الطلبات الداخلية أو أدوات
+             * الفحص المباشر للسيرفر.
+             */
+
+            if (!origin) {
+                return callback(
+                    null,
+                    true
+                );
+            }
+
+            /*
+             * السماح فقط بالدومينات المحددة.
+             */
+
+            if (
+                FRONTEND_ORIGINS.includes(
+                    origin
+                )
+            ) {
+                return callback(
+                    null,
+                    true
+                );
+            }
+
+            console.warn(
+                `Blocked CORS origin: ${origin}`
+            );
+
+            return callback(
+                new Error(
+                    'CORS origin not allowed'
+                )
+            );
+        },
+
+        /*
+         * مهم جدًا للجلسات والكوكيز.
+         */
+
         credentials: true,
+
         methods: [
             'GET',
-            'POST'
+            'POST',
+            'OPTIONS'
         ],
+
         allowedHeaders: [
             'Content-Type'
-        ]
+        ],
+
+        optionsSuccessStatus: 204
     })
 );
 
@@ -141,7 +238,10 @@ app.use(
 ========================================================= */
 
 function normalizeEmail(value) {
-    if (typeof value !== 'string') {
+
+    if (
+        typeof value !== 'string'
+    ) {
         return '';
     }
 
@@ -151,6 +251,7 @@ function normalizeEmail(value) {
 }
 
 function isValidEmail(email) {
+
     if (!email) {
         return false;
     }
@@ -165,16 +266,12 @@ function isValidEmail(email) {
 }
 
 function isValidPassword(password) {
-    if (typeof password !== 'string') {
+
+    if (
+        typeof password !== 'string'
+    ) {
         return false;
     }
-
-    /*
-     * الحد الأدنى فقط.
-     *
-     * لا نفرض شروطًا مزعجة مثل الرموز الخاصة
-     * لأن Argon2 يتولى تخزين كلمة المرور بأمان.
-     */
 
     return (
         password.length >= 8 &&
@@ -183,6 +280,7 @@ function isValidPassword(password) {
 }
 
 function generateOTP() {
+
     return crypto
         .randomInt(
             100000,
@@ -191,13 +289,17 @@ function generateOTP() {
         .toString();
 }
 
-function generateRandomToken(bytes = 32) {
+function generateRandomToken(
+    bytes = 32
+) {
+
     return crypto
         .randomBytes(bytes)
         .toString('hex');
 }
 
 function hashToken(token) {
+
     return crypto
         .createHmac(
             'sha256',
@@ -207,7 +309,11 @@ function hashToken(token) {
         .digest('hex');
 }
 
-function timingSafeStringEqual(a, b) {
+function timingSafeStringEqual(
+    a,
+    b
+) {
+
     if (
         typeof a !== 'string' ||
         typeof b !== 'string'
@@ -215,7 +321,9 @@ function timingSafeStringEqual(a, b) {
         return false;
     }
 
-    if (a.length !== b.length) {
+    if (
+        a.length !== b.length
+    ) {
         return false;
     }
 
@@ -226,8 +334,10 @@ function timingSafeStringEqual(a, b) {
 }
 
 function getSessionExpiration() {
+
     return new Date(
-        Date.now() + SESSION_TTL_MS
+        Date.now() +
+        SESSION_TTL_MS
     );
 }
 
@@ -238,37 +348,51 @@ function getSessionExpiration() {
 const SESSION_COOKIE_NAME =
     'routix_session';
 
+/*
+ * في الإنتاج:
+ *
+ * secure: true
+ * sameSite: none
+ *
+ * حتى يتم إرسال Cookie بين:
+ *
+ * https://www.routix.nx.kg
+ *
+ * و:
+ *
+ * https://production-1-54qv.onrender.com
+ *
+ * أما في التطوير المحلي فنستخدم:
+ *
+ * secure: false
+ * sameSite: lax
+ */
+
 const SESSION_COOKIE_OPTIONS = {
+
     httpOnly: true,
 
-    secure: IS_PRODUCTION,
+    secure:
+        IS_PRODUCTION,
 
-    sameSite: IS_PRODUCTION
-        ? 'none'
-        : 'lax',
+    sameSite:
+        IS_PRODUCTION
+            ? 'none'
+            : 'lax',
 
     path: '/',
 
-    maxAge: SESSION_TTL_MS
+    maxAge:
+        SESSION_TTL_MS
 };
 
 /* =========================================================
    DATABASE SCHEMAS
 ========================================================= */
 
-/*
- * ========================================================
- * USERS
- * ========================================================
- *
- * كل مستخدم له:
- *
- * email
- * passwordHash
- * apiTokenHash
- * verifiedAt
- * createdAt
- */
+/* =========================================================
+   USERS
+========================================================= */
 
 const userSchema =
     new mongoose.Schema(
@@ -303,42 +427,51 @@ const userSchema =
         }
     );
 
-/*
- * ========================================================
- * SESSIONS
- * ========================================================
- */
+/* =========================================================
+   SESSIONS
+========================================================= */
 
 const sessionSchema =
     new mongoose.Schema(
         {
             userId: {
-                type: mongoose.Schema.Types.ObjectId,
+                type:
+                    mongoose.Schema.Types.ObjectId,
+
                 ref: 'User',
+
                 required: true,
+
                 index: true
             },
 
             sessionTokenHash: {
                 type: String,
+
                 required: true,
+
                 unique: true,
+
                 index: true
             },
 
             expiresAt: {
                 type: Date,
+
                 required: true,
+
                 index: true
             },
 
             createdAt: {
                 type: Date,
+
                 default: Date.now
             },
 
             lastUsedAt: {
                 type: Date,
+
                 default: Date.now
             }
         }
@@ -346,7 +479,7 @@ const sessionSchema =
 
 /*
  * MongoDB يحذف الجلسة تلقائيًا
- * بعد الوصول إلى expiresAt.
+ * عند الوصول إلى expiresAt.
  */
 
 sessionSchema.index(
@@ -358,52 +491,61 @@ sessionSchema.index(
     }
 );
 
-/*
- * ========================================================
- * OTP VERIFICATION
- * ========================================================
- *
- * passwordHash موجود هنا لأن كلمة المرور يجب أن
- * تنتظر نجاح OTP قبل إنشاء User نهائي.
- */
+/* =========================================================
+   OTP VERIFICATION
+========================================================= */
 
 const otpSchema =
     new mongoose.Schema(
         {
             email: {
                 type: String,
+
                 required: true,
+
                 unique: true,
+
                 index: true,
+
                 lowercase: true,
+
                 trim: true,
+
                 maxlength: 254
             },
 
             otpHash: {
                 type: String,
+
                 required: true
             },
 
             passwordHash: {
                 type: String,
+
                 required: true
             },
 
             attempts: {
                 type: Number,
+
                 default: 0,
+
                 min: 0,
-                max: MAX_OTP_ATTEMPTS
+
+                max:
+                    MAX_OTP_ATTEMPTS
             },
 
             createdAt: {
                 type: Date,
+
                 default: Date.now
             },
 
             lastSentAt: {
                 type: Date,
+
                 default: Date.now
             }
         },
@@ -450,11 +592,14 @@ const OTPVerification =
 mongoose
     .connect(MONGO_URI)
     .then(() => {
+
         console.log(
             '✓ MongoDB connected successfully.'
         );
+
     })
     .catch((error) => {
+
         console.error(
             'MongoDB connection error:',
             error
@@ -470,10 +615,15 @@ mongoose
 app.get(
     '/',
     (req, res) => {
+
         res.json({
             success: true,
-            service: 'Routix Auth Server',
-            status: 'online'
+
+            service:
+                'Routix Auth Server',
+
+            status:
+                'online'
         });
     }
 );
@@ -481,12 +631,17 @@ app.get(
 app.get(
     '/health',
     (req, res) => {
+
         res.json({
+
             success: true,
-            status: 'ok',
+
+            status:
+                'ok',
 
             database:
-                mongoose.connection.readyState === 1
+                mongoose.connection
+                    .readyState === 1
                     ? 'connected'
                     : 'disconnected'
         });
@@ -517,19 +672,33 @@ app.post(
                VALIDATION
             --------------------------------------------- */
 
-            if (!isValidEmail(email)) {
+            if (
+                !isValidEmail(email)
+            ) {
+
                 return res.status(400).json({
+
                     success: false,
-                    code: 'INVALID_EMAIL',
+
+                    code:
+                        'INVALID_EMAIL',
+
                     message:
                         'يرجى إدخال بريد إلكتروني صحيح.'
                 });
             }
 
-            if (!isValidPassword(password)) {
+            if (
+                !isValidPassword(password)
+            ) {
+
                 return res.status(400).json({
+
                     success: false,
-                    code: 'INVALID_PASSWORD',
+
+                    code:
+                        'INVALID_PASSWORD',
+
                     message:
                         'كلمة المرور يجب أن تكون بين 8 و128 حرفًا.'
                 });
@@ -545,8 +714,11 @@ app.post(
                 });
 
             if (existingUser) {
+
                 return res.status(409).json({
+
                     success: false,
+
                     code:
                         'EMAIL_ALREADY_REGISTERED',
 
@@ -572,7 +744,8 @@ app.post(
                     ).getTime();
 
                 const elapsed =
-                    Date.now() - lastSent;
+                    Date.now() -
+                    lastSent;
 
                 if (
                     elapsed <
@@ -588,7 +761,9 @@ app.post(
                         );
 
                     return res.status(429).json({
+
                         success: false,
+
                         code:
                             'RESEND_COOLDOWN',
 
@@ -609,7 +784,8 @@ app.post(
                 await argon2.hash(
                     password,
                     {
-                        type: argon2.argon2id
+                        type:
+                            argon2.argon2id
                     }
                 );
 
@@ -624,7 +800,8 @@ app.post(
                 await argon2.hash(
                     otp,
                     {
-                        type: argon2.argon2id
+                        type:
+                            argon2.argon2id
                     }
                 );
 
@@ -643,7 +820,8 @@ app.post(
 
                     passwordHash,
 
-                    attempts: 0,
+                    attempts:
+                        0,
 
                     createdAt:
                         new Date(),
@@ -652,11 +830,14 @@ app.post(
                         new Date()
                 },
                 {
-                    upsert: true,
+                    upsert:
+                        true,
 
-                    new: true,
+                    new:
+                        true,
 
-                    setDefaultsOnInsert: true
+                    setDefaultsOnInsert:
+                        true
                 }
             );
 
@@ -671,6 +852,7 @@ app.post(
                         method: 'POST',
 
                         headers: {
+
                             accept:
                                 'application/json',
 
@@ -681,26 +863,28 @@ app.post(
                                 'application/json'
                         },
 
-                        body: JSON.stringify({
+                        body:
+                            JSON.stringify({
 
-                            sender: {
-                                name:
-                                    SENDER_NAME,
+                                sender: {
 
-                                email:
-                                    SENDER_EMAIL
-                            },
+                                    name:
+                                        SENDER_NAME,
 
-                            to: [
-                                {
-                                    email
-                                }
-                            ],
+                                    email:
+                                        SENDER_EMAIL
+                                },
 
-                            subject:
-                                'رمز التحقق الخاص بك - Routix',
+                                to: [
+                                    {
+                                        email
+                                    }
+                                ],
 
-                            htmlContent: `
+                                subject:
+                                    'رمز التحقق الخاص بك - Routix',
+
+                                htmlContent: `
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 
@@ -807,17 +991,20 @@ line-height:1.7;
 
 </body>
 </html>
-                            `
-                        })
+                                `
+                            })
                     }
                 );
 
             let brevoData = {};
 
             try {
+
                 brevoData =
                     await brevoResponse.json();
+
             } catch {
+
                 brevoData = {};
             }
 
@@ -825,7 +1012,9 @@ line-height:1.7;
                BREVO FAILED
             --------------------------------------------- */
 
-            if (!brevoResponse.ok) {
+            if (
+                !brevoResponse.ok
+            ) {
 
                 await OTPVerification.deleteOne({
                     email
@@ -838,7 +1027,9 @@ line-height:1.7;
                 );
 
                 return res.status(502).json({
+
                     success: false,
+
                     code:
                         'EMAIL_SEND_FAILED',
 
@@ -852,6 +1043,7 @@ line-height:1.7;
             --------------------------------------------- */
 
             return res.json({
+
                 success: true,
 
                 code:
@@ -869,6 +1061,7 @@ line-height:1.7;
             );
 
             return res.status(500).json({
+
                 success: false,
 
                 code:
@@ -905,9 +1098,14 @@ app.post(
                VALIDATION
             --------------------------------------------- */
 
-            if (!isValidEmail(email)) {
+            if (
+                !isValidEmail(email)
+            ) {
+
                 return res.status(400).json({
+
                     success: false,
+
                     code:
                         'INVALID_EMAIL',
 
@@ -921,8 +1119,11 @@ app.post(
                     `^\\d{${OTP_LENGTH}}$`
                 ).test(otp)
             ) {
+
                 return res.status(400).json({
+
                     success: false,
+
                     code:
                         'INVALID_OTP_FORMAT',
 
@@ -947,6 +1148,7 @@ app.post(
                 });
 
                 return res.status(409).json({
+
                     success: false,
 
                     code:
@@ -967,7 +1169,9 @@ app.post(
                 });
 
             if (!record) {
+
                 return res.status(400).json({
+
                     success: false,
 
                     code:
@@ -988,7 +1192,8 @@ app.post(
                 ).getTime();
 
             if (
-                Date.now() - createdAt >
+                Date.now() -
+                createdAt >
                 OTP_EXPIRES_MS
             ) {
 
@@ -997,6 +1202,7 @@ app.post(
                 });
 
                 return res.status(400).json({
+
                     success: false,
 
                     code:
@@ -1021,6 +1227,7 @@ app.post(
                 });
 
                 return res.status(429).json({
+
                     success: false,
 
                     code:
@@ -1035,7 +1242,8 @@ app.post(
                VERIFY OTP
             --------------------------------------------- */
 
-            let validOTP = false;
+            let validOTP =
+                false;
 
             try {
 
@@ -1046,7 +1254,9 @@ app.post(
                     );
 
             } catch {
-                validOTP = false;
+
+                validOTP =
+                    false;
             }
 
             /* ---------------------------------------------
@@ -1065,6 +1275,7 @@ app.post(
                     await record.deleteOne();
 
                     return res.status(429).json({
+
                         success: false,
 
                         code:
@@ -1078,6 +1289,7 @@ app.post(
                 await record.save();
 
                 return res.status(400).json({
+
                     success: false,
 
                     code:
@@ -1139,6 +1351,7 @@ app.post(
                     });
 
                     return res.status(409).json({
+
                         success: false,
 
                         code:
@@ -1216,6 +1429,7 @@ app.post(
                     'تم إنشاء الحساب والتحقق من البريد بنجاح.',
 
                 user: {
+
                     id:
                         user._id.toString(),
 
@@ -1225,12 +1439,6 @@ app.post(
                     verifiedAt:
                         user.verifiedAt
                 },
-
-                /*
-                 * يظهر API Token عند إنشاء الحساب.
-                 *
-                 * يتم تخزين Hash فقط في MongoDB.
-                 */
 
                 apiToken
             });
@@ -1243,6 +1451,7 @@ app.post(
             );
 
             return res.status(500).json({
+
                 success: false,
 
                 code:
@@ -1273,7 +1482,9 @@ async function requireSession(
             ];
 
         if (!sessionToken) {
+
             return res.status(401).json({
+
                 success: false,
 
                 code:
@@ -1288,7 +1499,9 @@ async function requireSession(
             typeof sessionToken !== 'string' ||
             sessionToken.length < 32
         ) {
+
             return res.status(401).json({
+
                 success: false,
 
                 code:
@@ -1317,6 +1530,7 @@ async function requireSession(
             );
 
             return res.status(401).json({
+
                 success: false,
 
                 code:
@@ -1347,6 +1561,7 @@ async function requireSession(
             );
 
             return res.status(401).json({
+
                 success: false,
 
                 code:
@@ -1379,6 +1594,7 @@ async function requireSession(
             );
 
             return res.status(401).json({
+
                 success: false,
 
                 code:
@@ -1418,6 +1634,7 @@ async function requireSession(
         );
 
         return res.status(500).json({
+
             success: false,
 
             code:
@@ -1453,8 +1670,12 @@ app.post(
                VALIDATION
             --------------------------------------------- */
 
-            if (!isValidEmail(email)) {
+            if (
+                !isValidEmail(email)
+            ) {
+
                 return res.status(400).json({
+
                     success: false,
 
                     code:
@@ -1466,7 +1687,9 @@ app.post(
             }
 
             if (!password) {
+
                 return res.status(400).json({
+
                     success: false,
 
                     code:
@@ -1487,7 +1710,9 @@ app.post(
                 });
 
             if (!user) {
+
                 return res.status(401).json({
+
                     success: false,
 
                     code:
@@ -1514,12 +1739,15 @@ app.post(
                     );
 
             } catch {
+
                 validPassword =
                     false;
             }
 
             if (!validPassword) {
+
                 return res.status(401).json({
+
                     success: false,
 
                     code:
@@ -1586,6 +1814,7 @@ app.post(
                     'تم تسجيل الدخول بنجاح.',
 
                 user: {
+
                     id:
                         user._id.toString(),
 
@@ -1605,6 +1834,7 @@ app.post(
             );
 
             return res.status(500).json({
+
                 success: false,
 
                 code:
@@ -1714,6 +1944,7 @@ app.post(
             );
 
             return res.status(500).json({
+
                 success: false,
 
                 code:
@@ -1735,22 +1966,12 @@ app.get(
     requireSession,
     async (req, res) => {
 
-        /*
-         * لا نعيد API Token الخام.
-         *
-         * الموجود في MongoDB هو Hash فقط.
-         *
-         * لذلك إذا فقد العميل التوكن،
-         * يحتاج Endpoint لإعادة توليده.
-         */
-
         return res.json({
 
             success: true,
 
             message:
                 'API Token موجود للحساب. لأسباب أمنية لا يتم إرجاع التوكن الحالي.'
-
         });
     }
 );
@@ -1780,12 +2001,6 @@ app.post(
 
             await req.user.save();
 
-            /*
-             * مهم:
-             *
-             * التوكن القديم أصبح غير صالح.
-             */
-
             return res.json({
 
                 success: true,
@@ -1808,6 +2023,7 @@ app.post(
             );
 
             return res.status(500).json({
+
                 success: false,
 
                 code:
@@ -1852,8 +2068,32 @@ app.use(
             error
         );
 
-        if (res.headersSent) {
+        if (
+            res.headersSent
+        ) {
             return next(error);
+        }
+
+        /*
+         * معالجة خطأ CORS بشكل واضح.
+         */
+
+        if (
+            error &&
+            error.message ===
+                'CORS origin not allowed'
+        ) {
+
+            return res.status(403).json({
+
+                success: false,
+
+                code:
+                    'CORS_ORIGIN_NOT_ALLOWED',
+
+                message:
+                    'هذا النطاق غير مسموح له بالاتصال بالسيرفر.'
+            });
         }
 
         return res.status(500).json({
@@ -1918,7 +2158,39 @@ app.listen(
         );
 
         console.log(
+            '✓ CORS: enabled'
+        );
+
+        console.log(
+            '✓ Credentials: enabled'
+        );
+
+        console.log(
+            '✓ www.routix.nx.kg: allowed'
+        );
+
+        console.log(
+            '✓ routix.nx.kg: allowed'
+        );
+
+        console.log(
             `✓ Session TTL: ${SESSION_TTL_DAYS} days`
+        );
+
+        console.log(
+            `✓ Cookie SameSite: ${
+                IS_PRODUCTION
+                    ? 'none'
+                    : 'lax'
+            }`
+        );
+
+        console.log(
+            `✓ Cookie Secure: ${
+                IS_PRODUCTION
+                    ? 'true'
+                    : 'false'
+            }`
         );
 
         console.log(
