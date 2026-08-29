@@ -14,11 +14,13 @@
     "zod": "^3.23.8",
     "tsx": "^4.23.12",
     "concurrently": "^8.2.2",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^20.12.7",
+    "@types/jsonwebtoken": "^9.0.6",
     "typescript": "^5.4.5"
   },
   "engines": {
