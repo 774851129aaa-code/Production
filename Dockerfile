@@ -9,7 +9,6 @@ RUN npm install
 COPY cloud-waf-proxy.ts ./
 COPY index.html ./
 
-
 FROM node:20-alpine
 
 WORKDIR /app
