@@ -6,8 +6,7 @@ COPY package*.json ./
 
 RUN npm install
 
-نسخ كافة الملفات الضرورية بما فيها server.js
-
+# Copy all required files
 COPY cloud-waf-proxy.ts ./
 COPY server.js ./
 COPY index.html ./
@@ -28,6 +27,5 @@ EXPOSE 8080
 
 USER node
 
-استخدام npm start لتشغيل الملفين بالتوازي عبر concurrently
-
+# Start both services using npm start
 CMD ["npm", "start"]
