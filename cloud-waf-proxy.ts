@@ -25,13 +25,6 @@ import {
   type Collection,
 } from "mongodb";
 
-import express, {
-    type Express,
-    type Request,
-    type Response,
-    type NextFunction
-} from 'express';
-
 import cors from 'cors';
 import mongoose, {
     type HydratedDocument,
@@ -39,7 +32,6 @@ import mongoose, {
 } from 'mongoose';
 
 import jwt from 'jsonwebtoken';
-import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
 import argon2 from 'argon2';
