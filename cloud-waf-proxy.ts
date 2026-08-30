@@ -322,14 +322,13 @@ const normalizeHost = normalizeDomain;
 
 const normalizeDomains = (
   values: string[],
-): string[] =>
-  [
-    ...new Set(
-      values
-        .map(normalizeDomain)
-        .filter(Boolean),
-    ),
-  ];
+): string[] => [
+  ...new Set(
+    values
+      .map(normalizeDomain)
+      .filter(Boolean),
+  ),
+];
 
 const truncate = (
   value: string,
@@ -427,9 +426,7 @@ for (
   const host of [
     process.env.RENDER_EXTERNAL_HOSTNAME,
     process.env.PUBLIC_HOST,
-
     'production-1-54qv.onrender.com',
-
     'www.routix.nx.kg',
     'routix.nx.kg',
   ]
@@ -522,7 +519,9 @@ const allowedOrigins = new Set(
     'https://production-1-54qv.onrender.com',
     'https://www.routix.nx.kg',
     'https://routix.nx.kg',
-  ].map((value) => value.toLowerCase()),
+  ].map((value) =>
+    value.toLowerCase(),
+  ),
 );
 
 app.use(
@@ -576,20 +575,19 @@ app.use(
    AUTH RATE LIMIT
 ============================================================ */
 
-const authLimiter =
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 30,
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30,
 
-    standardHeaders: true,
-    legacyHeaders: false,
+  standardHeaders: true,
+  legacyHeaders: false,
 
-    message: {
-      success: false,
-      message:
-        'تم تجاوز الحد المسموح من الطلبات، يرجى المحاولة لاحقاً.',
-    },
-  });
+  message: {
+    success: false,
+    message:
+      'تم تجاوز الحد المسموح من الطلبات، يرجى المحاولة لاحقاً.',
+  },
+});
 
 app.use(
   '/api/',
@@ -657,11 +655,9 @@ function migrateSite(
   const domains =
     normalizeDomains([
       primary,
-      ...(
-        Array.isArray(site?.domains)
-          ? site.domains
-          : []
-      ),
+      ...(Array.isArray(site?.domains)
+        ? site.domains
+        : []),
     ]);
 
   return {
@@ -833,7 +829,8 @@ async function saveDb(): Promise<void> {
       )
     ) {
       if (
-        value.expiresAt < now
+        value.expiresAt <
+        now
       ) {
         delete db.blacklists[
           key
@@ -850,7 +847,8 @@ async function saveDb(): Promise<void> {
       )
     ) {
       if (
-        value.expiresAt < now
+        value.expiresAt <
+        now
       ) {
         delete db.risks[
           key
@@ -887,8 +885,7 @@ async function saveDb(): Promise<void> {
       error,
     );
   } finally {
-    saveInProgress =
-      false;
+    saveInProgress = false;
   }
 }
 
@@ -1024,12 +1021,13 @@ function getSiteByHost(
   );
 }
 
-const getSiteById =
-  (id: string): Site | null =>
-    db.sites.find(
-      (site) =>
-        site.id === id,
-    ) || null;
+const getSiteById = (
+  id: string,
+): Site | null =>
+  db.sites.find(
+    (site) =>
+      site.id === id,
+  ) || null;
 
 function getSiteByApiKey(
   apiKey: string,
@@ -1250,13 +1248,12 @@ function settingNumber(
   const value =
     site.settings[key];
 
-  return
-    typeof value ===
-      'number' &&
+  return typeof value ===
+    'number' &&
     Number.isFinite(value) &&
     value > 0
-      ? value
-      : fallback;
+    ? value
+    : fallback;
 }
 
 function settingBoolean(
@@ -1267,23 +1264,21 @@ function settingBoolean(
   const value =
     site.settings[key];
 
-  return
-    typeof value ===
-      'boolean'
-      ? value
-      : fallback;
+  return typeof value ===
+    'boolean'
+    ? value
+    : fallback;
 }
 
 /* ============================================================
    BLACKLIST / RISK
 ============================================================ */
 
-const blacklistKey =
-  (
-    siteId: string,
-    ip: string,
-  ): string =>
-    `${siteId}:${ip}`;
+const blacklistKey = (
+  siteId: string,
+  ip: string,
+): string =>
+  `${siteId}:${ip}`;
 
 function isBlacklisted(
   site: Site,
@@ -1356,12 +1351,11 @@ function blacklist(
   dbDirty = true;
 }
 
-const riskKey =
-  (
-    siteId: string,
-    ip: string,
-  ): string =>
-    `${siteId}:${ip}`;
+const riskKey = (
+  siteId: string,
+  ip: string,
+): string =>
+  `${siteId}:${ip}`;
 
 function getRisk(
   site: Site,
@@ -1740,7 +1734,8 @@ function inspectString(
 
   let score = 0;
 
-  const reasons: string[] = [];
+  const reasons: string[] =
+    [];
 
   const rules: Array<
     [
@@ -1829,7 +1824,8 @@ function inspectRequest(
 } {
   let score = 0;
 
-  const reasons: string[] = [];
+  const reasons: string[] =
+    [];
 
   const values: Array<
     [unknown, string]
@@ -1915,6 +1911,7 @@ function inspectRequest(
 
   return {
     score,
+
     reasons: [
       ...new Set(
         reasons,
@@ -2016,19 +2013,18 @@ const CHALLENGE_WAIT_MS =
   config.CHALLENGE_WAIT_SECONDS *
   1000;
 
-const hmacSign =
-  (
-    value: string,
-  ): string =>
-    base64UrlEncode(
-      crypto
-        .createHmac(
-          'sha256',
-          challengeHmacKey,
-        )
-        .update(value)
-        .digest(),
-    );
+const hmacSign = (
+  value: string,
+): string =>
+  base64UrlEncode(
+    crypto
+      .createHmac(
+        'sha256',
+        challengeHmacKey,
+      )
+      .update(value)
+      .digest(),
+  );
 
 function createChallengeTicket(
   host: string,
@@ -2381,7 +2377,10 @@ function getCookie(
 
     const key =
       cookie
-        .slice(0, index)
+        .slice(
+          0,
+          index,
+        )
         .trim();
 
     if (
@@ -2392,7 +2391,9 @@ function getCookie(
 
     const value =
       cookie
-        .slice(index + 1)
+        .slice(
+          index + 1,
+        )
         .trim();
 
     try {
@@ -2431,7 +2432,9 @@ function setChallengeCookie(
   ];
 
   if (secure) {
-    parts.push('Secure');
+    parts.push(
+      'Secure',
+    );
   }
 
   res.setHeader(
@@ -2477,6 +2480,13 @@ function isChallengeCookieValid(
   );
 }
 
+/*
+  FIX:
+  التحدي الآن يرسل الـticket فعلياً إلى المتصفح.
+  المتصفح ينتظر المدة المطلوبة ثم يرسل ticket
+  إلى endpoint التحقق.
+*/
+
 function sendChallengePage(
   req: Request,
   res: Response,
@@ -2512,62 +2522,254 @@ function sendChallengePage(
     '0',
   );
 
+  res.setHeader(
+    'X-Robots-Tag',
+    'noindex, nofollow',
+  );
+
   res.type('html');
 
-  res.send(`
-<!doctype html>
+  const safeTicket =
+    JSON.stringify(ticket);
+
+  res.send(`<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Checking your browser...</title>
+<meta name="robots" content="noindex,nofollow">
+<title>Routix Security Check</title>
+
+<style>
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  min-height:100%;
+  background:#070b14;
+  color:#e8edf7;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+body{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+
+.card{
+  width:min(470px,100%);
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:24px;
+  padding:34px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(20,29,48,.98),
+      rgba(8,13,24,.98)
+    );
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.45);
+  text-align:center;
+}
+
+.logo{
+  width:62px;
+  height:62px;
+  margin:0 auto 20px;
+  display:grid;
+  place-items:center;
+  border-radius:18px;
+  background:#18243b;
+  border:1px solid rgba(255,255,255,.08);
+  font-size:30px;
+}
+
+h1{
+  margin:0 0 10px;
+  font-size:24px;
+}
+
+p{
+  color:#9ca9bd;
+  line-height:1.7;
+  margin:0;
+}
+
+.status{
+  margin-top:25px;
+  padding:15px;
+  border-radius:14px;
+  background:#0e1627;
+  border:1px solid rgba(255,255,255,.07);
+}
+
+.spinner{
+  width:34px;
+  height:34px;
+  margin:0 auto 14px;
+  border-radius:50%;
+  border:3px solid rgba(255,255,255,.12);
+  border-top-color:#fff;
+  animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+.small{
+  margin-top:18px;
+  font-size:12px;
+  color:#65738a;
+}
+</style>
 </head>
+
 <body>
-<h2>Checking your browser...</h2>
-<p>Please wait ${wait} seconds.</p>
-<p>Protected by Routix</p>
+
+<div class="card">
+  <div class="logo">🛡️</div>
+
+  <h1>Checking your browser...</h1>
+
+  <p>
+    Please wait while Routix verifies your browser.
+  </p>
+
+  <div class="status">
+    <div class="spinner"></div>
+    <div id="status">
+      Security check in progress...
+    </div>
+  </div>
+
+  <div class="small">
+    Protected by Routix WAF
+  </div>
+</div>
 
 <script>
-(function () {
-  const ticket = ${JSON.stringify(ticket)};
-  const waitMs = ${wait * 1000};
+(function(){
 
-  setTimeout(async function () {
-    try {
-      const response = await fetch(
-        '/__waf/challenge/verify',
-        {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-routix-challenge': ticket
-          },
-          body: JSON.stringify({
-            ticket: ticket
-          })
-        }
+  const ticket = ${safeTicket};
+
+  const waitMs =
+    ${config.CHALLENGE_WAIT_SECONDS * 1000};
+
+  const status =
+    document.getElementById('status');
+
+  const started =
+    Date.now();
+
+  function update(){
+    const elapsed =
+      Date.now() - started;
+
+    const remaining =
+      Math.max(
+        0,
+        Math.ceil(
+          (waitMs - elapsed) / 1000
+        )
       );
 
-      if (response.ok) {
+    if(remaining > 0){
+      status.textContent =
+        'Security check in progress... ' +
+        remaining +
+        's';
+    }else{
+      status.textContent =
+        'Verifying browser...';
+    }
+  }
+
+  update();
+
+  const timer =
+    setInterval(update,250);
+
+  setTimeout(async function(){
+
+    clearInterval(timer);
+
+    try{
+
+      const response =
+        await fetch(
+          '/__waf/challenge/verify',
+          {
+            method:'POST',
+            credentials:'same-origin',
+            cache:'no-store',
+            headers:{
+              'Content-Type':
+                'application/json',
+              'X-Routix-Challenge':
+                ticket
+            },
+            body:JSON.stringify({
+              ticket:ticket
+            })
+          }
+        );
+
+      const data =
+        await response.json()
+          .catch(function(){
+            return {};
+          });
+
+      if(
+        response.ok &&
+        data.success &&
+        data.verified
+      ){
+        status.textContent =
+          'Verified. Loading...';
+
         window.location.reload();
         return;
       }
 
-      document.body.innerHTML =
-        '<h2>Security check failed</h2>' +
-        '<p>Please refresh the page and try again.</p>';
-    } catch (error) {
-      document.body.innerHTML =
-        '<h2>Security check failed</h2>' +
-        '<p>Please refresh the page and try again.</p>';
+      status.textContent =
+        'Security check failed. Retrying...';
+
+      setTimeout(function(){
+        window.location.reload();
+      },1200);
+
+    }catch(error){
+
+      status.textContent =
+        'Connection check failed. Retrying...';
+
+      setTimeout(function(){
+        window.location.reload();
+      },1500);
     }
+
   }, waitMs);
+
 })();
 </script>
+
 </body>
-</html>
-  `);
+</html>`);
 }
 
 /* ============================================================
@@ -2611,12 +2813,6 @@ const UserModel =
     'User',
     userSchema,
   );
-
-/*
-  OTP:
-  - One OTP per email.
-  - Automatically expires after 5 minutes.
-*/
 
 const otpSchema =
   new Schema({
@@ -2720,19 +2916,20 @@ function getOtpFromRequest(
 const SESSION_COOKIE =
   'routix_session';
 
-const SESSION_COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: true,
-  sameSite:
-    'none' as const,
-  path: '/',
-  maxAge:
-    7 *
-    24 *
-    60 *
-    60 *
-    1000,
-};
+const SESSION_COOKIE_OPTIONS =
+  {
+    httpOnly: true,
+    secure: true,
+    sameSite:
+      'none' as const,
+    path: '/',
+    maxAge:
+      7 *
+      24 *
+      60 *
+      60 *
+      1000,
+  };
 
 function createSession(
   res: Response,
@@ -2914,11 +3111,6 @@ app.post(
           )
           .toString();
 
-      /*
-        مهم:
-        لا نحفظ OTP إلا بعد قبول Brevo للرسالة.
-      */
-
       const response =
         await fetch(
           'https://api.brevo.com/v3/smtp/email',
@@ -2956,27 +3148,18 @@ app.post(
 
               htmlContent: `
 <!doctype html>
-<html lang="ar">
-<body dir="rtl">
-
-<h2>إنشاء حساب Routix</h2>
-
+<html lang="ar" dir="rtl">
+<body style="font-family:Arial,sans-serif;background:#f4f7fb;padding:30px">
+<div style="max-width:520px;margin:auto;background:white;border-radius:16px;padding:30px;text-align:center">
+<h2>🛡️ إنشاء حساب Routix</h2>
 <p>مرحباً بك في Routix.</p>
-
 <p>رمز التحقق الخاص بك هو:</p>
-
-<h1 style="letter-spacing:8px;">
+<div style="font-size:36px;font-weight:bold;letter-spacing:8px;margin:25px 0">
 ${otpCode}
-</h1>
-
-<p>
-هذا الرمز صالح لمدة 5 دقائق فقط.
-</p>
-
-<p>
-لا تشارك الرمز مع أي شخص.
-</p>
-
+</div>
+<p>هذا الرمز صالح لمدة 5 دقائق فقط.</p>
+<p>لا تشارك الرمز مع أي شخص.</p>
+</div>
 </body>
 </html>
               `,
@@ -2995,9 +3178,7 @@ ${otpCode}
         data = {};
       }
 
-      if (
-        !response.ok
-      ) {
+      if (!response.ok) {
         console.error(
           'Brevo error:',
           data,
@@ -3018,9 +3199,12 @@ ${otpCode}
 
       await OTPModel.create({
         email,
+
         otp:
           otpCode,
+
         passwordHash,
+
         createdAt:
           new Date(),
       });
@@ -3082,10 +3266,6 @@ app.post(
           });
       }
 
-      /*
-        أولاً نتأكد أن الحساب لم يتم إنشاؤه مسبقاً.
-      */
-
       const existingUser =
         await UserModel.findOne({
           email,
@@ -3106,10 +3286,6 @@ app.post(
           });
       }
 
-      /*
-        جلب آخر OTP فقط.
-      */
-
       const record =
         await OTPModel.findOne({
           email,
@@ -3126,12 +3302,6 @@ app.post(
               'انتهت صلاحية رمز التحقق أو لم يتم طلب رمز',
           });
       }
-
-      /*
-        تحقق إضافي من عمر الرمز.
-        TTL في MongoDB قد يتأخر قليلاً،
-        لذلك نتحقق يدوياً أيضاً.
-      */
 
       const otpAge =
         Date.now() -
@@ -3155,10 +3325,6 @@ app.post(
           });
       }
 
-      /*
-        مقارنة آمنة للرمز.
-      */
-
       if (
         !secureCompare(
           record.otp,
@@ -3174,19 +3340,10 @@ app.post(
           });
       }
 
-      /*
-        حذف OTP قبل إنشاء الحساب
-        لمنع إعادة استخدامه.
-      */
-
       await OTPModel.deleteOne({
         _id:
           record._id,
       });
-
-      /*
-        إنشاء الحساب.
-      */
 
       const user =
         await UserModel.create({
@@ -3206,10 +3363,6 @@ app.post(
             new Date(),
         });
 
-      /*
-        تسجيل الدخول مباشرة بعد نجاح التحقق.
-      */
-
       createSession(
         res,
         user,
@@ -3219,9 +3372,7 @@ app.post(
         .status(201)
         .json({
           success: true,
-
           registered: true,
-
           loggedIn: true,
 
           message:
@@ -3475,7 +3626,8 @@ const verifySession =
       }
 
       const payload =
-        decoded as AuthJwtPayload;
+        decoded as
+          AuthJwtPayload;
 
       const user =
         await UserModel.findById(
@@ -3580,8 +3732,6 @@ app.get(
     });
   },
 );
-
-/* Alias مفيد إذا كان index.html يستخدم /api/me */
 
 app.get(
   '/api/me',
@@ -3706,10 +3856,9 @@ function adminAuth(
       'Retry-After',
       String(
         Math.ceil(
-          (
-            failure.expiresAt -
-            Date.now()
-          ) / 1000,
+          (failure.expiresAt -
+            Date.now()) /
+            1000,
         ),
       ),
     );
@@ -3834,9 +3983,7 @@ function adminAuth(
       Date.now();
 
     const current =
-      adminFailures.get(
-        ip,
-      );
+      adminFailures.get(ip);
 
     if (
       !current ||
@@ -3847,6 +3994,7 @@ function adminAuth(
         ip,
         {
           count: 1,
+
           expiresAt:
             now +
             ADMIN_FAILURE_WINDOW_MS,
@@ -3903,8 +4051,7 @@ function siteApiAuth(
   }
 
   if (
-    key.length >
-    512
+    key.length > 512
   ) {
     res
       .status(401)
@@ -3932,7 +4079,8 @@ function siteApiAuth(
 
   (
     req as WafRequest
-  ).wafSite = site;
+  ).wafSite =
+    site;
 
   next();
 }
@@ -4196,19 +4344,16 @@ app.post(
 
     const incomingDomains =
       normalizeDomains([
-        ...(
-          parsed.data.client_domain
-            ? [
-                parsed.data
-                  .client_domain,
-              ]
-            : []
-        ),
+        ...(parsed.data
+          .client_domain
+          ? [
+              parsed.data
+                .client_domain,
+            ]
+          : []),
 
-        ...(
-          parsed.data.domains ||
-          []
-        ),
+        ...(parsed.data.domains ||
+          []),
       ]);
 
     if (
@@ -4262,13 +4407,9 @@ app.post(
 
     const conflict =
       incomingDomains.find(
-        (
-          domain,
-        ) =>
+        (domain) =>
           db.sites.some(
-            (
-              site,
-            ) =>
+            (site) =>
               normalizeDomains([
                 site.client_domain,
                 ...(site.domains ||
@@ -4422,13 +4563,9 @@ app.post(
 
     const conflicts =
       newDomains.filter(
-        (
-          domain,
-        ) =>
+        (domain) =>
           db.sites.some(
-            (
-              other,
-            ) =>
+            (other) =>
               other.id !==
                 site.id &&
               normalizeDomains([
@@ -4574,7 +4711,8 @@ app.delete(
       domain
     ) {
       site.client_domain =
-        remaining[0] || '';
+        remaining[0] ||
+        '';
     }
 
     dbDirty = true;
@@ -5101,11 +5239,13 @@ app.get(
                     (
                       entry.expiresAt -
                       now
-                    ) / 1000,
+                    ) /
+                      1000,
                   ),
                 ),
 
-              temporary: true,
+              temporary:
+                true,
             };
           },
         )
@@ -5120,6 +5260,7 @@ app.get(
 
     res.json({
       blacklists,
+
       count:
         blacklists.length,
     });
@@ -5277,7 +5418,7 @@ function escapeHtml(
     )
     .replace(
       /'/g,
-      '&#39;',
+      '&#039;',
     );
 }
 
@@ -5290,332 +5431,1887 @@ app.get(
   ) => {
     res
       .type('html')
-      .send(`
-<!doctype html>
+      .send(`<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
+
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1"
+/>
+
+<meta
+  name="robots"
+  content="noindex,nofollow"
+/>
+
 <title>Routix — WAF Admin</title>
+
 <style>
-body {
-  font-family: Arial, sans-serif;
-  margin: 30px;
-  background: #f5f5f5;
+
+:root{
+  --bg:#070b14;
+  --panel:#0e1524;
+  --panel2:#111b2e;
+  --border:rgba(255,255,255,.08);
+  --text:#edf2fa;
+  --muted:#8795aa;
+  --green:#42d392;
+  --red:#ff647c;
+  --yellow:#f5c451;
+  --blue:#6ea8ff;
+  --shadow:0 25px 70px rgba(0,0,0,.34);
 }
 
-.card {
-  background: white;
-  padding: 20px;
-  margin-bottom: 20px;
-  border-radius: 12px;
+*{
+  box-sizing:border-box;
 }
 
-input, button {
-  padding: 10px;
-  margin: 5px;
+html{
+  background:var(--bg);
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+body{
+  margin:0;
+  min-height:100vh;
+  color:var(--text);
+  background:
+    radial-gradient(
+      circle at 15% 10%,
+      rgba(64,105,180,.14),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 85% 15%,
+      rgba(64,211,146,.08),
+      transparent 26%
+    ),
+    var(--bg);
+
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Tahoma,
+    Arial,
+    sans-serif;
 }
 
-th, td {
-  padding: 8px;
-  border-bottom: 1px solid #ddd;
-  text-align: right;
+button,
+input,
+textarea,
+select{
+  font:inherit;
 }
+
+button{
+  cursor:pointer;
+}
+
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:50;
+
+  border-bottom:1px solid var(--border);
+
+  background:
+    rgba(7,11,20,.84);
+
+  backdrop-filter:
+    blur(18px);
+}
+
+.topbar-inner{
+  width:min(1500px,calc(100% - 32px));
+  margin:auto;
+
+  min-height:76px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  gap:20px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+
+.brand-icon{
+  width:46px;
+  height:46px;
+
+  display:grid;
+  place-items:center;
+
+  border-radius:14px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #1d355d,
+      #0f1b30
+    );
+
+  border:1px solid var(--border);
+
+  font-size:22px;
+}
+
+.brand h1{
+  margin:0;
+  font-size:19px;
+}
+
+.brand small{
+  display:block;
+  margin-top:3px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.online{
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  color:#a8b6c9;
+  font-size:13px;
+}
+
+.dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:
+    0 0 0 5px rgba(66,211,146,.09),
+    0 0 16px rgba(66,211,146,.5);
+}
+
+.container{
+  width:min(1500px,calc(100% - 32px));
+  margin:28px auto 60px;
+}
+
+.hero{
+  margin-bottom:22px;
+}
+
+.hero h2{
+  margin:0;
+  font-size:27px;
+}
+
+.hero p{
+  margin:8px 0 0;
+  color:var(--muted);
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:
+    repeat(5,minmax(0,1fr));
+
+  gap:14px;
+
+  margin-bottom:22px;
+}
+
+.stat{
+  padding:20px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(17,27,46,.96),
+      rgba(10,16,29,.96)
+    );
+
+  border:1px solid var(--border);
+
+  border-radius:18px;
+
+  box-shadow:var(--shadow);
+}
+
+.stat .label{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.stat .value{
+  margin-top:8px;
+  font-size:28px;
+  font-weight:800;
+}
+
+.layout{
+  display:grid;
+  grid-template-columns:
+    370px minmax(0,1fr);
+
+  gap:20px;
+  align-items:start;
+}
+
+.panel{
+  background:
+    linear-gradient(
+      145deg,
+      rgba(17,27,46,.96),
+      rgba(10,16,29,.96)
+    );
+
+  border:1px solid var(--border);
+  border-radius:20px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+.panel-head{
+  padding:18px 20px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  gap:15px;
+
+  border-bottom:1px solid var(--border);
+}
+
+.panel-head h3{
+  margin:0;
+  font-size:16px;
+}
+
+.panel-head span{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.panel-body{
+  padding:20px;
+}
+
+.form-grid{
+  display:grid;
+  gap:13px;
+}
+
+label{
+  display:block;
+}
+
+label span{
+  display:block;
+  margin-bottom:7px;
+  color:#aebbd0;
+  font-size:12px;
+}
+
+input,
+textarea,
+select{
+  width:100%;
+
+  padding:12px 13px;
+
+  color:var(--text);
+  background:#080e1b;
+
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:12px;
+
+  outline:none;
+
+  transition:
+    border-color .2s,
+    box-shadow .2s;
+}
+
+input:focus,
+textarea:focus,
+select:focus{
+  border-color:
+    rgba(110,168,255,.55);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(110,168,255,.08);
+}
+
+textarea{
+  min-height:90px;
+  resize:vertical;
+}
+
+.help{
+  color:#65748a;
+  font-size:11px;
+  line-height:1.6;
+}
+
+.btn{
+  border:0;
+  border-radius:12px;
+
+  padding:12px 15px;
+
+  font-weight:700;
+}
+
+.btn-primary{
+  color:#07101e;
+  background:#edf3fb;
+}
+
+.btn-primary:hover{
+  background:#fff;
+}
+
+.btn-danger{
+  color:#fff;
+  background:
+    rgba(255,100,124,.14);
+
+  border:1px solid
+    rgba(255,100,124,.25);
+}
+
+.btn-soft{
+  color:#dce6f5;
+  background:#121d31;
+
+  border:1px solid var(--border);
+}
+
+.btn:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+.sites{
+  display:grid;
+  gap:14px;
+}
+
+.site-card{
+  padding:18px;
+
+  border:1px solid var(--border);
+  border-radius:16px;
+
+  background:
+    rgba(8,14,26,.65);
+}
+
+.site-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:15px;
+}
+
+.domain{
+  font-weight:800;
+  font-size:16px;
+  word-break:break-word;
+}
+
+.target{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:12px;
+  word-break:break-all;
+}
+
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+
+  padding:6px 9px;
+
+  border-radius:999px;
+
+  font-size:11px;
+  font-weight:700;
+}
+
+.badge-green{
+  color:#7cf0b7;
+  background:
+    rgba(66,211,146,.1);
+}
+
+.badge-red{
+  color:#ff91a2;
+  background:
+    rgba(255,100,124,.1);
+}
+
+.badge-blue{
+  color:#91baff;
+  background:
+    rgba(110,168,255,.1);
+}
+
+.metrics{
+  display:grid;
+  grid-template-columns:
+    repeat(5,minmax(0,1fr));
+
+  gap:8px;
+
+  margin-top:16px;
+}
+
+.metric{
+  padding:10px;
+
+  background:#0c1424;
+
+  border:1px solid var(--border);
+  border-radius:11px;
+}
+
+.metric b{
+  display:block;
+  font-size:16px;
+}
+
+.metric span{
+  color:var(--muted);
+  font-size:10px;
+}
+
+.domains{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:14px;
+}
+
+.domain-pill{
+  padding:5px 8px;
+  border-radius:8px;
+  background:#111d32;
+  color:#aebdd2;
+  font-size:11px;
+}
+
+.site-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:15px;
+}
+
+.api-key{
+  margin-top:12px;
+
+  padding:10px;
+
+  border-radius:10px;
+
+  background:#060b14;
+
+  border:1px solid var(--border);
+
+  color:#7f91aa;
+
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Consolas,
+    monospace;
+
+  font-size:10px;
+
+  word-break:break-all;
+}
+
+.two{
+  display:grid;
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:20px;
+
+  margin-top:20px;
+}
+
+.alert-list,
+.blacklist-list{
+  display:grid;
+  gap:10px;
+}
+
+.alert{
+  padding:13px;
+
+  border:1px solid var(--border);
+  border-radius:12px;
+
+  background:#0a1220;
+}
+
+.alert-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+
+.alert-path{
+  margin-top:8px;
+  color:#8fa0b7;
+
+  font-size:11px;
+
+  word-break:break-all;
+}
+
+.alert-reasons{
+  margin-top:8px;
+
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+}
+
+.reason{
+  padding:4px 6px;
+  border-radius:6px;
+
+  color:#f5c451;
+  background:
+    rgba(245,196,81,.08);
+
+  font-size:10px;
+}
+
+.empty{
+  padding:30px;
+  text-align:center;
+  color:var(--muted);
+}
+
+.toast{
+  position:fixed;
+  left:20px;
+  bottom:20px;
+  z-index:100;
+
+  min-width:240px;
+
+  padding:13px 15px;
+
+  border:1px solid var(--border);
+  border-radius:12px;
+
+  background:#101a2c;
+
+  box-shadow:var(--shadow);
+
+  transform:
+    translateY(20px);
+
+  opacity:0;
+
+  pointer-events:none;
+
+  transition:.25s;
+}
+
+.toast.show{
+  transform:
+    translateY(0);
+
+  opacity:1;
+}
+
+.modal{
+  position:fixed;
+  inset:0;
+  z-index:90;
+
+  display:none;
+  align-items:center;
+  justify-content:center;
+
+  padding:20px;
+
+  background:
+    rgba(0,0,0,.68);
+
+  backdrop-filter:
+    blur(8px);
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modal-card{
+  width:min(600px,100%);
+
+  max-height:
+    calc(100vh - 40px);
+
+  overflow:auto;
+
+  background:#0e1728;
+
+  border:1px solid var(--border);
+  border-radius:18px;
+
+  box-shadow:
+    0 30px 100px rgba(0,0,0,.5);
+}
+
+pre{
+  white-space:pre-wrap;
+  word-break:break-word;
+
+  padding:20px;
+  margin:0;
+
+  color:#aebbd0;
+
+  font-size:12px;
+  line-height:1.7;
+}
+
+@media(max-width:1150px){
+
+  .stats{
+    grid-template-columns:
+      repeat(3,1fr);
+  }
+
+  .layout{
+    grid-template-columns:1fr;
+  }
+
+}
+
+@media(max-width:760px){
+
+  .container,
+  .topbar-inner{
+    width:min(
+      100% - 20px,
+      1500px
+    );
+  }
+
+  .stats{
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+  .two{
+    grid-template-columns:1fr;
+  }
+
+  .metrics{
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+  .hero h2{
+    font-size:22px;
+  }
+
+}
+
+@media(max-width:440px){
+
+  .stats{
+    grid-template-columns:1fr;
+  }
+
+  .topbar-inner{
+    min-height:68px;
+  }
+
+  .online{
+    display:none;
+  }
+
+}
+
 </style>
+
 </head>
 
 <body>
 
-<div class="card">
+<header class="topbar">
 
-<h1>🛡️ Routix Multi-Site WAF Admin</h1>
+<div class="topbar-inner">
 
-<p>
-إدارة المواقع المحمية ومراقبة الطلبات والزوار والتنبيهات.
-</p>
+  <div class="brand">
 
-<p>
-🟢 Routix WAF Online
-</p>
+    <div class="brand-icon">
+      🛡️
+    </div>
+
+    <div>
+      <h1>Routix WAF</h1>
+      <small>Multi-Site Security Dashboard</small>
+    </div>
+
+  </div>
+
+  <div class="online">
+    <span class="dot"></span>
+    Routix WAF Online
+  </div>
 
 </div>
 
-<div class="card">
+</header>
 
-<h2>➕ إضافة موقع للحماية</h2>
+<main class="container">
 
-<form id="addSiteForm">
+<section class="hero">
 
-<input
-name="owner_id"
-placeholder="Owner ID"
-required
+  <h2>لوحة إدارة Routix</h2>
+
+  <p>
+    إدارة المواقع المحمية ومراقبة الطلبات والزوار والتنبيهات
+    والحماية من الهجمات.
+  </p>
+
+</section>
+
+<section class="stats">
+
+  <div class="stat">
+    <div class="label">المواقع</div>
+    <div class="value" id="statSites">0</div>
+  </div>
+
+  <div class="stat">
+    <div class="label">الزوار</div>
+    <div class="value" id="statVisitors">0</div>
+  </div>
+
+  <div class="stat">
+    <div class="label">إجمالي الطلبات</div>
+    <div class="value" id="statRequests">0</div>
+  </div>
+
+  <div class="stat">
+    <div class="label">الهجمات</div>
+    <div class="value" id="statAttacks">0</div>
+  </div>
+
+  <div class="stat">
+    <div class="label">IPs محظورة</div>
+    <div class="value" id="statBlacklisted">0</div>
+  </div>
+
+</section>
+
+<section class="layout">
+
+<div>
+
+  <div class="panel">
+
+    <div class="panel-head">
+      <h3>➕ إضافة موقع للحماية</h3>
+      <span>New protected site</span>
+    </div>
+
+    <div class="panel-body">
+
+      <form id="createSiteForm">
+
+        <div class="form-grid">
+
+          <label>
+            <span>Owner ID</span>
+            <input
+              name="owner_id"
+              placeholder="Owner ID"
+              required
+            />
+          </label>
+
+          <label>
+            <span>Primary Domain</span>
+            <input
+              name="client_domain"
+              placeholder="example.com"
+            />
+          </label>
+
+          <label>
+            <span>Additional Domains</span>
+            <textarea
+              name="domains"
+              placeholder="www.example.com&#10;api.example.com"
+            ></textarea>
+          </label>
+
+          <div class="help">
+            يمكنك وضع أكثر من نطاق، كل نطاق في سطر منفصل.
+          </div>
+
+          <label>
+            <span>Target / Origin URL</span>
+            <input
+              name="target_url"
+              placeholder="https://origin.example.com"
+              required
+            />
+          </label>
+
+          <label>
+            <span>API Key — اختياري</span>
+            <input
+              name="api_key"
+              placeholder="اتركه فارغاً لإنشاء مفتاح تلقائياً"
+            />
+          </label>
+
+          <button
+            class="btn btn-primary"
+            type="submit"
+          >
+            إضافة الموقع
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>
+
+<div>
+
+  <div class="panel">
+
+    <div class="panel-head">
+
+      <div>
+        <h3>🌐 المواقع المحمية</h3>
+        <span id="siteCountText">
+          جاري التحميل...
+        </span>
+      </div>
+
+      <button
+        class="btn btn-soft"
+        onclick="loadAll()"
+      >
+        🔄 تحديث
+      </button>
+
+    </div>
+
+    <div class="panel-body">
+
+      <div
+        id="sites"
+        class="sites"
+      >
+        <div class="empty">
+          جاري تحميل المواقع...
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+</section>
+
+<section class="two">
+
+<div class="panel">
+
+  <div class="panel-head">
+
+    <div>
+      <h3>🚫 IPs المحظورة</h3>
+      <span>Temporary blacklist</span>
+    </div>
+
+  </div>
+
+  <div class="panel-body">
+
+    <div
+      id="blacklists"
+      class="blacklist-list"
+    >
+      <div class="empty">
+        جاري التحميل...
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="panel">
+
+  <div class="panel-head">
+
+    <div>
+      <h3>🚨 التنبيهات</h3>
+      <span>Live WAF alerts</span>
+    </div>
+
+  </div>
+
+  <div class="panel-body">
+
+    <div
+      id="alerts"
+      class="alert-list"
+    >
+      <div class="empty">
+        جاري التحميل...
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+</section>
+
+</main>
+
+<div
+  id="toast"
+  class="toast"
+></div>
+
+<div
+  id="modal"
+  class="modal"
+  onclick="closeModal(event)"
 >
 
-<input
-name="client_domain"
-placeholder="example.com"
->
+  <div class="modal-card">
 
-<input
-name="domains"
-placeholder="example.com,www.example.com"
->
+    <div class="panel-head">
+      <h3 id="modalTitle">
+        التفاصيل
+      </h3>
 
-<input
-name="target_url"
-placeholder="https://origin.example.com"
-required
->
+      <button
+        class="btn btn-soft"
+        onclick="hideModal()"
+      >
+        إغلاق
+      </button>
+    </div>
 
-<button type="submit">
-إضافة الموقع
-</button>
+    <pre id="modalContent"></pre>
 
-</form>
-
-</div>
-
-<div class="card">
-
-<h2>🌐 المواقع المحمية</h2>
-
-<button onclick="loadSites()">
-🔄 تحديث
-</button>
-
-<div id="sites">
-جاري التحميل...
-</div>
-
-</div>
-
-<div class="card">
-
-<h2>🚫 IPs المحظورة</h2>
-
-<div id="blacklists">
-جاري التحميل...
-</div>
-
-</div>
-
-<div class="card">
-
-<h2>🚨 التنبيهات</h2>
-
-<div id="alerts">
-جاري التحميل...
-</div>
+  </div>
 
 </div>
 
 <script>
 
-async function api(url, options) {
-  const response = await fetch(
-    url,
-    options || {}
+const $ = (selector) =>
+  document.querySelector(selector);
+
+let sites = [];
+
+function escapeHtml(value){
+
+  return String(value ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+
+}
+
+function formatNumber(value){
+
+  return Number(value || 0)
+    .toLocaleString('en-US');
+
+}
+
+function formatDate(value){
+
+  if(!value){
+    return '—';
+  }
+
+  try{
+
+    return new Date(value)
+      .toLocaleString();
+
+  }catch{
+
+    return value;
+
+  }
+
+}
+
+function showToast(message){
+
+  const toast =
+    $('#toast');
+
+  toast.textContent =
+    message;
+
+  toast.classList.add(
+    'show'
   );
 
-  if (!response.ok) {
-    throw new Error(
-      await response.text()
-    );
-  }
+  clearTimeout(
+    showToast.timer
+  );
 
-  return response.json();
+  showToast.timer =
+    setTimeout(
+      () =>
+        toast.classList.remove(
+          'show'
+        ),
+      2800
+    );
+
 }
 
-async function loadSites() {
-  try {
-    const data =
-      await api(
-        '/__waf/admin/sites'
+function showModal(title,data){
+
+  $('#modalTitle')
+    .textContent =
+      title;
+
+  $('#modalContent')
+    .textContent =
+      typeof data === 'string'
+        ? data
+        : JSON.stringify(
+            data,
+            null,
+            2
+          );
+
+  $('#modal')
+    .classList.add(
+      'show'
+    );
+
+}
+
+function hideModal(){
+
+  $('#modal')
+    .classList.remove(
+      'show'
+    );
+
+}
+
+function closeModal(event){
+
+  if(
+    event.target ===
+    $('#modal')
+  ){
+    hideModal();
+  }
+
+}
+
+async function api(
+  url,
+  options={}
+){
+
+  const response =
+    await fetch(
+      url,
+      {
+        credentials:
+          'same-origin',
+        ...options
+      }
+    );
+
+  const text =
+    await response.text();
+
+  let data;
+
+  try{
+
+    data =
+      text
+        ? JSON.parse(text)
+        : {};
+
+  }catch{
+
+    data = {
+      raw:text
+    };
+
+  }
+
+  if(
+    !response.ok
+  ){
+
+    throw new Error(
+      data.message ||
+      data.error ||
+      data.raw ||
+      (
+        'HTTP ' +
+        response.status
+      )
+    );
+
+  }
+
+  return data;
+
+}
+
+function renderSites(){
+
+  const box =
+    $('#sites');
+
+  if(!sites.length){
+
+    box.innerHTML =
+      '<div class="empty">لا توجد مواقع محمية حالياً.</div>';
+
+    $('#siteCountText')
+      .textContent =
+        '0 مواقع';
+
+    return;
+
+  }
+
+  $('#siteCountText')
+    .textContent =
+      sites.length +
+      ' موقع';
+
+  box.innerHTML =
+    sites.map(
+      site => {
+
+        const stats =
+          site.stats || {};
+
+        const settings =
+          site.settings || {};
+
+        const enabled =
+          settings.enabled !==
+          false;
+
+        const challenge =
+          settings.enableChallenge !==
+          false;
+
+        return \`
+<div class="site-card">
+
+  <div class="site-top">
+
+    <div>
+
+      <div class="domain">
+        \${escapeHtml(
+          site.client_domain
+        )}
+      </div>
+
+      <div class="target">
+        → \${escapeHtml(
+          site.target_url
+        )}
+      </div>
+
+    </div>
+
+    <div>
+
+      <span class="badge \${enabled ? 'badge-green' : 'badge-red'}">
+        \${enabled ? 'WAF ON' : 'WAF OFF'}
+      </span>
+
+    </div>
+
+  </div>
+
+  <div class="domains">
+
+    \${(site.domains || [])
+      .map(
+        d =>
+          '<span class="domain-pill">' +
+          escapeHtml(d) +
+          '</span>'
+      )
+      .join('')}
+
+  </div>
+
+  <div class="metrics">
+
+    <div class="metric">
+      <b>\${formatNumber(
+        stats.totalRequests
+      )}</b>
+      <span>Requests</span>
+    </div>
+
+    <div class="metric">
+      <b>\${formatNumber(
+        stats.allowedRequests
+      )}</b>
+      <span>Allowed</span>
+    </div>
+
+    <div class="metric">
+      <b>\${formatNumber(
+        stats.blockedRequests
+      )}</b>
+      <span>Blocked</span>
+    </div>
+
+    <div class="metric">
+      <b>\${formatNumber(
+        stats.attacks
+      )}</b>
+      <span>Attacks</span>
+    </div>
+
+    <div class="metric">
+      <b>\${formatNumber(
+        site.visitors
+      )}</b>
+      <span>Visitors</span>
+    </div>
+
+  </div>
+
+  <div class="site-actions">
+
+    <span class="badge badge-blue">
+      Challenge:
+      \${challenge ? 'ON' : 'OFF'}
+    </span>
+
+    <button
+      class="btn btn-soft"
+      onclick="viewSite('\${site.id}')"
+    >
+      التفاصيل
+    </button>
+
+    <button
+      class="btn btn-danger"
+      onclick="deleteSite('\${site.id}')"
+    >
+      حذف الموقع
+    </button>
+
+  </div>
+
+  <div class="api-key">
+    API Key:
+    \${escapeHtml(
+      site.api_key
+    )}
+  </div>
+
+</div>
+        \`;
+
+      }
+    )
+    .join('');
+
+}
+
+async function loadSites(){
+
+  const data =
+    await api(
+      '/__waf/admin/sites'
+    );
+
+  sites =
+    data.sites || [];
+
+  renderSites();
+
+}
+
+async function loadStats(){
+
+  const data =
+    await api(
+      '/__waf/admin/stats'
+    );
+
+  $('#statSites')
+    .textContent =
+      formatNumber(
+        data.sites
       );
 
-    document.getElementById(
-      'sites'
-    ).innerHTML =
-      '<pre>' +
-      escapeHtml(
-        JSON.stringify(
-          data,
-          null,
-          2
-        )
-      ) +
-      '</pre>';
+  $('#statVisitors')
+    .textContent =
+      formatNumber(
+        data.visitors
+      );
 
-  } catch (error) {
-    document.getElementById(
-      'sites'
-    ).textContent =
-      String(error);
-  }
+  $('#statRequests')
+    .textContent =
+      formatNumber(
+        data.totals?.requests
+      );
+
+  $('#statAttacks')
+    .textContent =
+      formatNumber(
+        data.totals?.attacks
+      );
+
+  $('#statBlacklisted')
+    .textContent =
+      formatNumber(
+        data.blacklisted
+      );
+
 }
 
-async function loadBlacklists() {
-  try {
+async function loadBlacklists(){
+
+  const box =
+    $('#blacklists');
+
+  try{
+
     const data =
       await api(
         '/__waf/admin/blacklists'
       );
 
-    document.getElementById(
-      'blacklists'
-    ).innerHTML =
-      '<pre>' +
-      escapeHtml(
-        JSON.stringify(
-          data,
-          null,
-          2
-        )
-      ) +
-      '</pre>';
+    const list =
+      data.blacklists || [];
 
-  } catch (error) {
-    document.getElementById(
-      'blacklists'
-    ).textContent =
-      String(error);
+    if(!list.length){
+
+      box.innerHTML =
+        '<div class="empty">لا توجد عناوين IP محظورة حالياً.</div>';
+
+      return;
+
+    }
+
+    box.innerHTML =
+      list.map(
+        item =>
+          \`
+<div class="alert">
+
+  <div class="alert-row">
+
+    <strong>
+      \${escapeHtml(
+        item.ip
+      )}
+    </strong>
+
+    <span class="badge badge-red">
+      \${formatNumber(
+        item.remainingSeconds
+      )}s
+    </span>
+
+  </div>
+
+  <div class="target">
+    \${escapeHtml(
+      item.domain
+    )}
+  </div>
+
+  <div class="alert-path">
+    السبب:
+    \${escapeHtml(
+      item.reason
+    )}
+  </div>
+
+</div>
+          \`
+      )
+      .join('');
+
+  }catch(error){
+
+    box.innerHTML =
+      '<div class="empty">تعذر تحميل القائمة.</div>';
+
   }
+
 }
 
-async function loadAlerts() {
-  try {
+async function loadAlerts(){
+
+  const box =
+    $('#alerts');
+
+  try{
+
     const data =
       await api(
         '/__waf/admin/alerts'
       );
 
-    document.getElementById(
-      'alerts'
-    ).innerHTML =
-      '<pre>' +
-      escapeHtml(
-        JSON.stringify(
-          data,
-          null,
-          2
+    const list =
+      data.alerts || [];
+
+    if(!list.length){
+
+      box.innerHTML =
+        '<div class="empty">لا توجد تنبيهات حتى الآن.</div>';
+
+      return;
+
+    }
+
+    box.innerHTML =
+      list
+        .slice(0,80)
+        .map(
+          alert =>
+            \`
+<div class="alert">
+
+  <div class="alert-row">
+
+    <span class="badge \${alert.action === 'block' ? 'badge-red' : alert.action === 'honeypot' ? 'badge-blue' : 'badge-green'}">
+      \${escapeHtml(
+        alert.action
+      )}
+    </span>
+
+    <span class="target">
+      \${escapeHtml(
+        formatDate(
+          alert.time
         )
-      ) +
-      '</pre>';
+      )}
+    </span>
 
-  } catch (error) {
-    document.getElementById(
-      'alerts'
-    ).textContent =
-      String(error);
+  </div>
+
+  <div style="margin-top:9px;font-weight:700">
+    \${escapeHtml(
+      alert.ip
+    )}
+  </div>
+
+  <div class="alert-path">
+    \${escapeHtml(
+      alert.domain
+    )}
+    ·
+    \${escapeHtml(
+      alert.path
+    )}
+  </div>
+
+  <div class="alert-reasons">
+
+    <span class="reason">
+      Risk:
+      \${escapeHtml(
+        alert.risk
+      )}
+    </span>
+
+    \${(alert.reasons || [])
+      .map(
+        reason =>
+          '<span class="reason">' +
+          escapeHtml(reason) +
+          '</span>'
+      )
+      .join('')}
+
+  </div>
+
+</div>
+            \`
+        )
+        .join('');
+
+  }catch(error){
+
+    box.innerHTML =
+      '<div class="empty">تعذر تحميل التنبيهات.</div>';
+
   }
+
 }
 
-function escapeHtml(value) {
-  return String(value)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+async function viewSite(id){
+
+  try{
+
+    const data =
+      await api(
+        '/__waf/admin/sites/' +
+        encodeURIComponent(id)
+      );
+
+    showModal(
+      'تفاصيل الموقع',
+      data
+    );
+
+  }catch(error){
+
+    showToast(
+      error.message
+    );
+
+  }
+
 }
 
-document
-  .getElementById(
-    'addSiteForm'
-  )
+async function deleteSite(id){
+
+  const site =
+    sites.find(
+      item =>
+        item.id === id
+    );
+
+  if(!site){
+    return;
+  }
+
+  const confirmed =
+    window.confirm(
+      'هل أنت متأكد من حذف الموقع ' +
+      site.client_domain +
+      '؟ سيتم حذف بياناته من قائمة الحماية والتنبيهات وقائمة الزوار.'
+    );
+
+  if(!confirmed){
+    return;
+  }
+
+  try{
+
+    await api(
+      '/__waf/admin/sites/' +
+      encodeURIComponent(id),
+      {
+        method:'DELETE'
+      }
+    );
+
+    showToast(
+      'تم حذف الموقع بنجاح'
+    );
+
+    await loadAll();
+
+  }catch(error){
+
+    showToast(
+      error.message
+    );
+
+  }
+
+}
+
+$('#createSiteForm')
   .addEventListener(
     'submit',
-    async function(event) {
+    async event => {
 
       event.preventDefault();
 
       const form =
+        event.currentTarget;
+
+      const formData =
         new FormData(
-          event.target
+          form
         );
 
-      const domains =
+      const owner_id =
         String(
-          form.get('domains') ||
-          ''
-        )
-          .split(',')
+          formData.get(
+            'owner_id'
+          ) || ''
+        ).trim();
+
+      const client_domain =
+        String(
+          formData.get(
+            'client_domain'
+          ) || ''
+        ).trim();
+
+      const domainsText =
+        String(
+          formData.get(
+            'domains'
+          ) || ''
+        );
+
+      const target_url =
+        String(
+          formData.get(
+            'target_url'
+          ) || ''
+        ).trim();
+
+      const api_key =
+        String(
+          formData.get(
+            'api_key'
+          ) || ''
+        ).trim();
+
+      const domains =
+        domainsText
+          .split(
+            /[\\n,]+/
+          )
           .map(
             value =>
               value.trim()
           )
           .filter(Boolean);
 
-      try {
+      try{
 
         await api(
           '/__waf/admin/sites',
           {
-            method: 'POST',
+            method:'POST',
 
-            headers: {
+            headers:{
               'Content-Type':
                 'application/json'
             },
 
             body:
               JSON.stringify({
-                owner_id:
-                  form.get(
-                    'owner_id'
-                  ),
-
+                owner_id,
                 client_domain:
-                  form.get(
-                    'client_domain'
-                  ) || undefined,
+                  client_domain ||
+                  undefined,
 
                 domains,
 
-                target_url:
-                  form.get(
-                    'target_url'
-                  ),
+                target_url,
 
-                settings: {
+                api_key:
+                  api_key ||
+                  undefined,
+
+                settings:{
                   enableChallenge:
+                    true,
+
+                  enabled:
+                    true,
+
+                  enableSqlInjection:
+                    true,
+
+                  enableXss:
+                    true,
+
+                  enableRce:
+                    true,
+
+                  enablePathTraversal:
                     true
                 }
               })
           }
         );
 
-        alert(
-          'تمت إضافة الموقع'
+        form.reset();
+
+        showToast(
+          'تمت إضافة الموقع بنجاح'
         );
 
-        event.target.reset();
+        await loadAll();
 
-        loadSites();
+      }catch(error){
 
-      } catch (error) {
-        alert(
-          String(error)
+        showToast(
+          error.message
         );
+
       }
+
     }
   );
 
-loadSites();
-loadBlacklists();
-loadAlerts();
+async function loadAll(){
+
+  try{
+
+    await Promise.all([
+      loadSites(),
+      loadStats(),
+      loadBlacklists(),
+      loadAlerts()
+    ]);
+
+  }catch(error){
+
+    showToast(
+      error.message
+    );
+
+  }
+
+}
+
+function startLiveEvents(){
+
+  try{
+
+    const events =
+      new EventSource(
+        '/__waf/admin/events'
+      );
+
+    events.onmessage =
+      function(event){
+
+        try{
+
+          const data =
+            JSON.parse(
+              event.data
+            );
+
+          if(
+            data &&
+            data.type ===
+              'connected'
+          ){
+            return;
+          }
+
+          loadStats();
+          loadAlerts();
+          loadBlacklists();
+
+        }catch{
+
+          // ignore malformed event
+
+        }
+
+      };
+
+    events.onerror =
+      function(){
+
+        events.close();
+
+        setTimeout(
+          startLiveEvents,
+          5000
+        );
+
+      };
+
+  }catch{
+
+    setTimeout(
+      startLiveEvents,
+      5000
+    );
+
+  }
+
+}
+
+loadAll();
+
+startLiveEvents();
+
+setInterval(
+  loadStats,
+  10000
+);
+
+setInterval(
+  loadSites,
+  15000
+);
+
+setInterval(
+  loadBlacklists,
+  15000
+);
+
+setInterval(
+  loadAlerts,
+  10000
+);
 
 </script>
 
 </body>
-</html>
-      `);
+</html>`);
   },
 );
 
@@ -5765,8 +7461,7 @@ app.get(
     res,
   ) => {
     res.json({
-      status:
-        'ok',
+      status: 'ok',
 
       service:
         'multi-site-cloud-waf',
@@ -6154,6 +7849,7 @@ function violationDecision(
 
   return {
     action,
+
     riskScore:
       score,
 
@@ -6162,6 +7858,7 @@ function violationDecision(
     ],
 
     requestId,
+
     site,
   };
 }
@@ -6294,7 +7991,8 @@ async function evaluate(
       );
 
     if (
-      count >= limit
+      count >=
+      limit
     ) {
       blacklist(
         site,
@@ -6419,7 +8117,8 @@ async function evaluate(
       );
 
     const action: Action =
-      score >= threshold
+      score >=
+      threshold
         ? 'honeypot'
         : 'block';
 
@@ -6564,7 +8263,6 @@ async function evaluate(
     blacklist(
       site,
       ip,
-
       inspection.reasons.join(
         ',',
       ) ||
