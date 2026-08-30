@@ -1,14 +1,9 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-
-<head>
+<!DOCTYPE html><html lang="ar" dir="rtl"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#02060b">
   <meta name="description" content="Routix — Web Application Firewall & Traffic Protection">
-  <title>Routix — Cloud WAF</title>
-
-  <style>
+  <title>Routix — Cloud WAF</title>  <style>
     :root {
       --bg:#02050a;
       --bg2:#06101a;
@@ -49,7 +44,8 @@
     }
 
     body.locked,
-    body.auth-open {
+    body.auth-open,
+    body.client-open {
       overflow:hidden;
     }
 
@@ -59,7 +55,8 @@
     }
 
     button,
-    input {
+    input,
+    select {
       font-family:inherit;
     }
 
@@ -67,7 +64,9 @@
       cursor:pointer;
     }
 
-    /* BACKGROUND */
+    /* =========================================================
+       BACKGROUND
+    ========================================================== */
 
     .cyber-bg {
       position:fixed;
@@ -190,7 +189,22 @@
       }
     }
 
-    /* INTRO */
+    @keyframes pulse {
+      50% {
+        opacity:.4;
+        transform:scale(.75);
+      }
+    }
+
+    @keyframes authSpin {
+      to {
+        transform:rotate(360deg);
+      }
+    }
+
+    /* =========================================================
+       INTRO
+    ========================================================== */
 
     .intro {
       position:fixed;
@@ -410,14 +424,9 @@
       }
     }
 
-    @keyframes pulse {
-      50% {
-        opacity:.4;
-        transform:scale(.75);
-      }
-    }
-
-    /* HEADER */
+    /* =========================================================
+       HEADER
+    ========================================================== */
 
     header {
       position:fixed;
@@ -531,7 +540,9 @@
       font-size:18px;
     }
 
-    /* AUTH */
+    /* =========================================================
+       AUTH
+    ========================================================== */
 
     .auth-overlay {
       position:fixed;
@@ -684,11 +695,6 @@
       font-size:14px;
     }
 
-    .password-toggle:hover {
-      color:white;
-      border-color:var(--border-hover);
-    }
-
     .otp-input {
       text-align:center;
       letter-spacing:8px;
@@ -791,17 +797,9 @@
       animation:authSpin .7s linear infinite;
     }
 
-    @keyframes authSpin {
-      to {
-        transform:rotate(360deg);
-      }
-    }
-
-    /* MAIN */
-
-    main {
-      opacity:1;
-    }
+    /* =========================================================
+       MAIN PUBLIC
+    ========================================================== */
 
     .section {
       width:min(1200px,100%);
@@ -835,8 +833,6 @@
       font-size:14px;
       line-height:1.9;
     }
-
-    /* DASHBOARD */
 
     .dashboard {
       min-height:100vh;
@@ -896,8 +892,6 @@
       background:linear-gradient(135deg,var(--cyan),var(--blue));
       box-shadow:0 15px 40px rgba(57,124,255,.18);
     }
-
-    /* RADAR */
 
     .radar-card {
       position:relative;
@@ -987,8 +981,6 @@
       }
     }
 
-    /* STATS */
-
     .stats {
       display:grid;
       grid-template-columns:repeat(4,1fr);
@@ -1022,8 +1014,6 @@
     .stat-value.cyan {
       color:var(--cyan);
     }
-
-    /* FEATURES */
 
     .features {
       display:grid;
@@ -1081,8 +1071,6 @@
       font:9px Consolas,monospace;
       direction:ltr;
     }
-
-    /* INTEGRATION */
 
     .integration {
       display:grid;
@@ -1176,8 +1164,6 @@
       line-height:1.7;
     }
 
-    /* FLOW */
-
     .flow {
       display:grid;
       grid-template-columns:repeat(9,1fr);
@@ -1216,8 +1202,6 @@
       font:20px Consolas,monospace;
     }
 
-    /* SETTINGS */
-
     .settings-grid {
       display:grid;
       grid-template-columns:repeat(3,1fr);
@@ -1250,8 +1234,6 @@
       text-align:left;
       font:10px Consolas,monospace;
     }
-
-    /* ABOUT */
 
     .about {
       display:grid;
@@ -1290,8 +1272,6 @@
       color:white;
     }
 
-    /* FOOTER */
-
     footer {
       padding:30px 6%;
       border-top:1px solid rgba(255,255,255,.05);
@@ -1304,7 +1284,756 @@
       color:var(--cyan);
     }
 
-    /* RESPONSIVE */
+    /* =========================================================
+       CLIENT PANEL
+    ========================================================== */
+
+    #clientPanel {
+      display:none;
+      position:fixed;
+      inset:0;
+      z-index:300;
+      overflow:hidden;
+      background:
+        radial-gradient(circle at 80% 10%,rgba(57,124,255,.10),transparent 28%),
+        linear-gradient(180deg,#02050a 0%,#030a12 100%);
+    }
+
+    #clientPanel.active {
+      display:flex;
+    }
+
+    .client-sidebar {
+      width:245px;
+      flex:0 0 245px;
+      height:100vh;
+      overflow-y:auto;
+      border-left:1px solid var(--border);
+      background:rgba(4,10,17,.94);
+      backdrop-filter:blur(18px);
+      padding:20px 14px;
+    }
+
+    .client-brand {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:7px 10px 24px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      margin-bottom:17px;
+    }
+
+    .client-brand .brand-logo {
+      width:35px;
+      height:35px;
+      flex:0 0 35px;
+    }
+
+    .client-brand-text strong {
+      display:block;
+      font-size:16px;
+    }
+
+    .client-brand-text span {
+      color:var(--muted2);
+      font:8px Consolas,monospace;
+      direction:ltr;
+    }
+
+    .client-nav-label {
+      color:#486073;
+      font:9px Consolas,monospace;
+      letter-spacing:1.2px;
+      padding:8px 12px;
+    }
+
+    .client-nav {
+      display:grid;
+      gap:4px;
+    }
+
+    .client-nav button {
+      width:100%;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-height:43px;
+      padding:0 12px;
+      border:1px solid transparent;
+      border-radius:10px;
+      color:#8ea4b5;
+      background:transparent;
+      text-align:right;
+      font-size:11px;
+      transition:.2s;
+    }
+
+    .client-nav button:hover,
+    .client-nav button.active {
+      color:white;
+      border-color:var(--border);
+      background:rgba(54,230,255,.055);
+    }
+
+    .client-nav button.active {
+      color:var(--cyan);
+      box-shadow:inset -2px 0 0 var(--cyan);
+    }
+
+    .client-nav-icon {
+      width:25px;
+      height:25px;
+      display:grid;
+      place-items:center;
+      border:1px solid rgba(54,230,255,.10);
+      border-radius:7px;
+      color:var(--cyan);
+      font:10px Consolas,monospace;
+    }
+
+    .client-sidebar-bottom {
+      margin-top:22px;
+      padding-top:17px;
+      border-top:1px solid rgba(255,255,255,.05);
+    }
+
+    .client-session {
+      padding:13px;
+      border:1px solid var(--border);
+      border-radius:11px;
+      background:rgba(54,230,255,.025);
+      margin-bottom:9px;
+    }
+
+    .client-session small {
+      display:block;
+      color:var(--muted2);
+      font-size:8px;
+      margin-bottom:6px;
+    }
+
+    .client-session span {
+      display:block;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      direction:ltr;
+      text-align:left;
+      color:var(--cyan);
+      font:10px Consolas,monospace;
+    }
+
+    .client-logout {
+      width:100%;
+      min-height:40px;
+      border:1px solid rgba(255,82,109,.16);
+      border-radius:10px;
+      color:#ff8294;
+      background:rgba(255,82,109,.035);
+      font-size:10px;
+    }
+
+    .client-main {
+      flex:1;
+      min-width:0;
+      height:100vh;
+      overflow-y:auto;
+    }
+
+    .client-topbar {
+      position:sticky;
+      top:0;
+      z-index:20;
+      min-height:76px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+      padding:0 28px;
+      border-bottom:1px solid rgba(255,255,255,.05);
+      background:rgba(2,5,10,.78);
+      backdrop-filter:blur(18px);
+    }
+
+    .client-page-title {
+      min-width:0;
+    }
+
+    .client-page-title .eyebrow {
+      margin-bottom:3px;
+      font-size:9px;
+    }
+
+    .client-page-title h1 {
+      font-size:20px;
+    }
+
+    .client-top-actions {
+      display:flex;
+      align-items:center;
+      gap:9px;
+    }
+
+    .client-refresh {
+      min-height:36px;
+      padding:0 12px;
+      border:1px solid var(--border);
+      border-radius:9px;
+      color:var(--cyan);
+      background:rgba(255,255,255,.025);
+      font-size:10px;
+    }
+
+    .client-status {
+      display:flex;
+      align-items:center;
+      gap:7px;
+      padding:8px 11px;
+      border:1px solid rgba(67,230,167,.14);
+      border-radius:9px;
+      color:var(--green);
+      background:rgba(67,230,167,.035);
+      font:9px Consolas,monospace;
+      direction:ltr;
+    }
+
+    .client-content {
+      width:min(1400px,100%);
+      margin:auto;
+      padding:27px;
+    }
+
+    .client-page {
+      display:none;
+      animation:fadeUp .25s ease both;
+    }
+
+    .client-page.active {
+      display:block;
+    }
+
+    .client-grid {
+      display:grid;
+      gap:13px;
+    }
+
+    .client-grid.four {
+      grid-template-columns:repeat(4,1fr);
+    }
+
+    .client-grid.three {
+      grid-template-columns:repeat(3,1fr);
+    }
+
+    .client-grid.two {
+      grid-template-columns:repeat(2,1fr);
+    }
+
+    .client-card {
+      min-width:0;
+      padding:19px;
+      border:1px solid var(--border);
+      border-radius:15px;
+      background:
+        radial-gradient(circle at 100% 0%,rgba(54,230,255,.045),transparent 45%),
+        rgba(7,15,25,.76);
+      box-shadow:0 15px 45px rgba(0,0,0,.12);
+    }
+
+    .client-card-header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+
+    .client-card-header h3 {
+      font-size:13px;
+    }
+
+    .client-card-header span {
+      color:var(--muted2);
+      font:9px Consolas,monospace;
+      direction:ltr;
+    }
+
+    .metric-card {
+      position:relative;
+      min-height:125px;
+      overflow:hidden;
+    }
+
+    .metric-card::after {
+      content:"";
+      position:absolute;
+      left:-30px;
+      bottom:-50px;
+      width:120px;
+      height:120px;
+      border-radius:50%;
+      border:1px solid rgba(54,230,255,.06);
+      box-shadow:0 0 50px rgba(54,230,255,.04);
+    }
+
+    .metric-icon {
+      width:35px;
+      height:35px;
+      display:grid;
+      place-items:center;
+      margin-bottom:13px;
+      border:1px solid rgba(54,230,255,.14);
+      border-radius:9px;
+      color:var(--cyan);
+      background:rgba(54,230,255,.035);
+      font:12px Consolas,monospace;
+    }
+
+    .metric-label {
+      color:var(--muted2);
+      font-size:9px;
+      margin-bottom:7px;
+    }
+
+    .metric-value {
+      font:900 24px Consolas,monospace;
+      direction:ltr;
+      text-align:right;
+    }
+
+    .metric-value.green {
+      color:var(--green);
+    }
+
+    .metric-value.red {
+      color:var(--red);
+    }
+
+    .metric-value.yellow {
+      color:var(--yellow);
+    }
+
+    .metric-sub {
+      color:#587083;
+      font-size:8px;
+      margin-top:7px;
+    }
+
+    .client-section-heading {
+      display:flex;
+      align-items:end;
+      justify-content:space-between;
+      gap:15px;
+      margin:27px 0 13px;
+    }
+
+    .client-section-heading h2 {
+      font-size:17px;
+    }
+
+    .client-section-heading p {
+      color:var(--muted);
+      font-size:10px;
+      line-height:1.7;
+      margin-top:5px;
+    }
+
+    .client-input {
+      width:100%;
+      min-height:44px;
+      padding:0 12px;
+      outline:none;
+      border:1px solid var(--border);
+      border-radius:10px;
+      background:#02070c;
+      color:white;
+      direction:ltr;
+      text-align:left;
+      font-size:11px;
+    }
+
+    .client-input:focus {
+      border-color:var(--cyan);
+      box-shadow:0 0 0 3px rgba(54,230,255,.055);
+    }
+
+    .client-form {
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:9px;
+    }
+
+    .client-btn {
+      min-height:44px;
+      padding:0 17px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      color:var(--cyan);
+      background:rgba(54,230,255,.04);
+      font-size:10px;
+    }
+
+    .client-btn.primary {
+      border:0;
+      color:#021018;
+      font-weight:900;
+      background:linear-gradient(135deg,var(--cyan),var(--blue));
+    }
+
+    .client-btn.danger {
+      color:#ff91a0;
+      border-color:rgba(255,82,109,.17);
+      background:rgba(255,82,109,.035);
+    }
+
+    .site-card {
+      position:relative;
+      overflow:hidden;
+    }
+
+    .site-card-top {
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:start;
+    }
+
+    .site-name {
+      font-size:14px;
+      font-weight:900;
+      direction:ltr;
+      text-align:left;
+    }
+
+    .site-domain {
+      color:var(--muted);
+      direction:ltr;
+      text-align:left;
+      font:10px Consolas,monospace;
+      margin-top:6px;
+    }
+
+    .badge {
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      padding:5px 8px;
+      border-radius:7px;
+      font:8px Consolas,monospace;
+      direction:ltr;
+      white-space:nowrap;
+    }
+
+    .badge.green {
+      color:var(--green);
+      border:1px solid rgba(67,230,167,.16);
+      background:rgba(67,230,167,.04);
+    }
+
+    .badge.red {
+      color:#ff8395;
+      border:1px solid rgba(255,82,109,.16);
+      background:rgba(255,82,109,.04);
+    }
+
+    .badge.yellow {
+      color:var(--yellow);
+      border:1px solid rgba(255,209,102,.16);
+      background:rgba(255,209,102,.04);
+    }
+
+    .site-details {
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      margin-top:17px;
+    }
+
+    .site-detail {
+      padding:10px;
+      border:1px solid rgba(54,230,255,.08);
+      border-radius:8px;
+      background:rgba(0,0,0,.12);
+    }
+
+    .site-detail small {
+      display:block;
+      color:var(--muted2);
+      font-size:8px;
+      margin-bottom:5px;
+    }
+
+    .site-detail strong {
+      display:block;
+      direction:ltr;
+      text-align:left;
+      font:10px Consolas,monospace;
+    }
+
+    .empty-state {
+      padding:38px 20px;
+      text-align:center;
+      border:1px dashed rgba(54,230,255,.13);
+      border-radius:14px;
+      color:var(--muted);
+      background:rgba(54,230,255,.018);
+    }
+
+    .empty-state .empty-icon {
+      font:24px Consolas,monospace;
+      color:var(--cyan);
+      margin-bottom:12px;
+    }
+
+    .empty-state h3 {
+      color:white;
+      font-size:14px;
+      margin-bottom:7px;
+    }
+
+    .empty-state p {
+      font-size:10px;
+      line-height:1.8;
+      max-width:540px;
+      margin:auto;
+    }
+
+    .table-wrap {
+      width:100%;
+      overflow:auto;
+      border:1px solid rgba(54,230,255,.08);
+      border-radius:11px;
+    }
+
+    .data-table {
+      width:100%;
+      min-width:620px;
+      border-collapse:collapse;
+      direction:rtl;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding:12px 13px;
+      border-bottom:1px solid rgba(255,255,255,.045);
+      font-size:9px;
+      text-align:right;
+      white-space:nowrap;
+    }
+
+    .data-table th {
+      color:#688093;
+      background:rgba(54,230,255,.018);
+      font:9px Consolas,monospace;
+    }
+
+    .data-table td {
+      color:#b8c9d5;
+    }
+
+    .data-table tr:last-child td {
+      border-bottom:0;
+    }
+
+    .ltr {
+      direction:ltr !important;
+      text-align:left !important;
+      font-family:Consolas,monospace;
+    }
+
+    .value-cyan {
+      color:var(--cyan) !important;
+    }
+
+    .value-green {
+      color:var(--green) !important;
+    }
+
+    .value-red {
+      color:var(--red) !important;
+    }
+
+    .value-yellow {
+      color:var(--yellow) !important;
+    }
+
+    .bar-list {
+      display:grid;
+      gap:13px;
+    }
+
+    .bar-row {
+      display:grid;
+      grid-template-columns:90px 1fr 55px;
+      align-items:center;
+      gap:10px;
+    }
+
+    .bar-row label {
+      color:#8da3b4;
+      font-size:9px;
+      direction:ltr;
+      text-align:left;
+    }
+
+    .bar-track {
+      height:7px;
+      overflow:hidden;
+      border-radius:99px;
+      background:rgba(255,255,255,.055);
+    }
+
+    .bar-fill {
+      height:100%;
+      width:0;
+      border-radius:99px;
+      background:linear-gradient(90deg,var(--cyan),var(--blue));
+      transition:width .6s ease;
+    }
+
+    .bar-value {
+      color:#8da3b4;
+      direction:ltr;
+      text-align:right;
+      font:9px Consolas,monospace;
+    }
+
+    .timeline {
+      position:relative;
+      display:grid;
+      gap:9px;
+    }
+
+    .timeline-item {
+      display:grid;
+      grid-template-columns:90px 10px 1fr;
+      gap:10px;
+      align-items:start;
+    }
+
+    .timeline-time {
+      color:#557082;
+      font:8px Consolas,monospace;
+      direction:ltr;
+      text-align:left;
+      padding-top:2px;
+    }
+
+    .timeline-dot {
+      width:8px;
+      height:8px;
+      margin-top:3px;
+      border-radius:50%;
+      background:var(--cyan);
+      box-shadow:0 0 10px rgba(54,230,255,.5);
+    }
+
+    .timeline-body {
+      padding:9px 11px;
+      border:1px solid rgba(54,230,255,.08);
+      border-radius:8px;
+      background:rgba(54,230,255,.018);
+    }
+
+    .timeline-body strong {
+      display:block;
+      color:#d9eef3;
+      font-size:9px;
+      margin-bottom:4px;
+    }
+
+    .timeline-body span {
+      color:#63798a;
+      font:8px Consolas,monospace;
+      direction:ltr;
+      text-align:left;
+      display:block;
+    }
+
+    .notice {
+      padding:12px 14px;
+      border:1px solid rgba(255,209,102,.14);
+      border-radius:10px;
+      color:#d7bc70;
+      background:rgba(255,209,102,.025);
+      font-size:9px;
+      line-height:1.8;
+      margin-bottom:13px;
+    }
+
+    .notice strong {
+      color:var(--yellow);
+    }
+
+    .api-endpoint {
+      padding:13px;
+      border:1px solid rgba(54,230,255,.09);
+      border-radius:10px;
+      background:#02070c;
+      margin-bottom:8px;
+    }
+
+    .api-method {
+      display:inline-block;
+      margin-left:7px;
+      color:var(--green);
+      font:900 9px Consolas,monospace;
+      direction:ltr;
+    }
+
+    .api-path {
+      color:var(--cyan);
+      font:10px Consolas,monospace;
+      direction:ltr;
+    }
+
+    .api-description {
+      color:var(--muted2);
+      font-size:8px;
+      margin-top:7px;
+      line-height:1.7;
+    }
+
+    .account-row {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:15px;
+      min-height:51px;
+      padding:0 13px;
+      border-bottom:1px solid rgba(255,255,255,.045);
+    }
+
+    .account-row:last-child {
+      border-bottom:0;
+    }
+
+    .account-row span {
+      color:var(--muted2);
+      font-size:9px;
+    }
+
+    .account-row strong {
+      color:#d9eef3;
+      font-size:10px;
+      direction:ltr;
+      text-align:left;
+    }
+
+    .mobile-client-menu {
+      display:none;
+      width:38px;
+      height:38px;
+      border:1px solid var(--border);
+      border-radius:9px;
+      color:white;
+      background:rgba(255,255,255,.025);
+      font-size:17px;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================== */
 
     @media (max-width:1050px) {
 
@@ -1330,6 +2059,14 @@
 
       .flow {
         grid-template-columns:1fr 30px 1fr;
+      }
+
+      .client-grid.four {
+        grid-template-columns:repeat(2,1fr);
+      }
+
+      .client-grid.three {
+        grid-template-columns:repeat(2,1fr);
       }
     }
 
@@ -1410,6 +2147,46 @@
       .header-login {
         display:inline-flex;
       }
+
+      .client-sidebar {
+        position:absolute;
+        right:0;
+        top:0;
+        z-index:50;
+        transform:translateX(100%);
+        transition:.25s;
+        box-shadow:-20px 0 60px rgba(0,0,0,.5);
+      }
+
+      .client-sidebar.mobile-open {
+        transform:translateX(0);
+      }
+
+      .mobile-client-menu {
+        display:block;
+      }
+
+      .client-topbar {
+        padding:0 15px;
+      }
+
+      .client-content {
+        padding:18px 13px;
+      }
+
+      .client-grid.four,
+      .client-grid.three,
+      .client-grid.two {
+        grid-template-columns:1fr;
+      }
+
+      .client-top-actions .client-status {
+        display:none;
+      }
+
+      .client-page-title h1 {
+        font-size:17px;
+      }
     }
 
     @media (max-width:500px) {
@@ -1453,6 +2230,18 @@
       .header-login {
         padding:8px 10px;
       }
+
+      .client-form {
+        grid-template-columns:1fr;
+      }
+
+      .site-details {
+        grid-template-columns:1fr;
+      }
+
+      .bar-row {
+        grid-template-columns:70px 1fr 45px;
+      }
     }
 
     @media (prefers-reduced-motion:reduce) {
@@ -1465,926 +2254,2085 @@
         scroll-behavior:auto!important;
       }
     }
-
-  </style>
-</head>
-
-<body class="locked">
-
-  <div class="cyber-bg"></div>
+  </style></head><body class="locked">  <div class="cyber-bg"></div>
   <div class="orb one"></div>
   <div class="orb two"></div>
   <div class="particles" id="particles"></div>
-  <div class="scanlines"></div>
+  <div class="scanlines"></div>  <!-- =========================================================
+       INTRO
+  ========================================================== -->  <section class="intro" id="intro"><div class="intro-tech">
+  <div class="intro-grid"></div>
+</div>
 
-  <!-- INTRO -->
+<div class="intro-content">
 
-  <section class="intro" id="intro">
+  <div class="intro-status">
+    <span class="live-dot"></span>
+    ROUTIX WAF SYSTEM • PROTECTION LAYER READY
+  </div>
 
-    <div class="intro-tech">
-      <div class="intro-grid"></div>
-    </div>
+  <div class="intro-logo"></div>
 
-    <div class="intro-content">
+  <h1>
+    Routix<span>.</span>
+  </h1>
 
-      <div class="intro-status">
-        <span class="live-dot"></span>
-        ROUTIX WAF SYSTEM • PROTECTION LAYER READY
-      </div>
+  <p>
+    Web Application Firewall مصمم لمراقبة وحماية
+    تطبيقات الويب من الترافيك المشبوه، الهجمات
+    على مستوى L7، تجاوز المعدلات، والمصادر عالية الخطورة.
+  </p>
 
-      <div class="intro-logo"></div>
+  <button class="enter-btn" onclick="enterPlatform()">
+    دخول إلى المنصة
+    <span>←</span>
+  </button>
 
-      <h1>
-        Routix<span>.</span>
-      </h1>
+</div>
 
-      <p>
-        Web Application Firewall مصمم لمراقبة وحماية
-        تطبيقات الويب من الترافيك المشبوه، الهجمات
-        على مستوى L7، تجاوز المعدلات، والمصادر عالية الخطورة.
-      </p>
+<div class="intro-corner">
+  ROUTIX / SECURITY INFRASTRUCTURE / 2026
+</div>
 
-      <button class="enter-btn" onclick="enterPlatform()">
-        دخول إلى المنصة
-        <span>←</span>
-      </button>
+  </section>  <!-- =========================================================
+       AUTH
+  ========================================================== -->  <div class="auth-overlay" id="authOverlay" aria-hidden="true"><div class="auth-box" role="dialog" aria-modal="true">
 
-    </div>
-
-    <div class="intro-corner">
-      ROUTIX / SECURITY INFRASTRUCTURE / 2026
-    </div>
-
-  </section>
-
-
-  <!-- AUTH -->
-
-  <div
-    class="auth-overlay"
-    id="authOverlay"
-    aria-hidden="true"
+  <button
+    class="auth-close"
+    type="button"
+    onclick="closeAuth()"
   >
+    ×
+  </button>
 
-    <div
-      class="auth-box"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="authTitle"
+  <div class="auth-logo"></div>
+
+  <div class="auth-header">
+
+    <span class="eyebrow">
+      ROUTIX AUTHENTICATION
+    </span>
+
+    <h2 id="authTitle">
+      تسجيل الدخول
+    </h2>
+
+    <p id="authDescription">
+      أدخل بريدك الإلكتروني وكلمة المرور لإرسال رمز تحقق آمن.
+    </p>
+
+  </div>
+
+  <!-- STEP 1 -->
+
+  <div class="auth-step active" id="emailStep">
+
+    <label class="auth-label" for="loginEmail">
+      البريد الإلكتروني
+    </label>
+
+    <input
+      class="auth-input"
+      id="loginEmail"
+      type="email"
+      inputmode="email"
+      autocomplete="email"
+      placeholder="example@email.com"
+      maxlength="150"
     >
 
-      <button
-        class="auth-close"
-        type="button"
-        onclick="closeAuth()"
-        aria-label="إغلاق"
+    <label
+      class="auth-label"
+      for="loginPassword"
+      style="margin-top:13px;"
+    >
+      كلمة المرور
+    </label>
+
+    <div class="password-wrap">
+
+      <input
+        class="auth-input"
+        id="loginPassword"
+        type="password"
+        autocomplete="current-password"
+        placeholder="أدخل كلمة المرور"
+        maxlength="128"
       >
-        ×
+
+      <button
+        class="password-toggle"
+        type="button"
+        onclick="togglePassword()"
+        id="passwordToggle"
+      >
+        ◉
       </button>
 
-      <div class="auth-logo"></div>
+    </div>
 
-      <div class="auth-header">
+    <button
+      class="auth-btn"
+      id="sendOtpBtn"
+      type="button"
+      onclick="sendOTP()"
+    >
+      إرسال كود التحقق
+    </button>
 
-        <span class="eyebrow">
-          ROUTIX AUTHENTICATION
-        </span>
+    <div class="auth-message" id="emailMessage"></div>
 
-        <h2 id="authTitle">
-          تسجيل الدخول
-        </h2>
+    <div class="auth-note">
+      سيتم التحقق من البريد وكلمة المرور ثم إنشاء
+      رمز تحقق مؤقت وإرساله إلى بريدك الإلكتروني.
+    </div>
 
-        <p id="authDescription">
-          أدخل بريدك الإلكتروني وكلمة المرور لإرسال رمز تحقق آمن.
-        </p>
+  </div>
 
+
+  <!-- STEP 2 -->
+
+  <div class="auth-step" id="otpStep">
+
+    <div
+      class="auth-email-display"
+      id="authEmailDisplay"
+    ></div>
+
+    <label class="auth-label" for="loginOtp">
+      رمز التحقق
+    </label>
+
+    <input
+      class="auth-input otp-input"
+      id="loginOtp"
+      type="text"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      maxlength="6"
+      placeholder="000000"
+    >
+
+    <button
+      class="auth-btn"
+      id="verifyOtpBtn"
+      type="button"
+      onclick="verifyOTP()"
+    >
+      تأكيد تسجيل الدخول
+    </button>
+
+    <button
+      class="auth-secondary"
+      type="button"
+      onclick="backToEmail()"
+    >
+      تغيير البريد أو كلمة المرور
+    </button>
+
+    <div class="auth-message" id="otpMessage"></div>
+
+    <div class="auth-note">
+      الرمز صالح لمدة 5 دقائق فقط.
+    </div>
+
+  </div>
+
+</div>
+
+  </div>  <!-- =========================================================
+       PUBLIC HEADER
+  ========================================================== -->  <header><a href="#home" class="brand">
+  <span class="brand-logo"></span>
+  <span class="brand-name">Routix</span>
+</a>
+
+<nav id="nav">
+  <a href="#home">الرئيسية</a>
+  <a href="#features">المميزات</a>
+  <a href="#api">API</a>
+  <a href="#integration">طريقة الربط</a>
+  <a href="#settings">الإعدادات</a>
+  <a href="#about">من نحن</a>
+</nav>
+
+<div class="header-actions">
+
+  <button
+    class="header-login"
+    id="headerLoginBtn"
+    type="button"
+    onclick="openAuth()"
+  >
+    <span>◉</span>
+    تسجيل الدخول
+  </button>
+
+  <span
+    class="header-user"
+    id="headerUser"
+    style="display:none;"
+  >
+    <span>●</span>
+    <span id="headerUserEmail"></span>
+  </span>
+
+  <button
+    class="header-logout"
+    id="headerLogoutBtn"
+    type="button"
+    onclick="logout()"
+    style="display:none;"
+  >
+    خروج
+  </button>
+
+</div>
+
+<button
+  class="mobile-menu"
+  onclick="toggleMenu()"
+  type="button"
+>
+  ☰
+</button>
+
+  </header>  <!-- =========================================================
+       PUBLIC MAIN
+  ========================================================== -->  <main id="publicMain"><section class="section dashboard" id="home">
+
+  <div class="dashboard-copy">
+
+    <span class="eyebrow">
+      ROUTIX / CLOUD WAF
+    </span>
+
+    <h1>
+      حماية موقعك تبدأ<br>
+      من أول <span>Request.</span>
+    </h1>
+
+    <p>
+      Routix يعمل كطبقة حماية أمام تطبيقك،
+      يراقب الترافيك وطلبات HTTP، يحد من
+      المعدلات المرتفعة، يكتشف أنماط الهجمات
+      ويمنحك رؤية مباشرة لما يحدث على مستوى
+      البنية التحتية والتطبيق.
+    </p>
+
+    <div class="dashboard-actions">
+
+      <a href="#features" class="btn">
+        استكشف المميزات
+      </a>
+
+      <button
+        class="btn btn-primary"
+        onclick="openAuth()"
+      >
+        دخول لوحة العميل
+      </button>
+
+    </div>
+
+    <div class="stats">
+
+      <div class="stat">
+        <div class="stat-label">WAF STATUS</div>
+        <div class="stat-value green">ACTIVE</div>
       </div>
 
-
-      <!-- STEP 1 -->
-
-      <div
-        class="auth-step active"
-        id="emailStep"
-      >
-
-        <label
-          class="auth-label"
-          for="loginEmail"
-        >
-          البريد الإلكتروني
-        </label>
-
-        <input
-          class="auth-input"
-          id="loginEmail"
-          type="email"
-          inputmode="email"
-          autocomplete="email"
-          placeholder="example@email.com"
-          maxlength="150"
-        >
-
-        <label
-          class="auth-label"
-          for="loginPassword"
-          style="margin-top:13px;"
-        >
-          كلمة المرور
-        </label>
-
-        <div class="password-wrap">
-
-          <input
-            class="auth-input"
-            id="loginPassword"
-            type="password"
-            autocomplete="current-password"
-            placeholder="أدخل كلمة المرور"
-            maxlength="128"
-          >
-
-          <button
-            class="password-toggle"
-            type="button"
-            onclick="togglePassword()"
-            id="passwordToggle"
-            aria-label="إظهار كلمة المرور"
-          >
-            ◉
-          </button>
-
-        </div>
-
-        <button
-          class="auth-btn"
-          id="sendOtpBtn"
-          type="button"
-          onclick="sendOTP()"
-        >
-          إرسال كود التحقق
-        </button>
-
-        <div
-          class="auth-message"
-          id="emailMessage"
-        ></div>
-
-        <div class="auth-note">
-          سيتم التحقق من البريد وكلمة المرور ثم إنشاء
-          رمز تحقق مؤقت وإرساله إلى بريدك الإلكتروني.
-        </div>
-
+      <div class="stat">
+        <div class="stat-label">LAYER</div>
+        <div class="stat-value cyan">L7</div>
       </div>
 
+      <div class="stat">
+        <div class="stat-label">RATE CONTROL</div>
+        <div class="stat-value">ON</div>
+      </div>
 
-      <!-- STEP 2 -->
-
-      <div
-        class="auth-step"
-        id="otpStep"
-      >
-
-        <div
-          class="auth-email-display"
-          id="authEmailDisplay"
-        ></div>
-
-        <label
-          class="auth-label"
-          for="loginOtp"
-        >
-          رمز التحقق
-        </label>
-
-        <input
-          class="auth-input otp-input"
-          id="loginOtp"
-          type="text"
-          inputmode="numeric"
-          autocomplete="one-time-code"
-          maxlength="6"
-          placeholder="000000"
-        >
-
-        <button
-          class="auth-btn"
-          id="verifyOtpBtn"
-          type="button"
-          onclick="verifyOTP()"
-        >
-          تأكيد تسجيل الدخول
-        </button>
-
-        <button
-          class="auth-secondary"
-          id="backToEmailBtn"
-          type="button"
-          onclick="backToEmail()"
-        >
-          تغيير البريد أو كلمة المرور
-        </button>
-
-        <div
-          class="auth-message"
-          id="otpMessage"
-        ></div>
-
-        <div class="auth-note">
-          الرمز صالح لمدة 5 دقائق فقط.
-        </div>
-
+      <div class="stat">
+        <div class="stat-label">LIVE EVENTS</div>
+        <div class="stat-value green">READY</div>
       </div>
 
     </div>
 
   </div>
 
+  <div class="radar-card">
 
-  <!-- HEADER -->
+    <div class="radar">
+      <div class="radar-ring"></div>
+      <div class="radar-sweep"></div>
+    </div>
 
-  <header>
+    <div class="radar-label">
+      <span>TRAFFIC_MONITOR</span>
+      <strong>● PROTECTED</strong>
+    </div>
 
-    <a href="#home" class="brand">
-      <span class="brand-logo"></span>
-      <span class="brand-name">Routix</span>
-    </a>
+  </div>
 
-    <nav id="nav">
+</section>
 
-      <a href="#home">الرئيسية</a>
-      <a href="#features">المميزات</a>
-      <a href="#api">API</a>
-      <a href="#integration">طريقة الربط</a>
-      <a href="#settings">الإعدادات</a>
-      <a href="#about">من نحن</a>
 
-    </nav>
+<section id="features" class="section">
 
-    <div class="header-actions">
+  <div class="section-title">
 
-      <button
-        class="header-login"
-        id="headerLoginBtn"
-        type="button"
-        onclick="openAuth()"
-      >
-        <span>◉</span>
-        تسجيل الدخول
-      </button>
+    <span class="eyebrow">
+      SECURITY ENGINE
+    </span>
 
-      <span
-        class="header-user"
-        id="headerUser"
-        style="display:none;"
-      >
-        <span>●</span>
-        <span id="headerUserEmail"></span>
-      </span>
+    <h2>
+      حماية متعددة الطبقات للترافيك
+    </h2>
 
-      <button
-        class="header-logout"
-        id="headerLogoutBtn"
-        type="button"
-        onclick="logout()"
-        style="display:none;"
-      >
-        خروج
-      </button>
+    <p>
+      Routix يجمع بين التحكم بالترافيك،
+      تحليل الطلبات، تقييم المخاطر وآليات
+      الحماية المختلفة داخل طبقة واحدة.
+    </p>
+
+  </div>
+
+  <div class="features">
+
+    <article class="feature">
+      <div class="feature-icon">◈</div>
+      <h3>Rate Limiting</h3>
+      <p>تحديد عدد الطلبات المسموح بها لكل IP.</p>
+      <span class="tag">TRAFFIC_CONTROL</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">⚡</div>
+      <h3>Burst Protection</h3>
+      <p>التعامل مع الارتفاعات المفاجئة والسريعة في الطلبات.</p>
+      <span class="tag">BURST_DETECTION</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">L7</div>
+      <h3>Layer 7 Protection</h3>
+      <p>فحص طلبات HTTP وتحليل المسارات والرؤوس والبيانات.</p>
+      <span class="tag">HTTP_INSPECTION</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">SQL</div>
+      <h3>SQLi Detection</h3>
+      <p>كشف أنماط شائعة مرتبطة بمحاولات SQL Injection.</p>
+      <span class="tag">ATTACK_DETECTION</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">X</div>
+      <h3>XSS Detection</h3>
+      <p>فحص الأنماط المعروفة المرتبطة بمحاولات XSS.</p>
+      <span class="tag">WEB_SECURITY</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">R</div>
+      <h3>Risk Scoring</h3>
+      <p>بناء درجة خطورة للمصادر والطلبات.</p>
+      <span class="tag">RISK_ENGINE</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">H</div>
+      <h3>Honeypot</h3>
+      <p>رصد المصادر التي تتفاعل مع نقاط غير طبيعية.</p>
+      <span class="tag">THREAT_INTELLIGENCE</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">⊘</div>
+      <h3>Blacklist</h3>
+      <p>التعامل مع المصادر التي تتجاوز سياسات الحماية.</p>
+      <span class="tag">IP_CONTROL</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">↯</div>
+      <h3>Concurrency Control</h3>
+      <p>التحكم في الاتصالات المتزامنة لكل IP.</p>
+      <span class="tag">CONNECTION_LIMIT</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">◌</div>
+      <h3>Live Alerts</h3>
+      <p>مراقبة الأحداث والتنبيهات بشكل مباشر.</p>
+      <span class="tag">REAL_TIME</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">▣</div>
+      <h3>Security Headers</h3>
+      <p>تحسين طبقة HTTP الأمنية.</p>
+      <span class="tag">HTTP_SECURITY</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">↗</div>
+      <h3>Reverse Proxy</h3>
+      <p>تمرير الطلبات الطبيعية إلى التطبيق الأصلي.</p>
+      <span class="tag">PROXY_LAYER</span>
+    </article>
+
+  </div>
+
+</section>
+
+
+<section id="api" class="section">
+
+  <div class="section-title">
+
+    <span class="eyebrow">
+      REQUEST PIPELINE
+    </span>
+
+    <h2>
+      كيف يمر الطلب داخل Routix؟
+    </h2>
+
+    <p>
+      Routix يصبح نقطة الدخول العامة بينما يبقى التطبيق الأصلي خلفه.
+    </p>
+
+  </div>
+
+  <div class="flow">
+
+    <div class="flow-node">
+      <b>CLIENT</b>
+      <span>HTTP Request</span>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-node">
+      <b>ROUTIX</b>
+      <span>استقبال وفحص</span>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-node">
+      <b>WAF ENGINE</b>
+      <span>Rate / L7 / Risk</span>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-node">
+      <b>DECISION</b>
+      <span>Allow / Block / Limit</span>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-node">
+      <b>TARGET</b>
+      <span>التطبيق الأصلي</span>
+    </div>
+
+  </div>
+
+</section>
+
+
+<section id="integration" class="section">
+
+  <div class="section-title">
+
+    <span class="eyebrow">
+      API & INTEGRATION
+    </span>
+
+    <h2>
+      اربط Routix بموقع العميل
+    </h2>
+
+    <p>
+      Routix يعمل كطبقة حماية أمام تطبيق العميل.
+    </p>
+
+  </div>
+
+  <div class="integration">
+
+    <div class="steps">
+
+      <div class="step">
+        <b class="step-number">01</b>
+        <div>
+          <strong>أضف موقعك إلى Routix</strong>
+          <span>أنشئ إعداد الموقع من خلال نظام الإدارة.</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <b class="step-number">02</b>
+        <div>
+          <strong>التحقق من حالة الربط</strong>
+          <span>تأكد من إعداد الدومين والتطبيق المرتبط.</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <b class="step-number">03</b>
+        <div>
+          <strong>وجّه الدومين إلى Routix</strong>
+          <span>مرر حركة المرور الخاصة بالدومين إلى نقطة الدخول.</span>
+        </div>
+      </div>
+
+      <div class="step">
+        <b class="step-number">04</b>
+        <div>
+          <strong>احتفظ بالأسرار على السيرفر</strong>
+          <span>لا تعرض مفاتيح الإدارة أو إعدادات البنية الداخلية.</span>
+        </div>
+      </div>
 
     </div>
 
-    <button
-      class="mobile-menu"
-      onclick="toggleMenu()"
-      type="button"
-      aria-label="القائمة"
-    >
-      ☰
-    </button>
+    <div class="code-card">
 
-  </header>
-
-
-  <!-- MAIN -->
-
-  <main id="home">
-
-    <!-- DASHBOARD -->
-
-    <section class="section dashboard">
-
-      <div class="dashboard-copy">
-
-        <span class="eyebrow">
-          ROUTIX / CLOUD WAF
-        </span>
-
-        <h1>
-          حماية موقعك تبدأ<br>
-          من أول <span>Request.</span>
-        </h1>
-
-        <p>
-          Routix يعمل كطبقة حماية أمام تطبيقك،
-          يراقب الترافيك وطلبات HTTP، يحد من
-          المعدلات المرتفعة، يكتشف أنماط الهجمات
-          ويمنحك رؤية مباشرة لما يحدث على مستوى
-          البنية التحتية والتطبيق.
-        </p>
-
-        <div class="dashboard-actions">
-
-          <a href="#features" class="btn">
-            استكشف المميزات
-          </a>
-
-        </div>
-
-        <div class="stats">
-
-          <div class="stat">
-            <div class="stat-label">WAF STATUS</div>
-            <div class="stat-value green">ACTIVE</div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-label">LAYER</div>
-            <div class="stat-value cyan">L7</div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-label">RATE CONTROL</div>
-            <div class="stat-value">ON</div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-label">LIVE EVENTS</div>
-            <div class="stat-value green">READY</div>
-          </div>
-
-        </div>
-
+      <div class="code-title">
+        <span class="code-dot"></span>
+        ROUTIX / SITE CONFIGURATION
       </div>
 
-      <div class="radar-card">
-
-        <div class="radar">
-          <div class="radar-ring"></div>
-          <div class="radar-sweep"></div>
-        </div>
-
-        <div class="radar-label">
-          <span>TRAFFIC_MONITOR</span>
-          <strong>● PROTECTED</strong>
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- FEATURES -->
-
-    <section id="features" class="section">
-
-      <div class="section-title">
-
-        <span class="eyebrow">
-          SECURITY ENGINE
-        </span>
-
-        <h2>
-          حماية متعددة الطبقات للترافيك
-        </h2>
-
-        <p>
-          Routix يجمع بين التحكم بالترافيك،
-          تحليل الطلبات، تقييم المخاطر وآليات
-          الحماية المختلفة داخل طبقة واحدة.
-        </p>
-
-      </div>
-
-      <div class="features">
-
-        <article class="feature">
-          <div class="feature-icon">◈</div>
-          <h3>Rate Limiting</h3>
-          <p>
-            تحديد عدد الطلبات المسموح بها لكل IP
-            خلال نافذة زمنية وتقليل إساءة استخدام الموارد.
-          </p>
-          <span class="tag">TRAFFIC_CONTROL</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">⚡</div>
-          <h3>Burst Protection</h3>
-          <p>
-            التعامل مع الارتفاعات المفاجئة والسريعة
-            في الطلبات قبل انتقال الضغط إلى التطبيق الأصلي.
-          </p>
-          <span class="tag">BURST_DETECTION</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">L7</div>
-          <h3>Layer 7 Protection</h3>
-          <p>
-            فحص طلبات HTTP على مستوى التطبيق
-            وتحليل المسارات والرؤوس والبيانات.
-          </p>
-          <span class="tag">HTTP_INSPECTION</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">SQL</div>
-          <h3>SQLi Detection</h3>
-          <p>
-            كشف أنماط شائعة مرتبطة بمحاولات
-            SQL Injection داخل الطلبات.
-          </p>
-          <span class="tag">ATTACK_DETECTION</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">X</div>
-          <h3>XSS Detection</h3>
-          <p>
-            فحص الأنماط المعروفة المرتبطة بمحاولات
-            Cross-Site Scripting.
-          </p>
-          <span class="tag">WEB_SECURITY</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">R</div>
-          <h3>Risk Scoring</h3>
-          <p>
-            بناء درجة خطورة للمصادر والطلبات
-            للمساعدة في اتخاذ قرار الحظر أو التقييد.
-          </p>
-          <span class="tag">RISK_ENGINE</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">H</div>
-          <h3>Honeypot</h3>
-          <p>
-            مسارات طُعم يمكن استخدامها لرصد
-            المصادر التي تتفاعل مع نقاط غير طبيعية.
-          </p>
-          <span class="tag">THREAT_INTELLIGENCE</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">⊘</div>
-          <h3>Blacklist</h3>
-          <p>
-            التعامل مع المصادر التي تتجاوز سياسات
-            الحماية وإبقاؤها ضمن قائمة الحظر.
-          </p>
-          <span class="tag">IP_CONTROL</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">↯</div>
-          <h3>Concurrency Control</h3>
-          <p>
-            التحكم في عدد الاتصالات المتزامنة
-            لكل IP وعلى مستوى الخدمة.
-          </p>
-          <span class="tag">CONNECTION_LIMIT</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">◌</div>
-          <h3>Live Alerts</h3>
-          <p>
-            مراقبة الأحداث والتنبيهات بشكل مباشر
-            من خلال قناة الأحداث الخاصة بالـWAF.
-          </p>
-          <span class="tag">REAL_TIME</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">▣</div>
-          <h3>Security Headers</h3>
-          <p>
-            تحسين طبقة HTTP الأمنية باستخدام
-            إعدادات Security Headers المناسبة للسيرفر.
-          </p>
-          <span class="tag">HTTP_SECURITY</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">↗</div>
-          <h3>Reverse Proxy</h3>
-          <p>
-            تمرير الطلبات الطبيعية إلى التطبيق الأصلي
-            مع إبقاء التطبيق خلف طبقة Routix.
-          </p>
-          <span class="tag">PROXY_LAYER</span>
-        </article>
-
-      </div>
-
-    </section>
-
-
-    <!-- API -->
-
-    <section id="api" class="section">
-
-      <div class="section-title">
-
-        <span class="eyebrow">
-          REQUEST PIPELINE
-        </span>
-
-        <h2>
-          كيف يمر الطلب داخل Routix؟
-        </h2>
-
-        <p>
-          الفكرة الأساسية هي أن Routix يصبح نقطة
-          الدخول العامة، بينما يبقى التطبيق الأصلي خلفه.
-        </p>
-
-      </div>
-
-      <div class="flow">
-
-        <div class="flow-node">
-          <b>CLIENT</b>
-          <span>المستخدم يرسل HTTP Request</span>
-        </div>
-
-        <div class="flow-arrow">→</div>
-
-        <div class="flow-node">
-          <b>ROUTIX</b>
-          <span>استقبال وفحص الطلب</span>
-        </div>
-
-        <div class="flow-arrow">→</div>
-
-        <div class="flow-node">
-          <b>WAF ENGINE</b>
-          <span>Rate / L7 / Risk / Rules</span>
-        </div>
-
-        <div class="flow-arrow">→</div>
-
-        <div class="flow-node">
-          <b>DECISION</b>
-          <span>Allow / Block / Limit</span>
-        </div>
-
-        <div class="flow-arrow">→</div>
-
-        <div class="flow-node">
-          <b>TARGET</b>
-          <span>تمرير الطلب الطبيعي للتطبيق</span>
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- INTEGRATION -->
-
-    <section id="integration" class="section">
-
-      <div class="section-title">
-
-        <span class="eyebrow">
-          API & INTEGRATION
-        </span>
-
-        <h2>
-          اربط Routix بموقع العميل
-        </h2>
-
-        <p>
-          Routix يعمل كطبقة حماية أمام تطبيق العميل،
-          بحيث تمر الطلبات عبر طبقة الحماية أولًا.
-        </p>
-
-      </div>
-
-      <div class="integration">
-
-        <div class="steps">
-
-          <div class="step">
-
-            <b class="step-number">01</b>
-
-            <div>
-              <strong>أضف موقعك إلى Routix</strong>
-              <span>
-                أنشئ إعداد الموقع من خلال لوحة الإدارة
-                وحدد النطاق والتطبيق المرتبط به.
-              </span>
-            </div>
-
-          </div>
-
-          <div class="step">
-
-            <b class="step-number">02</b>
-
-            <div>
-              <strong>التحقق من حالة الربط</strong>
-              <span>
-                تحديد رابط موقع العميل في ملف البيئة،
-                ثم توجيه الدومين إلى سيرفرك.
-              </span>
-            </div>
-
-          </div>
-
-          <div class="step">
-
-            <b class="step-number">03</b>
-
-            <div>
-              <strong>وجّه الدومين إلى Routix</strong>
-              <span>
-                بعد إعداد الموقع، وجّه حركة المرور
-                الخاصة بالدومين إلى نقطة الدخول.
-              </span>
-            </div>
-
-          </div>
-
-          <div class="step">
-
-            <b class="step-number">04</b>
-
-            <div>
-              <strong>احتفظ بإعدادات السيرفر بشكل آمن</strong>
-              <span>
-                مفاتيح النظام وبيانات الإدارة والإعدادات
-                الداخلية تبقى على السيرفر.
-              </span>
-            </div>
-
-          </div>
-
-        </div>
-
-        <div class="code-card">
-
-          <div class="code-title">
-            <span class="code-dot"></span>
-            ROUTIX / SITE CONFIGURATION
-          </div>
-
-          <pre># Routix Site Configuration
+      <pre># Routix Site Configuration
 
 SITE_DOMAIN=your-domain.com
 
 SITE_TOKEN=YOUR_SITE_TOKEN
 
-يتم إنشاء القيم الحساسة
-وإدارتها من خلال السيرفر
+لا تضع داخل الواجهة:
 
-لا تضع:
-
-WAF_API_KEY
 ADMIN_PASSWORD
+ADMIN_BASIC_AUTH
 TARGET_URL الداخلي
+SERVER_SECRETS
 
-أو أي أسرار خاصة بالسيرفر
-داخل كود الواجهة العامة.</pre>
+Site API Key يستخدم فقط للوصول
+إلى Site APIs المسموح بها.</pre>
 
-          <div class="warning">
-            لأسباب أمنية، لا يتم عرض مفاتيح النظام أو بيانات
-            الإدارة أو إعدادات البنية الداخلية في الصفحة العامة.
-          </div>
-
-        </div>
-
+      <div class="warning">
+        مفاتيح الإدارة وإعدادات السيرفر الحساسة يجب أن تبقى على الخادم.
       </div>
 
-    </section>
+    </div>
+
+  </div>
+
+</section>
 
 
-    <!-- SETTINGS -->
+<section id="settings" class="section">
 
-    <section id="settings" class="section">
+  <div class="section-title">
+
+    <span class="eyebrow">
+      WAF CONFIGURATION
+    </span>
+
+    <h2>
+      الإعدادات التشغيلية
+    </h2>
+
+    <p>
+      يتم التحكم بالسلوك التشغيلي للـWAF من إعدادات السيرفر.
+    </p>
+
+  </div>
+
+  <div class="settings-grid">
+
+    <article class="setting">
+      <h3>Traffic Control</h3>
+      <p>التحكم في معدل الطلبات والـBurst.</p>
+      <code>RATE LIMITING<br>BURST PROTECTION<br>GLOBAL TRAFFIC</code>
+    </article>
+
+    <article class="setting">
+      <h3>Risk Engine</h3>
+      <p>تقييم مستوى خطورة الطلبات والمصادر.</p>
+      <code>RISK ENGINE<br>THREAT DETECTION<br>SECURITY RULES</code>
+    </article>
+
+    <article class="setting">
+      <h3>Concurrency</h3>
+      <p>التحكم في الاتصالات المتزامنة.</p>
+      <code>PER-IP LIMIT<br>GLOBAL LIMIT<br>CONNECTION CONTROL</code>
+    </article>
+
+    <article class="setting">
+      <h3>Proxy</h3>
+      <p>إدارة الاتصال بين Routix والتطبيق الأصلي.</p>
+      <code>REVERSE PROXY<br>UPSTREAM<br>CONNECTION ROUTING</code>
+    </article>
+
+    <article class="setting">
+      <h3>Request Limits</h3>
+      <p>حدود ومهلات الطلبات والاتصال.</p>
+      <code>REQUEST LIMITS<br>TIMEOUT CONTROL<br>HEADER LIMITS</code>
+    </article>
+
+    <article class="setting">
+      <h3>Security</h3>
+      <p>الإعدادات الحساسة تدار داخليًا على السيرفر.</p>
+      <code>SERVER SIDE ONLY<br>PRIVATE CONFIGURATION<br>SECRET STORAGE</code>
+    </article>
+
+  </div>
+
+</section>
+
+
+<section id="about" class="section">
+
+  <div class="about">
+
+    <div class="about-copy">
+
+      <span class="eyebrow">
+        ABOUT ROUTIX
+      </span>
 
       <div class="section-title">
 
-        <span class="eyebrow">
-          WAF CONFIGURATION
-        </span>
-
         <h2>
-          الإعدادات التشغيلية
+          نبني الحماية بعقلية البنية التحتية.
         </h2>
 
         <p>
-          يتم التحكم في السلوك التشغيلي للـWAF
-          من خلال إعدادات البيئة الموجودة على السيرفر.
+          Routix مشروع تقني لحماية تطبيقات الويب
+          ومراقبة الترافيك والأحداث الأمنية.
+          <br><br>
+          الهدف هو توفير طبقة WAF عملية وقابلة للمراقبة
+          مع أدوات للتحكم بالترافيك وتحليل الأحداث.
         </p>
 
       </div>
 
-      <div class="settings-grid">
+      <button
+        class="btn btn-primary"
+        onclick="openAuth()"
+      >
+        افتح لوحة العميل ←
+      </button>
 
-        <article class="setting">
+    </div>
 
-          <h3>Traffic Control</h3>
+    <div class="terminal">
 
-          <p>
-            التحكم في معدل الطلبات والحدود العامة
-            وحدود الـBurst.
-          </p>
+      <div>
+        <span class="white">$</span>
+        routix start
+      </div>
 
-          <code>
-            RATE LIMITING<br>
-            BURST PROTECTION<br>
-            GLOBAL TRAFFIC
-          </code>
+      <div class="green">✓ WAF protection enabled</div>
+      <div class="green">✓ L7 inspection enabled</div>
+      <div class="green">✓ Rate limiting enabled</div>
+      <div class="green">✓ Risk engine enabled</div>
+      <div class="green">✓ Honeypot monitoring enabled</div>
+      <div class="green">✓ Blacklist engine enabled</div>
+      <div class="green">✓ Live admin events enabled</div>
 
-        </article>
+      <div>
+        <span class="cyan">→</span>
+        proxying through Routix
+      </div>
 
-        <article class="setting">
+      <div>
+        <span class="cyan">→</span>
+        protection layer active
+      </div>
 
-          <h3>Risk Engine</h3>
+    </div>
 
-          <p>
-            تقييم مستوى خطورة الطلبات والمصادر
-            واتخاذ الإجراء المناسب.
-          </p>
+  </div>
 
-          <code>
-            RISK ENGINE<br>
-            THREAT DETECTION<br>
-            SECURITY RULES
-          </code>
+</section>
 
-        </article>
+  </main>  <footer>
+    © 2026 <span>Routix</span> — Cloud WAF & Application Protection
+  </footer>  <!-- =========================================================
+       CLIENT DASHBOARD
+  ========================================================== -->  <section id="clientPanel"><aside class="client-sidebar" id="clientSidebar">
 
-        <article class="setting">
+  <div class="client-brand">
 
-          <h3>Concurrency</h3>
+    <span class="brand-logo"></span>
 
-          <p>
-            التحكم في عدد الاتصالات المتزامنة لكل
-            مصدر وعلى مستوى الخدمة.
-          </p>
+    <div class="client-brand-text">
+      <strong>Routix</strong>
+      <span>CLIENT SECURITY CONSOLE</span>
+    </div>
 
-          <code>
-            PER-IP LIMIT<br>
-            GLOBAL LIMIT<br>
-            CONNECTION CONTROL
-          </code>
+  </div>
 
-        </article>
+  <div class="client-nav-label">
+    OVERVIEW
+  </div>
 
-        <article class="setting">
+  <div class="client-nav">
 
-          <h3>Proxy</h3>
+    <button
+      class="active"
+      data-page="clientDashboard"
+      onclick="switchClientPage('clientDashboard',this)"
+    >
+      <span class="client-nav-icon">◈</span>
+      Dashboard
+    </button>
 
-          <p>
-            إدارة الاتصال بين Routix والتطبيق الأصلي.
-          </p>
+    <button
+      data-page="clientSites"
+      onclick="switchClientPage('clientSites',this)"
+    >
+      <span class="client-nav-icon">S</span>
+      Sites
+    </button>
 
-          <code>
-            REVERSE PROXY<br>
-            UPSTREAM<br>
-            CONNECTION ROUTING
-          </code>
+    <button
+      data-page="clientTraffic"
+      onclick="switchClientPage('clientTraffic',this)"
+    >
+      <span class="client-nav-icon">↗</span>
+      Traffic
+    </button>
 
-        </article>
+    <button
+      data-page="clientSecurity"
+      onclick="switchClientPage('clientSecurity',this)"
+    >
+      <span class="client-nav-icon">!</span>
+      Security Events
+    </button>
 
-        <article class="setting">
+    <button
+      data-page="clientThreats"
+      onclick="switchClientPage('clientThreats',this)"
+    >
+      <span class="client-nav-icon">T</span>
+      Threat Intelligence
+    </button>
 
-          <h3>Request Limits</h3>
+    <button
+      data-page="clientIP"
+      onclick="switchClientPage('clientIP',this)"
+    >
+      <span class="client-nav-icon">IP</span>
+      IP Management
+    </button>
 
-          <p>
-            التحكم في حدود ومهلات الطلبات والاتصال.
-          </p>
+    <button
+      data-page="clientAnalytics"
+      onclick="switchClientPage('clientAnalytics',this)"
+    >
+      <span class="client-nav-icon">A</span>
+      Analytics
+    </button>
 
-          <code>
-            REQUEST LIMITS<br>
-            TIMEOUT CONTROL<br>
-            HEADER LIMITS
-          </code>
+  </div>
 
-        </article>
+  <div class="client-nav-label" style="margin-top:15px;">
+    PLATFORM
+  </div>
 
-        <article class="setting">
+  <div class="client-nav">
 
-          <h3>Security</h3>
+    <button
+      data-page="clientAPI"
+      onclick="switchClientPage('clientAPI',this)"
+    >
+      <span class="client-nav-icon">API</span>
+      API
+    </button>
 
-          <p>
-            مفاتيح النظام وبيانات الإدارة والإعدادات
-            الحساسة تتم إدارتها داخليًا على السيرفر.
-          </p>
+    <button
+      data-page="clientAccount"
+      onclick="switchClientPage('clientAccount',this)"
+    >
+      <span class="client-nav-icon">U</span>
+      Account
+    </button>
 
-          <code>
-            SERVER SIDE ONLY<br>
-            PRIVATE CONFIGURATION<br>
-            SECRET STORAGE
-          </code>
+  </div>
 
-        </article>
+  <div class="client-sidebar-bottom">
+
+    <div class="client-session">
+
+      <small>
+        AUTHENTICATED SESSION
+      </small>
+
+      <span id="clientSidebarEmail">
+        USER
+      </span>
+
+    </div>
+
+    <button
+      class="client-logout"
+      onclick="logout()"
+    >
+      تسجيل الخروج
+    </button>
+
+  </div>
+
+</aside>
+
+
+<div class="client-main">
+
+  <div class="client-topbar">
+
+    <div class="client-page-title">
+
+      <span class="eyebrow" id="clientPageEyebrow">
+        ROUTIX / DASHBOARD
+      </span>
+
+      <h1 id="clientPageTitle">
+        لوحة العميل
+      </h1>
+
+    </div>
+
+    <div class="client-top-actions">
+
+      <div class="client-status">
+        <span class="live-dot"></span>
+        SESSION ACTIVE
+      </div>
+
+      <button
+        class="client-refresh"
+        onclick="refreshCurrentClientPage()"
+      >
+        ↻ تحديث
+      </button>
+
+      <button
+        class="mobile-client-menu"
+        onclick="toggleClientSidebar()"
+      >
+        ☰
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div class="client-content">
+
+
+    <!-- =====================================================
+         CLIENT DASHBOARD
+    ====================================================== -->
+
+    <section
+      class="client-page active"
+      id="clientDashboard"
+    >
+
+      <div class="section-title" style="margin-bottom:24px;">
+
+        <span class="eyebrow">
+          SECURITY OVERVIEW
+        </span>
+
+        <h2>
+          حالة الحماية الآن
+        </h2>
+
+        <p>
+          نظرة سريعة على حالة موقعك والترافيك والأحداث الأمنية.
+        </p>
+
+      </div>
+
+
+      <div class="client-grid four">
+
+        <div class="client-card metric-card">
+
+          <div class="metric-icon">◈</div>
+
+          <div class="metric-label">
+            WAF STATUS
+          </div>
+
+          <div
+            class="metric-value green"
+            id="dashWafStatus"
+          >
+            READY
+          </div>
+
+          <div class="metric-sub">
+            PROTECTION LAYER
+          </div>
+
+        </div>
+
+
+        <div class="client-card metric-card">
+
+          <div class="metric-icon">↗</div>
+
+          <div class="metric-label">
+            REQUESTS
+          </div>
+
+          <div
+            class="metric-value cyan"
+            id="dashRequests"
+          >
+            —
+          </div>
+
+          <div class="metric-sub">
+            SITE REQUESTS
+          </div>
+
+        </div>
+
+
+        <div class="client-card metric-card">
+
+          <div class="metric-icon">⊘</div>
+
+          <div class="metric-label">
+            BLOCKED
+          </div>
+
+          <div
+            class="metric-value red"
+            id="dashBlocked"
+          >
+            —
+          </div>
+
+          <div class="metric-sub">
+            SECURITY ACTIONS
+          </div>
+
+        </div>
+
+
+        <div class="client-card metric-card">
+
+          <div class="metric-icon">✓</div>
+
+          <div class="metric-label">
+            ALLOWED
+          </div>
+
+          <div
+            class="metric-value green"
+            id="dashAllowed"
+          >
+            —
+          </div>
+
+          <div class="metric-sub">
+            ALLOWED REQUESTS
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="client-section-heading">
+        <div>
+          <h2>Live Activity</h2>
+          <p>آخر البيانات التي تمكن Site API من إتاحتها.</p>
+        </div>
+      </div>
+
+
+      <div class="client-grid two">
+
+        <div class="client-card">
+
+          <div class="client-card-header">
+            <h3>Traffic Snapshot</h3>
+            <span>LIVE</span>
+          </div>
+
+          <div class="bar-list">
+
+            <div class="bar-row">
+              <label>REQUESTS</label>
+              <div class="bar-track">
+                <div
+                  class="bar-fill"
+                  id="dashRequestsBar"
+                ></div>
+              </div>
+              <span
+                class="bar-value"
+                id="dashRequestsBarValue"
+              >—</span>
+            </div>
+
+            <div class="bar-row">
+              <label>ALLOWED</label>
+              <div class="bar-track">
+                <div
+                  class="bar-fill"
+                  id="dashAllowedBar"
+                ></div>
+              </div>
+              <span
+                class="bar-value"
+                id="dashAllowedBarValue"
+              >—</span>
+            </div>
+
+            <div class="bar-row">
+              <label>BLOCKED</label>
+              <div class="bar-track">
+                <div
+                  class="bar-fill"
+                  id="dashBlockedBar"
+                ></div>
+              </div>
+              <span
+                class="bar-value"
+                id="dashBlockedBarValue"
+              >—</span>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="client-card">
+
+          <div class="client-card-header">
+            <h3>Security State</h3>
+            <span>WAF</span>
+          </div>
+
+          <div class="timeline">
+
+            <div class="timeline-item">
+
+              <div class="timeline-time">
+                NOW
+              </div>
+
+              <div class="timeline-dot"></div>
+
+              <div class="timeline-body">
+                <strong>Protection layer</strong>
+                <span id="dashProtectionState">
+                  Waiting for Site API
+                </span>
+              </div>
+
+            </div>
+
+            <div class="timeline-item">
+
+              <div class="timeline-time">
+                SESSION
+              </div>
+
+              <div class="timeline-dot"></div>
+
+              <div class="timeline-body">
+                <strong>Authentication</strong>
+                <span id="dashSessionState">
+                  AUTHENTICATED
+                </span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
 
       </div>
 
     </section>
 
 
-    <!-- ABOUT -->
+    <!-- =====================================================
+         SITES
+    ====================================================== -->
 
-    <section id="about" class="section">
+    <section
+      class="client-page"
+      id="clientSites"
+    >
 
-      <div class="about">
+      <div class="section-title">
 
-        <div class="about-copy">
+        <span class="eyebrow">
+          SITE MANAGEMENT
+        </span>
 
-          <span class="eyebrow">
-            ABOUT ROUTIX
-          </span>
+        <h2>
+          My Sites
+        </h2>
 
-          <div class="section-title">
+        <p>
+          إدارة الموقع الذي يخص حسابك ومراقبة حالته.
+        </p>
 
-            <h2>
-              نبني الحماية بعقلية
-              البنية التحتية.
-            </h2>
+      </div>
+
+
+      <div class="notice">
+        <strong>ملاحظة أمنية:</strong>
+        الـAPI الحالي لا يحتوي Endpoint للمستخدم يعيد قائمة
+        المواقع المرتبطة بحسابه. لذلك لا يتم استخدام
+        <span class="ltr">/__waf/admin/sites</span>
+        هنا لأن هذا Endpoint خاص بالأدمن.
+      </div>
+
+
+      <div class="client-card">
+
+        <div class="client-card-header">
+          <h3>Site API Connection</h3>
+          <span>x-waf-api-key</span>
+        </div>
+
+        <div class="client-form">
+
+          <input
+            class="client-input"
+            id="siteApiKeyInput"
+            type="password"
+            autocomplete="off"
+            placeholder="أدخل Site API Key"
+          >
+
+          <button
+            class="client-btn primary"
+            onclick="saveSiteApiKey()"
+          >
+            ربط الموقع
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div
+        id="sitesContainer"
+        style="margin-top:13px;"
+      ></div>
+
+    </section>
+
+
+    <!-- =====================================================
+         TRAFFIC
+    ====================================================== -->
+
+    <section
+      class="client-page"
+      id="clientTraffic"
+    >
+
+      <div class="section-title">
+
+        <span class="eyebrow">
+          TRAFFIC MONITOR
+        </span>
+
+        <h2>
+          Live Traffic
+        </h2>
+
+        <p>
+          إحصائيات الطلبات المتاحة من Site API.
+        </p>
+
+      </div>
+
+
+      <div class="client-grid four">
+
+        <div class="client-card metric-card">
+          <div class="metric-icon">↗</div>
+          <div class="metric-label">REQUESTS</div>
+          <div
+            class="metric-value cyan"
+            id="trafficRequests"
+          >—</div>
+        </div>
+
+        <div class="client-card metric-card">
+          <div class="metric-icon">⚡</div>
+          <div class="metric-label">REQUESTS / MIN</div>
+          <div
+            class="metric-value"
+            id="trafficRPM"
+          >—</div>
+        </div>
+
+        <div class="client-card metric-card">
+          <div class="metric-icon">HTTP</div>
+          <div class="metric-label">HTTP METHODS</div>
+          <div
+            class="metric-value"
+            id="trafficMethods"
+          >—</div>
+        </div>
+
+        <div class="client-card metric-card">
+          <div class="metric-icon">2xx</div>
+          <div class="metric-label">STATUS CODES</div>
+          <div
+            class="metric-value green"
+            id="trafficStatusCodes"
+          >—</div>
+        </div>
+
+      </div>
+
+
+      <div class="client-section-heading">
+        <div>
+          <h2>Traffic Data</h2>
+          <p>يتم استخراج البيانات من <span class="ltr">/__waf/api/stats</span>.</p>
+        </div>
+      </div>
+
+
+      <div class="client-grid two">
+
+        <div class="client-card">
+
+          <div class="client-card-header">
+            <h3>Requests Distribution</h3>
+            <span>ANALYTICS</span>
+          </div>
+
+          <div class="bar-list">
+
+            <div class="bar-row">
+              <label>ALLOWED</label>
+              <div class="bar-track">
+                <div
+                  class="bar-fill"
+                  id="trafficAllowedBar"
+                ></div>
+              </div>
+              <span
+                class="bar-value"
+                id="trafficAllowedPercent"
+              >—</span>
+            </div>
+
+            <div class="bar-row">
+              <label>BLOCKED</label>
+              <div class="bar-track">
+                <div
+                  class="bar-fill"
+                  id="trafficBlockedBar"
+                ></div>
+              </div>
+              <span
+                class="bar-value"
+                id="trafficBlockedPercent"
+              >—</span>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="client-card">
+
+          <div class="client-card-header">
+            <h3>Visitor Count</h3>
+            <span>VISITORS API</span>
+          </div>
+
+          <div
+            class="metric-value cyan"
+            id="trafficVisitors"
+          >
+            —
+          </div>
+
+          <div class="metric-sub">
+            GET /__waf/api/visitors
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SECURITY
+    ====================================================== -->
+
+    <section
+      class="client-page"
+      id="clientSecurity"
+    >
+
+      <div class="section-title">
+
+        <span class="eyebrow">
+          SECURITY EVENTS
+        </span>
+
+        <h2>
+          Security Events
+        </h2>
+
+        <p>
+          التنبيهات والأحداث الأمنية التي يعيدها WAF.
+        </p>
+
+      </div>
+
+
+      <div class="client-grid four">
+
+        <div class="client-card metric-card">
+          <div class="metric-icon">!</div>
+          <div class="metric-label">ALERTS</div>
+          <div
+            class="metric-value red"
+            id="securityAlerts"
+          >—</div>
+        </div>
+
+        <div class="client-card metric-card">
+          <div class="metric-icon">C</div>
+          <div class="metric-label">CHALLENGES</div>
+          <div
+            class="metric-value yellow"
+            id="securityChallenges"
+          >—</div>
+        </div>
+
+        <div class="client-card metric-card">
+          <div class="metric-icon">A</div>
+          <div class="metric-label">ATTACKS</div>
+          <div
+            class="metric-value red"
+            id="securityAttacks"
+          >—</div>
+        </div>
+
+        <div class="client-card metric-card">
+          <div class="metric-icon">L</div>
+          <div class="metric-label">LIVE LOG</div>
+          <div
+            class="metric-value green"
+            id="securityLive"
+          >READY</div>
+        </div>
+
+      </div>
+
+
+      <div class="client-section-heading">
+        <div>
+          <h2>Event Logs</h2>
+          <p>GET /__waf/api/alerts</p>
+        </div>
+      </div>
+
+
+      <div class="client-card">
+
+        <div class="table-wrap">
+
+          <table class="data-table">
+
+            <thead>
+              <tr>
+                <th>TIME</th>
+                <th>TYPE</th>
+                <th>IP</th>
+                <th>ACTION</th>
+                <th>RISK</th>
+              </tr>
+            </thead>
+
+            <tbody id="securityEventsBody">
+
+              <tr>
+                <td colspan="5">
+                  لا توجد بيانات محملة حاليًا.
+                </td>
+              </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         THREAT INTELLIGENCE
+    ====================================================== -->
+
+    <section
+      class="client-page"
+      id="clientThreats"
+    >
+
+      <div class="section-title">
+
+        <span class="eyebrow">
+          THREAT INTELLIGENCE
+        </span>
+
+        <h2>
+          تحليل المخاطر
+        </h2>
+
+        <p>
+          قراءة Threat Score وحالة المصادر المشبوهة من البيانات المتاحة.
+        </p>
+
+      </div>
+
+
+      <div class="client-grid four">
+
+        <div class="client-card metric-card">
+
+          <div class="metric-icon">R</div>
+
+          <div class="metric-label">
+            THREAT SCORE
+          </div>
+
+          <div
+            class="metric-value yellow"
+            id="threatScore"
+          >
+            —
+          </div>
+
+        </div>
+
+        <div class="client-card metric-card">
+
+          <div class="metric-icon">IP</div>
+
+          <div class="metric-label">
+            SUSPICIOUS SOURCES
+          </div>
+
+          <div
+            class="metric-value red"
+            id="threatSources"
+          >
+            —
+          </div>
+
+        </div>
+
+        <div class="client-card metric-card">
+
+          <div class="metric-icon">ATK</div>
+
+          <div class="metric-label">
+            ATTACK TYPES
+          </div>
+
+          <div
+            class="metric-value"
+            id="threatTypes"
+          >
+            —
+          </div>
+
+        </div>
+
+        <div class="client-card metric-card">
+
+          <div class="metric-icon">!</div>
+
+          <div class="metric-label">
+            RISK STATE
+          </div>
+
+          <div
+            class="metric-value green"
+            id="threatRiskState"
+          >
+            —
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="client-section-heading">
+        <div>
+          <h2>Risk Analysis</h2>
+          <p>حالة IP الحالية عبر /__waf/api/status.</p>
+        </div>
+      </div>
+
+
+      <div class="client-card">
+
+        <div class="client-form">
+
+          <input
+            class="client-input"
+            id="threatIpInput"
+            placeholder="8.8.8.8"
+          >
+
+          <button
+            class="client-btn primary"
+            onclick="checkIPStatus()"
+          >
+            فحص IP
+          </button>
+
+        </div>
+
+
+        <div
+          id="ipStatusResult"
+          style="margin-top:13px;"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         IP MANAGEMENT
+    ====================================================== -->
+
+    <section
+      class="client-page"
+      id="clientIP"
+    >
+
+      <div class="section-title">
+
+        <span class="eyebrow">
+          IP MANAGEMENT
+        </span>
+
+        <h2>
+          Blacklist
+        </h2>
+
+        <p>
+          عرض حالة الحظر المتاحة حاليًا من WAF.
+        </p>
+
+      </div>
+
+
+      <div class="notice">
+        <strong>الحالة الحالية:</strong>
+        السيرفر يحتوي على API لجلب الـBlacklist فقط.
+        لا يوجد API يدوي لإضافة أو حذف IP من القائمة،
+        لذلك الواجهة لا تنشئ Endpoint غير موجود.
+      </div>
+
+
+      <div class="client-card">
+
+        <div class="client-card-header">
+          <h3>IP Status</h3>
+          <span>/__waf/status/:ip</span>
+        </div>
+
+        <div class="client-form">
+
+          <input
+            class="client-input"
+            id="blacklistIpInput"
+            placeholder="IP Address"
+          >
+
+          <button
+            class="client-btn"
+            onclick="checkBlacklistIP()"
+          >
+            فحص الحالة
+          </button>
+
+        </div>
+
+        <div
+          id="blacklistResult"
+          style="margin-top:13px;"
+        ></div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ANALYTICS
+    ====================================================== -->
+
+    <section
+      class="client-page"
+      id="clientAnalytics"
+    >
+
+      <div class="section-title">
+
+        <span class="eyebrow">
+          ANALYTICS ENGINE
+        </span>
+
+        <h2>
+          Analytics
+        </h2>
+
+        <p>
+          Traffic Analytics وSecurity Analytics المبنية على Site APIs الحالية.
+        </p>
+
+      </div>
+
+
+      <div class="client-grid four">
+
+        <div class="client-card metric-card">
+          <div class="metric-icon">R</div>
+          <div class="metric-label">TOTAL REQUESTS</div>
+          <div
+            class="metric-value cyan"
+            id="analyticsRequests"
+          >—</div>
+        </div>
+
+        <div class="client-card metric-card">
+          <div class="metric-icon">✓</div>
+          <div class="metric-label">ALLOWED</div>
+          <div
+            class="metric-value green"
+            id="analyticsAllowed"
+          >—</div>
+        </div>
+
+        <div class="client-card metric-card">
+          <div class="metric-icon">⊘</div>
+          <div class="metric-label">BLOCKED</div>
+          <div
+            class="metric-value red"
+            id="analyticsBlocked"
+          >—</div>
+        </div>
+
+        <div class="client-card metric-card">
+          <div class="metric-icon">H</div>
+          <div class="metric-label">HONEYPOT</div>
+          <div
+            class="metric-value yellow"
+            id="analyticsHoneypot"
+          >—</div>
+        </div>
+
+      </div>
+
+
+      <div class="client-section-heading">
+        <div>
+          <h2>Attack Statistics</h2>
+          <p>مؤشرات الهجمات المتاحة من stats وalerts.</p>
+        </div>
+      </div>
+
+
+      <div class="client-grid two">
+
+        <div class="client-card">
+
+          <div class="client-card-header">
+            <h3>Traffic Analytics</h3>
+            <span>STATS</span>
+          </div>
+
+          <div class="bar-list">
+
+            <div class="bar-row">
+              <label>ALLOWED</label>
+              <div class="bar-track">
+                <div
+                  class="bar-fill"
+                  id="analyticsAllowedBar"
+                ></div>
+              </div>
+              <span
+                class="bar-value"
+                id="analyticsAllowedPct"
+              >—</span>
+            </div>
+
+            <div class="bar-row">
+              <label>BLOCKED</label>
+              <div class="bar-track">
+                <div
+                  class="bar-fill"
+                  id="analyticsBlockedBar"
+                ></div>
+              </div>
+              <span
+                class="bar-value"
+                id="analyticsBlockedPct"
+              >—</span>
+            </div>
+
+            <div class="bar-row">
+              <label>HONEYPOT</label>
+              <div class="bar-track">
+                <div
+                  class="bar-fill"
+                  id="analyticsHoneypotBar"
+                ></div>
+              </div>
+              <span
+                class="bar-value"
+                id="analyticsHoneypotPct"
+              >—</span>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="client-card">
+
+          <div class="client-card-header">
+            <h3>Security Analytics</h3>
+            <span>ALERTS</span>
+          </div>
+
+          <div
+            class="timeline"
+            id="analyticsTimeline"
+          >
+
+            <div class="timeline-item">
+
+              <div class="timeline-time">
+                —
+              </div>
+
+              <div class="timeline-dot"></div>
+
+              <div class="timeline-body">
+                <strong>
+                  لا توجد بيانات بعد
+                </strong>
+                <span>
+                  اربط Site API Key لعرض Analytics.
+                </span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         API
+    ====================================================== -->
+
+    <section
+      class="client-page"
+      id="clientAPI"
+    >
+
+      <div class="section-title">
+
+        <span class="eyebrow">
+          API CONSOLE
+        </span>
+
+        <h2>
+          API
+        </h2>
+
+        <p>
+          الـEndpoints المسموح استخدامها من لوحة العميل بدون عرض أسرار السيرفر.
+        </p>
+
+      </div>
+
+
+      <div class="notice">
+        <strong>Security:</strong>
+        لا يتم عرض Admin Basic Auth أو كلمات مرور الإدارة.
+        Site API Key يستخدم فقط مع Site APIs الحالية.
+      </div>
+
+
+      <div class="client-grid two">
+
+        <div class="client-card">
+
+          <div class="client-card-header">
+            <h3>API Usage</h3>
+            <span>CLIENT ACCESS</span>
+          </div>
+
+          <div class="api-endpoint">
+            <span class="api-method">GET</span>
+            <span class="api-path">/__waf/api/stats</span>
+            <div class="api-description">
+              إحصائيات الموقع والطلبات.
+            </div>
+          </div>
+
+          <div class="api-endpoint">
+            <span class="api-method">GET</span>
+            <span class="api-path">/__waf/api/visitors</span>
+            <div class="api-description">
+              عدد الزوار.
+            </div>
+          </div>
+
+          <div class="api-endpoint">
+            <span class="api-method">GET</span>
+            <span class="api-path">/__waf/api/status</span>
+            <div class="api-description">
+              حالة IP: blacklist + risk + concurrent.
+            </div>
+          </div>
+
+          <div class="api-endpoint">
+            <span class="api-method">GET</span>
+            <span class="api-path">/__waf/api/alerts</span>
+            <div class="api-description">
+              تنبيهات WAF للموقع.
+            </div>
+          </div>
+
+        </div>
+
+
+        <div class="client-card">
+
+          <div class="client-card-header">
+            <h3>Authentication</h3>
+            <span>HEADER</span>
+          </div>
+
+          <pre style="min-height:270px;">GET /__waf/api/stats
+
+Header:
+
+x-waf-api-key: YOUR_SITE_API_KEY
+
+---
+
+Authentication APIs:
+
+POST /api/check-email
+POST /api/register
+POST /api/verify-otp
+POST /api/login
+GET  /api/profile
+GET  /api/me
+POST /api/logout</pre>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ACCOUNT
+    ====================================================== -->
+
+    <section
+      class="client-page"
+      id="clientAccount"
+    >
+
+      <div class="section-title">
+
+        <span class="eyebrow">
+          ACCOUNT
+        </span>
+
+        <h2>
+          Account
+        </h2>
+
+        <p>
+          بيانات الحساب والجلسة الحالية.
+        </p>
+
+      </div>
+
+
+      <div class="client-grid two">
+
+        <div class="client-card">
+
+          <div class="client-card-header">
+            <h3>Profile</h3>
+            <span>/api/profile</span>
+          </div>
+
+          <div>
+
+            <div class="account-row">
+              <span>Email</span>
+              <strong id="accountEmail">—</strong>
+            </div>
+
+            <div class="account-row">
+              <span>Status</span>
+              <strong
+                id="accountStatus"
+                class="value-green"
+              >
+                AUTHENTICATED
+              </strong>
+            </div>
+
+            <div class="account-row">
+              <span>Session</span>
+              <strong>ACTIVE</strong>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="client-card">
+
+          <div class="client-card-header">
+            <h3>Security</h3>
+            <span>SESSION</span>
+          </div>
+
+          <div>
+
+            <div class="account-row">
+              <span>Authentication</span>
+              <strong>SECURE SESSION</strong>
+            </div>
+
+            <div class="account-row">
+              <span>Cookie</span>
+              <strong>HTTP SESSION</strong>
+            </div>
+
+            <div class="account-row">
+              <span>Logout</span>
+              <button
+                class="client-btn danger"
+                style="min-height:32px;"
+                onclick="logout()"
+              >
+                إنهاء الجلسة
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="client-card">
+
+          <div class="client-card-header">
+            <h3>Sessions</h3>
+            <span>CURRENT</span>
+          </div>
+
+          <div class="empty-state">
+
+            <div class="empty-icon">
+              ◉
+            </div>
+
+            <h3>
+              الجلسة الحالية
+            </h3>
 
             <p>
-              Routix مشروع تقني طوره مطورون شغوفون
-              بالأمن السيبراني، البنية التحتية وتطوير الأنظمة.
-              <br><br>
-              نؤمن أن طبقة الحماية الجيدة يجب أن تكون
-              عملية، واضحة وقابلة للمراقبة.
-              <br><br>
-              هدف Routix هو توفير طبقة WAF قابلة للدمج
-              مع المواقع والتطبيقات، مع أدوات للتحكم
-              بالترافيك ومراقبة الأحداث الأمنية.
+              الـAPI الحالي يوفر التحقق من الجلسة الحالية
+              لكنه لا يوفر Endpoint لعرض قائمة كل الجلسات.
             </p>
 
           </div>
 
-          <a href="#features" class="btn btn-primary">
-            استكشف Routix ←
-          </a>
-
         </div>
 
-        <div class="terminal">
 
-          <div>
-            <span class="white">$</span>
-            routix start
+        <div class="client-card">
+
+          <div class="client-card-header">
+            <h3>Logout</h3>
+            <span>/api/logout</span>
           </div>
 
-          <div class="green">
-            ✓ WAF protection enabled
-          </div>
+          <p style="color:var(--muted);font-size:10px;line-height:1.8;margin-bottom:14px;">
+            إنهاء الجلسة الحالية وحذف Cookie الخاصة بالجلسة.
+          </p>
 
-          <div class="green">
-            ✓ L7 inspection enabled
-          </div>
-
-          <div class="green">
-            ✓ Rate limiting enabled
-          </div>
-
-          <div class="green">
-            ✓ Risk engine enabled
-          </div>
-
-          <div class="green">
-            ✓ Honeypot monitoring enabled
-          </div>
-
-          <div class="green">
-            ✓ Blacklist engine enabled
-          </div>
-
-          <div class="green">
-            ✓ Live admin events enabled
-          </div>
-
-          <div>
-            <span class="cyan">→</span>
-            proxying through Routix
-          </div>
-
-          <div>
-            <span class="cyan">→</span>
-            protection layer active
-          </div>
+          <button
+            class="client-btn danger"
+            style="width:100%;"
+            onclick="logout()"
+          >
+            تسجيل الخروج
+          </button>
 
         </div>
 
@@ -2392,33 +4340,38 @@ TARGET_URL الداخلي
 
     </section>
 
-  </main>
+  </div>
 
+</div>
 
-  <!-- FOOTER -->
-
-  <footer>
-    © 2026 <span>Routix</span> — Cloud WAF & Application Protection
-  </footer>
-
-
-  <script>
+  </section>  <script>
 
     /* =========================================================
-       AUTH SERVER
+       ROUTIX CONFIG
     ========================================================== */
 
     const AUTH_SERVER =
       "https://production-1-54qv.onrender.com";
+
+
+    /* =========================================================
+       AUTH STATE
+    ========================================================== */
 
     let currentEmail = "";
     let currentPassword = "";
     let isLoggedIn = false;
     let currentUser = null;
 
+    let siteApiKey =
+      sessionStorage.getItem("routix_site_api_key") || "";
+
+    let currentClientPage =
+      "clientDashboard";
+
 
     /* =========================================================
-       API REQUEST
+       GENERIC REQUEST
     ========================================================== */
 
     async function authRequest(endpoint, options = {}) {
@@ -2426,35 +4379,80 @@ TARGET_URL الداخلي
       const config = {
         ...options,
 
-        credentials: "include",
+        credentials:"include",
 
-        headers: {
+        headers:{
           ...(options.headers || {})
         }
       };
 
-      const response = await fetch(
-        AUTH_SERVER + endpoint,
-        config
-      );
+      const response =
+        await fetch(
+          AUTH_SERVER + endpoint,
+          config
+        );
 
       let data = {};
 
       try {
-
         data = await response.json();
-
       } catch {
-
         data = {};
-
       }
 
       return {
         response,
         data
       };
+    }
 
+
+    /* =========================================================
+       SITE API REQUEST
+    ========================================================== */
+
+    async function siteRequest(
+      endpoint,
+      options = {}
+    ) {
+
+      if (!siteApiKey) {
+
+        throw new Error(
+          "SITE_API_KEY_REQUIRED"
+        );
+
+      }
+
+      const config = {
+        ...options,
+
+        headers:{
+          ...(options.headers || {}),
+
+          "x-waf-api-key":
+            siteApiKey
+        }
+      };
+
+      const response =
+        await fetch(
+          AUTH_SERVER + endpoint,
+          config
+        );
+
+      let data = {};
+
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
+
+      return {
+        response,
+        data
+      };
     }
 
 
@@ -2465,7 +4463,9 @@ TARGET_URL الداخلي
     function openAuth() {
 
       const overlay =
-        document.getElementById("authOverlay");
+        document.getElementById(
+          "authOverlay"
+        );
 
       overlay.classList.add("show");
 
@@ -2488,7 +4488,7 @@ TARGET_URL الداخلي
           .getElementById("loginEmail")
           .focus();
 
-      }, 100);
+      },100);
 
     }
 
@@ -2496,7 +4496,9 @@ TARGET_URL الداخلي
     function closeAuth() {
 
       const overlay =
-        document.getElementById("authOverlay");
+        document.getElementById(
+          "authOverlay"
+        );
 
       overlay.classList.remove("show");
 
@@ -2515,16 +4517,24 @@ TARGET_URL الداخلي
     function setAuthStep(step) {
 
       const emailStep =
-        document.getElementById("emailStep");
+        document.getElementById(
+          "emailStep"
+        );
 
       const otpStep =
-        document.getElementById("otpStep");
+        document.getElementById(
+          "otpStep"
+        );
 
       if (step === "otp") {
 
-        emailStep.classList.remove("active");
+        emailStep.classList.remove(
+          "active"
+        );
 
-        otpStep.classList.add("active");
+        otpStep.classList.add(
+          "active"
+        );
 
         document
           .getElementById("authTitle")
@@ -2542,13 +4552,17 @@ TARGET_URL الداخلي
             .getElementById("loginOtp")
             .focus();
 
-        }, 100);
+        },100);
 
       } else {
 
-        otpStep.classList.remove("active");
+        otpStep.classList.remove(
+          "active"
+        );
 
-        emailStep.classList.add("active");
+        emailStep.classList.add(
+          "active"
+        );
 
         document
           .getElementById("authTitle")
@@ -2579,40 +4593,25 @@ TARGET_URL الداخلي
 
 
     /* =========================================================
-       PASSWORD VISIBILITY
+       PASSWORD
     ========================================================== */
 
     function togglePassword() {
 
-      const passwordInput =
-        document.getElementById("loginPassword");
-
-      const toggle =
-        document.getElementById("passwordToggle");
+      const input =
+        document.getElementById(
+          "loginPassword"
+        );
 
       if (
-        passwordInput.type === "password"
+        input.type === "password"
       ) {
 
-        passwordInput.type = "text";
-
-        toggle.textContent = "◉";
-
-        toggle.setAttribute(
-          "aria-label",
-          "إخفاء كلمة المرور"
-        );
+        input.type = "text";
 
       } else {
 
-        passwordInput.type = "password";
-
-        toggle.textContent = "◉";
-
-        toggle.setAttribute(
-          "aria-label",
-          "إظهار كلمة المرور"
-        );
+        input.type = "password";
 
       }
 
@@ -2620,7 +4619,7 @@ TARGET_URL الداخلي
 
 
     /* =========================================================
-       AUTH MESSAGES
+       MESSAGES
     ========================================================== */
 
     function showMessage(
@@ -2630,12 +4629,16 @@ TARGET_URL الداخلي
     ) {
 
       const element =
-        document.getElementById(elementId);
+        document.getElementById(
+          elementId
+        );
 
-      element.textContent = message;
+      element.textContent =
+        message;
 
       element.className =
-        "auth-message show " + type;
+        "auth-message show " +
+        type;
 
     }
 
@@ -2695,43 +4698,35 @@ TARGET_URL الداخلي
 
 
     /* =========================================================
-       REGISTER + SEND OTP
-       
-       FLOW:
-
-       POST /api/register
-       email + password
-
-       SERVER
-          ↓
-       Generate OTP
-          ↓
-       Brevo
-          ↓
-       Email OTP
+       REGISTER + OTP
     ========================================================== */
 
     async function sendOTP() {
 
       const emailInput =
-        document.getElementById("loginEmail");
+        document.getElementById(
+          "loginEmail"
+        );
 
       const passwordInput =
-        document.getElementById("loginPassword");
+        document.getElementById(
+          "loginPassword"
+        );
 
       const button =
-        document.getElementById("sendOtpBtn");
+        document.getElementById(
+          "sendOtpBtn"
+        );
 
       const email =
-        emailInput.value.trim().toLowerCase();
+        emailInput.value
+          .trim()
+          .toLowerCase();
 
       const password =
         passwordInput.value;
 
       clearAuthMessages();
-
-
-      /* EMAIL */
 
       if (!email) {
 
@@ -2746,7 +4741,6 @@ TARGET_URL الداخلي
 
       }
 
-
       const emailPattern =
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -2757,14 +4751,9 @@ TARGET_URL الداخلي
           "البريد الإلكتروني غير صالح."
         );
 
-        emailInput.focus();
-
         return;
 
       }
-
-
-      /* PASSWORD */
 
       if (!password) {
 
@@ -2779,7 +4768,6 @@ TARGET_URL الداخلي
 
       }
 
-
       if (password.length < 8) {
 
         showMessage(
@@ -2787,21 +4775,15 @@ TARGET_URL الداخلي
           "كلمة المرور يجب أن تكون 8 أحرف أو أكثر."
         );
 
-        passwordInput.focus();
-
         return;
 
       }
 
+      currentEmail =
+        email;
 
-      /*
-       * نحفظ البيانات مؤقتًا حتى نرسلها
-       * مرة أخرى مع OTP إلى /api/verify-otp
-       */
-
-      currentEmail = email;
-      currentPassword = password;
-
+      currentPassword =
+        password;
 
       setButtonLoading(
         button,
@@ -2809,22 +4791,7 @@ TARGET_URL الداخلي
         "جاري إرسال الكود"
       );
 
-
       try {
-
-        /*
-         * IMPORTANT:
-         *
-         * هنا تم تغيير endpoint من:
-         *
-         * /api/send-otp
-         *
-         * إلى:
-         *
-         * /api/register
-         *
-         * حسب التدفق المطلوب.
-         */
 
         const {
           response,
@@ -2840,12 +4807,11 @@ TARGET_URL الداخلي
             },
 
             body:JSON.stringify({
-              email:email,
-              password:password
+              email,
+              password
             })
           }
         );
-
 
         if (
           !response.ok ||
@@ -2862,41 +4828,25 @@ TARGET_URL الداخلي
 
         }
 
-
-        /*
-         * عرض البريد في شاشة OTP
-         */
-
         document
-          .getElementById("authEmailDisplay")
-          .textContent = email;
-
-
-        showMessage(
-          "emailMessage",
-          data.message ||
-          "تم إرسال كود التحقق إلى بريدك الإلكتروني.",
-          "success"
-        );
-
-
-        /*
-         * الانتقال إلى شاشة OTP
-         */
+          .getElementById(
+            "authEmailDisplay"
+          )
+          .textContent =
+          email;
 
         setAuthStep("otp");
 
-
-      } catch (error) {
+      } catch(error) {
 
         console.error(
-          "Register / Send OTP Error:",
+          "Register error:",
           error
         );
 
         showMessage(
           "emailMessage",
-          "تعذر الاتصال بسيرفر تسجيل الدخول. تحقق من اتصال الإنترنت."
+          "تعذر الاتصال بسيرفر تسجيل الدخول."
         );
 
       } finally {
@@ -2914,70 +4864,37 @@ TARGET_URL الداخلي
 
     /* =========================================================
        VERIFY OTP
-       
-       POST /api/verify-otp
-
-       email + password + otp
-
-       SERVER
-          ↓
-       Verify OTP
-          ↓
-       Confirm Registration
-          ↓
-       Login Session
     ========================================================== */
 
     async function verifyOTP() {
 
       const otpInput =
-        document.getElementById("loginOtp");
+        document.getElementById(
+          "loginOtp"
+        );
 
       const button =
-        document.getElementById("verifyOtpBtn");
+        document.getElementById(
+          "verifyOtpBtn"
+        );
 
       const otp =
         otpInput.value.trim();
 
       clearAuthMessages();
 
-
-      if (!currentEmail) {
-
-        backToEmail();
-
-        return;
-
-      }
-
-
-      if (!currentPassword) {
-
-        backToEmail();
-
-        showMessage(
-          "emailMessage",
-          "أدخل البريد الإلكتروني وكلمة المرور مرة أخرى."
-        );
-
-        return;
-
-      }
-
-
-      if (!/^\d{6}$/.test(otp)) {
+      if (
+        !/^\d{6}$/.test(otp)
+      ) {
 
         showMessage(
           "otpMessage",
           "أدخل كود التحقق المكون من 6 أرقام."
         );
 
-        otpInput.focus();
-
         return;
 
       }
-
 
       setButtonLoading(
         button,
@@ -2985,18 +4902,7 @@ TARGET_URL الداخلي
         "جاري التحقق"
       );
 
-
       try {
-
-        /*
-         * إرسال:
-         *
-         * email
-         * password
-         * otp
-         *
-         * إلى السيرفر
-         */
 
         const {
           response,
@@ -3014,11 +4920,10 @@ TARGET_URL الداخلي
             body:JSON.stringify({
               email:currentEmail,
               password:currentPassword,
-              otp:otp
+              otp
             })
           }
         );
-
 
         if (
           !response.ok ||
@@ -3035,11 +4940,6 @@ TARGET_URL الداخلي
 
         }
 
-
-        /*
-         * تم تأكيد التسجيل / تسجيل الدخول
-         */
-
         isLoggedIn = true;
 
         currentUser =
@@ -3047,17 +4947,9 @@ TARGET_URL الداخلي
             email:currentEmail
           };
 
-
-        /*
-         * لا نحتاج الاحتفاظ بكلمة المرور
-         * بعد نجاح التحقق.
-         */
-
         currentPassword = "";
 
-
         updateAuthUI();
-
 
         showMessage(
           "otpMessage",
@@ -3066,18 +4958,18 @@ TARGET_URL الداخلي
           "success"
         );
 
-
         setTimeout(() => {
 
           closeAuth();
 
-        },700);
+          openClientPanel();
 
+        },500);
 
-      } catch (error) {
+      } catch(error) {
 
         console.error(
-          "Verify OTP Error:",
+          "Verify OTP error:",
           error
         );
 
@@ -3100,7 +4992,7 @@ TARGET_URL الداخلي
 
 
     /* =========================================================
-       CHECK EXISTING SESSION
+       SESSION
     ========================================================== */
 
     async function checkSession() {
@@ -3117,7 +5009,6 @@ TARGET_URL الداخلي
           }
         );
 
-
         if (
           response.ok &&
           data.success &&
@@ -3132,21 +5023,19 @@ TARGET_URL الداخلي
           currentEmail =
             currentUser?.email || "";
 
+          updateAuthUI();
+
         } else {
 
           isLoggedIn = false;
-
           currentUser = null;
-
           currentEmail = "";
+
+          updateAuthUI();
 
         }
 
-
-        updateAuthUI();
-
-
-      } catch (error) {
+      } catch(error) {
 
         console.warn(
           "Session check failed:",
@@ -3163,7 +5052,7 @@ TARGET_URL الداخلي
 
 
     /* =========================================================
-       UPDATE AUTH UI
+       AUTH UI
     ========================================================== */
 
     function updateAuthUI() {
@@ -3188,7 +5077,6 @@ TARGET_URL الداخلي
           "headerUserEmail"
         );
 
-
       if (isLoggedIn) {
 
         loginButton.style.display =
@@ -3201,6 +5089,24 @@ TARGET_URL الداخلي
           "inline-flex";
 
         userEmail.textContent =
+          currentUser?.email ||
+          currentEmail ||
+          "USER";
+
+        document
+          .getElementById(
+            "clientSidebarEmail"
+          )
+          .textContent =
+          currentUser?.email ||
+          currentEmail ||
+          "USER";
+
+        document
+          .getElementById(
+            "accountEmail"
+          )
+          .textContent =
           currentUser?.email ||
           currentEmail ||
           "USER";
@@ -3231,37 +5137,19 @@ TARGET_URL الداخلي
 
       try {
 
-        const {
-          response,
-          data
-        } = await authRequest(
+        await authRequest(
           "/api/logout",
           {
             method:"POST"
           }
         );
 
+      } catch(error) {
 
-        if (
-          !response.ok ||
-          !data.success
-        ) {
-
-          console.warn(
-            "Logout response:",
-            data
-          );
-
-        }
-
-
-      } catch (error) {
-
-        console.error(
-          "Logout Error:",
+        console.warn(
+          "Logout request failed:",
           error
         );
-
 
       } finally {
 
@@ -3272,6 +5160,8 @@ TARGET_URL الداخلي
         currentEmail = "";
 
         currentPassword = "";
+
+        closeClientPanel();
 
         updateAuthUI();
 
@@ -3287,9 +5177,13 @@ TARGET_URL الداخلي
     function enterPlatform() {
 
       const intro =
-        document.getElementById("intro");
+        document.getElementById(
+          "intro"
+        );
 
-      intro.classList.add("hidden");
+      intro.classList.add(
+        "hidden"
+      );
 
       document.body.classList.remove(
         "locked"
@@ -3297,7 +5191,8 @@ TARGET_URL الداخلي
 
       setTimeout(() => {
 
-        intro.style.display = "none";
+        intro.style.display =
+          "none";
 
       },750);
 
@@ -3305,23 +5200,1767 @@ TARGET_URL الداخلي
 
 
     /* =========================================================
-       MOBILE MENU
+       CLIENT PANEL
     ========================================================== */
 
-    function toggleMenu() {
+    function openClientPanel() {
 
-      const nav =
-        document.getElementById("nav");
+      if (!isLoggedIn) {
 
-      nav.classList.toggle(
-        "mobile-open"
+        openAuth();
+
+        return;
+
+      }
+
+      document.body.classList.add(
+        "client-open"
+      );
+
+      document
+        .getElementById(
+          "clientPanel"
+        )
+        .classList.add(
+          "active"
+        );
+
+      currentClientPage =
+        "clientDashboard";
+
+      switchClientPage(
+        "clientDashboard",
+        document.querySelector(
+          '.client-nav button[data-page="clientDashboard"]'
+        )
+      );
+
+      updateAuthUI();
+
+      loadClientDashboard();
+
+    }
+
+
+    function closeClientPanel() {
+
+      document.body.classList.remove(
+        "client-open"
+      );
+
+      document
+        .getElementById(
+          "clientPanel"
+        )
+        .classList.remove(
+          "active"
+        );
+
+    }
+
+
+    /* =========================================================
+       CLIENT NAVIGATION
+    ========================================================== */
+
+    const clientPageNames = {
+
+      clientDashboard:{
+        title:"لوحة العميل",
+        eyebrow:"ROUTIX / DASHBOARD"
+      },
+
+      clientSites:{
+        title:"Sites",
+        eyebrow:"ROUTIX / SITES"
+      },
+
+      clientTraffic:{
+        title:"Traffic",
+        eyebrow:"ROUTIX / TRAFFIC"
+      },
+
+      clientSecurity:{
+        title:"Security Events",
+        eyebrow:"ROUTIX / SECURITY"
+      },
+
+      clientThreats:{
+        title:"Threat Intelligence",
+        eyebrow:"ROUTIX / THREAT"
+      },
+
+      clientIP:{
+        title:"IP Management",
+        eyebrow:"ROUTIX / IP"
+      },
+
+      clientAnalytics:{
+        title:"Analytics",
+        eyebrow:"ROUTIX / ANALYTICS"
+      },
+
+      clientAPI:{
+        title:"API",
+        eyebrow:"ROUTIX / API"
+      },
+
+      clientAccount:{
+        title:"Account",
+        eyebrow:"ROUTIX / ACCOUNT"
+      }
+
+    };
+
+
+    function switchClientPage(
+      pageId,
+      button
+    ) {
+
+      currentClientPage =
+        pageId;
+
+      document
+        .querySelectorAll(
+          ".client-page"
+        )
+        .forEach(page => {
+
+          page.classList.remove(
+            "active"
+          );
+
+        });
+
+      const page =
+        document.getElementById(
+          pageId
+        );
+
+      if (page) {
+
+        page.classList.add(
+          "active"
+        );
+
+      }
+
+      document
+        .querySelectorAll(
+          ".client-nav button"
+        )
+        .forEach(btn => {
+
+          btn.classList.remove(
+            "active"
+          );
+
+        });
+
+      if (button) {
+
+        button.classList.add(
+          "active"
+        );
+
+      }
+
+      const meta =
+        clientPageNames[pageId];
+
+      if (meta) {
+
+        document
+          .getElementById(
+            "clientPageTitle"
+          )
+          .textContent =
+          meta.title;
+
+        document
+          .getElementById(
+            "clientPageEyebrow"
+          )
+          .textContent =
+          meta.eyebrow;
+
+      }
+
+      document
+        .getElementById(
+          "clientSidebar"
+        )
+        .classList.remove(
+          "mobile-open"
+        );
+
+      loadClientPage(
+        pageId
       );
 
     }
 
 
+    function toggleClientSidebar() {
+
+      document
+        .getElementById(
+          "clientSidebar"
+        )
+        .classList.toggle(
+          "mobile-open"
+        );
+
+    }
+
+
+    function refreshCurrentClientPage() {
+
+      loadClientPage(
+        currentClientPage
+      );
+
+    }
+
+
+    async function loadClientPage(
+      pageId
+    ) {
+
+      if (!isLoggedIn) {
+        return;
+      }
+
+      switch(pageId) {
+
+        case "clientDashboard":
+          await loadClientDashboard();
+          break;
+
+        case "clientSites":
+          renderSites();
+          break;
+
+        case "clientTraffic":
+          await loadTraffic();
+          break;
+
+        case "clientSecurity":
+          await loadSecurity();
+          break;
+
+        case "clientThreats":
+          await loadThreats();
+          break;
+
+        case "clientIP":
+          break;
+
+        case "clientAnalytics":
+          await loadAnalytics();
+          break;
+
+        case "clientAPI":
+          break;
+
+        case "clientAccount":
+          await loadAccount();
+          break;
+
+      }
+
+    }
+
+
+    /* =========================================================
+       SITE API KEY
+    ========================================================== */
+
+    function saveSiteApiKey() {
+
+      const input =
+        document.getElementById(
+          "siteApiKeyInput"
+        );
+
+      const key =
+        input.value.trim();
+
+      if (!key) {
+
+        alert(
+          "أدخل Site API Key أولاً."
+        );
+
+        return;
+
+      }
+
+      siteApiKey =
+        key;
+
+      sessionStorage.setItem(
+        "routix_site_api_key",
+        key
+      );
+
+      renderSites();
+
+      loadClientDashboard();
+
+      alert(
+        "تم ربط Site API Key بالجلسة الحالية."
+      );
+
+    }
+
+
+    function renderSites() {
+
+      const container =
+        document.getElementById(
+          "sitesContainer"
+        );
+
+      if (!siteApiKey) {
+
+        container.innerHTML = `
+
+          <div class="empty-state">
+
+            <div class="empty-icon">S</div>
+
+            <h3>
+              لا يوجد موقع مربوط حاليًا
+            </h3>
+
+            <p>
+              أدخل Site API Key الخاص بالموقع الذي يسمح لك
+              السيرفر بالوصول إلى بياناته.
+            </p>
+
+          </div>
+
+        `;
+
+        return;
+
+      }
+
+      container.innerHTML = `
+
+        <div class="client-card site-card">
+
+          <div class="site-card-top">
+
+            <div>
+
+              <div class="site-name">
+                ROUTIX SITE
+              </div>
+
+              <div class="site-domain">
+                API KEY CONNECTED
+              </div>
+
+            </div>
+
+            <span class="badge green">
+              ● CONNECTED
+            </span>
+
+          </div>
+
+          <div class="site-details">
+
+            <div class="site-detail">
+              <small>API</small>
+              <strong>ACTIVE</strong>
+            </div>
+
+            <div class="site-detail">
+              <small>WAF</small>
+              <strong>MONITORING</strong>
+            </div>
+
+            <div class="site-detail">
+              <small>PROTECTION</small>
+              <strong>ENABLED</strong>
+            </div>
+
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:13px;">
+
+            <button
+              class="client-btn"
+              onclick="switchClientPage(
+                'clientDashboard',
+                document.querySelector(
+                  '.client-nav button[data-page="clientDashboard"]'
+                )
+              )"
+            >
+              Dashboard
+            </button>
+
+            <button
+              class="client-btn danger"
+              onclick="removeSiteApiKey()"
+            >
+              فصل الموقع
+            </button>
+
+          </div>
+
+        </div>
+
+      `;
+
+    }
+
+
+    function removeSiteApiKey() {
+
+      siteApiKey = "";
+
+      sessionStorage.removeItem(
+        "routix_site_api_key"
+      );
+
+      document
+        .getElementById(
+          "siteApiKeyInput"
+        )
+        .value = "";
+
+      renderSites();
+
+    }
+
+
+    /* =========================================================
+       STATS HELPERS
+    ========================================================== */
+
+    function pickNumber(
+      object,
+      keys
+    ) {
+
+      if (!object) {
+        return 0;
+      }
+
+      for (const key of keys) {
+
+        const value =
+          object[key];
+
+        if (
+          typeof value === "number" &&
+          Number.isFinite(value)
+        ) {
+
+          return value;
+
+        }
+
+      }
+
+      return 0;
+
+    }
+
+
+    function pickValue(
+      object,
+      keys,
+      fallback = "—"
+    ) {
+
+      if (!object) {
+        return fallback;
+      }
+
+      for (const key of keys) {
+
+        if (
+          object[key] !== undefined &&
+          object[key] !== null
+        ) {
+
+          return object[key];
+
+        }
+
+      }
+
+      return fallback;
+
+    }
+
+
+    function formatNumber(
+      value
+    ) {
+
+      if (
+        value === null ||
+        value === undefined ||
+        value === ""
+      ) {
+
+        return "—";
+
+      }
+
+      const number =
+        Number(value);
+
+      if (
+        Number.isFinite(number)
+      ) {
+
+        return number.toLocaleString(
+          "en-US"
+        );
+
+      }
+
+      return String(value);
+
+    }
+
+
+    function extractStats(
+      data
+    ) {
+
+      const source =
+        data?.stats ||
+        data?.data ||
+        data ||
+        {};
+
+      return {
+
+        requests:pickNumber(
+          source,
+          [
+            "requests",
+            "totalRequests",
+            "total_requests",
+            "requestCount"
+          ]
+        ),
+
+        allowed:pickNumber(
+          source,
+          [
+            "allowed",
+            "allowedRequests",
+            "totalAllowed"
+          ]
+        ),
+
+        blocked:pickNumber(
+          source,
+          [
+            "blocked",
+            "blockedRequests",
+            "totalBlocked"
+          ]
+        ),
+
+        honeypot:pickNumber(
+          source,
+          [
+            "honeypot",
+            "honeypotRequests",
+            "honeypotHits"
+          ]
+        ),
+
+        attacks:pickNumber(
+          source,
+          [
+            "attacks",
+            "attackCount",
+            "totalAttacks"
+          ]
+        ),
+
+        visitors:pickNumber(
+          source,
+          [
+            "visitors",
+            "totalVisitors",
+            "visitorCount"
+          ]
+        ),
+
+        concurrent:pickNumber(
+          source,
+          [
+            "concurrent",
+            "activeClients",
+            "globalConcurrent"
+          ]
+        )
+
+      };
+
+    }
+
+
+    /* =========================================================
+       DASHBOARD
+    ========================================================== */
+
+    async function loadClientDashboard() {
+
+      if (!siteApiKey) {
+
+        document
+          .getElementById(
+            "dashWafStatus"
+          )
+          .textContent =
+          "READY";
+
+        return;
+
+      }
+
+      try {
+
+        const {
+          response,
+          data
+        } = await siteRequest(
+          "/__waf/api/stats"
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            "STATS_FAILED"
+          );
+        }
+
+        const stats =
+          extractStats(data);
+
+        document
+          .getElementById(
+            "dashWafStatus"
+          )
+          .textContent =
+          "ACTIVE";
+
+        document
+          .getElementById(
+            "dashRequests"
+          )
+          .textContent =
+          formatNumber(
+            stats.requests
+          );
+
+        document
+          .getElementById(
+            "dashBlocked"
+          )
+          .textContent =
+          formatNumber(
+            stats.blocked
+          );
+
+        document
+          .getElementById(
+            "dashAllowed"
+          )
+          .textContent =
+          formatNumber(
+            stats.allowed
+          );
+
+        document
+          .getElementById(
+            "dashProtectionState"
+          )
+          .textContent =
+          "WAF API CONNECTED";
+
+        setBar(
+          "dashRequestsBar",
+          stats.requests,
+          Math.max(
+            stats.requests,
+            1
+          )
+        );
+
+        setBar(
+          "dashAllowedBar",
+          stats.allowed,
+          Math.max(
+            stats.requests,
+            1
+          )
+        );
+
+        setBar(
+          "dashBlockedBar",
+          stats.blocked,
+          Math.max(
+            stats.requests,
+            1
+          )
+        );
+
+        document
+          .getElementById(
+            "dashRequestsBarValue"
+          )
+          .textContent =
+          formatNumber(
+            stats.requests
+          );
+
+        document
+          .getElementById(
+            "dashAllowedBarValue"
+          )
+          .textContent =
+          formatNumber(
+            stats.allowed
+          );
+
+        document
+          .getElementById(
+            "dashBlockedBarValue"
+          )
+          .textContent =
+          formatNumber(
+            stats.blocked
+          );
+
+      } catch(error) {
+
+        console.warn(
+          "Dashboard stats unavailable:",
+          error
+        );
+
+        document
+          .getElementById(
+            "dashWafStatus"
+          )
+          .textContent =
+          "NO DATA";
+
+        document
+          .getElementById(
+            "dashProtectionState"
+          )
+          .textContent =
+          "CHECK SITE API KEY";
+
+      }
+
+    }
+
+
+    function setBar(
+      elementId,
+      value,
+      max
+    ) {
+
+      const element =
+        document.getElementById(
+          elementId
+        );
+
+      if (!element) {
+        return;
+      }
+
+      const percentage =
+        Math.max(
+          0,
+          Math.min(
+            100,
+            (Number(value) /
+              Math.max(
+                Number(max),
+                1
+              )) *
+              100
+          )
+        );
+
+      element.style.width =
+        percentage + "%";
+
+    }
+
+
+    /* =========================================================
+       TRAFFIC
+    ========================================================== */
+
+    async function loadTraffic() {
+
+      if (!siteApiKey) {
+        return;
+      }
+
+      try {
+
+        const {
+          data
+        } = await siteRequest(
+          "/__waf/api/stats"
+        );
+
+        const stats =
+          extractStats(data);
+
+        document
+          .getElementById(
+            "trafficRequests"
+          )
+          .textContent =
+          formatNumber(
+            stats.requests
+          );
+
+        document
+          .getElementById(
+            "trafficRPM"
+          )
+          .textContent =
+          "—";
+
+        document
+          .getElementById(
+            "trafficMethods"
+          )
+          .textContent =
+          "HTTP";
+
+        document
+          .getElementById(
+            "trafficStatusCodes"
+          )
+          .textContent =
+          stats.allowed > 0
+            ? "2xx"
+            : "—";
+
+        const total =
+          Math.max(
+            stats.requests,
+            1
+          );
+
+        const allowedPct =
+          Math.round(
+            (stats.allowed / total) *
+            100
+          );
+
+        const blockedPct =
+          Math.round(
+            (stats.blocked / total) *
+            100
+          );
+
+        setBar(
+          "trafficAllowedBar",
+          allowedPct,
+          100
+        );
+
+        setBar(
+          "trafficBlockedBar",
+          blockedPct,
+          100
+        );
+
+        document
+          .getElementById(
+            "trafficAllowedPercent"
+          )
+          .textContent =
+          allowedPct + "%";
+
+        document
+          .getElementById(
+            "trafficBlockedPercent"
+          )
+          .textContent =
+          blockedPct + "%";
+
+        try {
+
+          const visitors =
+            await siteRequest(
+              "/__waf/api/visitors"
+            );
+
+          const visitorData =
+            visitors.data?.visitors ??
+            visitors.data?.count ??
+            visitors.data?.data ??
+            0;
+
+          document
+            .getElementById(
+              "trafficVisitors"
+            )
+            .textContent =
+            formatNumber(
+              visitorData
+            );
+
+        } catch {
+
+          document
+            .getElementById(
+              "trafficVisitors"
+            )
+            .textContent =
+            "—";
+
+        }
+
+      } catch(error) {
+
+        console.warn(
+          "Traffic error:",
+          error
+        );
+
+      }
+
+    }
+
+
+    /* =========================================================
+       SECURITY EVENTS
+    ========================================================== */
+
+    async function loadSecurity() {
+
+      if (!siteApiKey) {
+        return;
+      }
+
+      try {
+
+        const {
+          response,
+          data
+        } = await siteRequest(
+          "/__waf/api/alerts"
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            "ALERTS_FAILED"
+          );
+        }
+
+        const alerts =
+          Array.isArray(data)
+            ? data
+            : (
+              data.alerts ||
+              data.data ||
+              []
+            );
+
+        document
+          .getElementById(
+            "securityAlerts"
+          )
+          .textContent =
+          formatNumber(
+            alerts.length
+          );
+
+        document
+          .getElementById(
+            "securityChallenges"
+          )
+          .textContent =
+          formatNumber(
+            countByText(
+              alerts,
+              [
+                "challenge",
+                "challenged"
+              ]
+            )
+          );
+
+        document
+          .getElementById(
+            "securityAttacks"
+          )
+          .textContent =
+          formatNumber(
+            alerts.length
+          );
+
+        const body =
+          document.getElementById(
+            "securityEventsBody"
+          );
+
+        if (!alerts.length) {
+
+          body.innerHTML = `
+            <tr>
+              <td colspan="5">
+                لا توجد تنبيهات حاليًا.
+              </td>
+            </tr>
+          `;
+
+          return;
+
+        }
+
+        body.innerHTML =
+          alerts
+            .slice(0,30)
+            .map(alert => {
+
+              const time =
+                pickValue(
+                  alert,
+                  [
+                    "time",
+                    "timestamp",
+                    "createdAt",
+                    "date"
+                  ],
+                  "—"
+                );
+
+              const type =
+                pickValue(
+                  alert,
+                  [
+                    "type",
+                    "event",
+                    "rule",
+                    "reason"
+                  ],
+                  "ALERT"
+                );
+
+              const ip =
+                pickValue(
+                  alert,
+                  [
+                    "ip",
+                    "clientIp",
+                    "source"
+                  ],
+                  "—"
+                );
+
+              const action =
+                pickValue(
+                  alert,
+                  [
+                    "action",
+                    "decision"
+                  ],
+                  "BLOCK"
+                );
+
+              const risk =
+                pickValue(
+                  alert,
+                  [
+                    "risk",
+                    "riskScore",
+                    "score"
+                  ],
+                  "—"
+                );
+
+              return `
+                <tr>
+                  <td class="ltr">
+                    ${escapeHTML(time)}
+                  </td>
+                  <td>
+                    ${escapeHTML(type)}
+                  </td>
+                  <td class="ltr">
+                    ${escapeHTML(ip)}
+                  </td>
+                  <td class="value-red">
+                    ${escapeHTML(action)}
+                  </td>
+                  <td class="value-yellow">
+                    ${escapeHTML(risk)}
+                  </td>
+                </tr>
+              `;
+
+            })
+            .join("");
+
+      } catch(error) {
+
+        console.warn(
+          "Security error:",
+          error
+        );
+
+        document
+          .getElementById(
+            "securityLive"
+          )
+          .textContent =
+          "NO DATA";
+
+      }
+
+    }
+
+
+    function countByText(
+      array,
+      words
+    ) {
+
+      return array.filter(
+        item => {
+
+          const text =
+            JSON.stringify(
+              item
+            ).toLowerCase();
+
+          return words.some(
+            word =>
+              text.includes(
+                word
+              )
+          );
+
+        }
+      ).length;
+
+    }
+
+
+    /* =========================================================
+       THREATS
+    ========================================================== */
+
+    async function loadThreats() {
+
+      if (!siteApiKey) {
+        return;
+      }
+
+      try {
+
+        const {
+          data
+        } = await siteRequest(
+          "/__waf/api/status"
+        );
+
+        const source =
+          data?.status ||
+          data?.data ||
+          data ||
+          {};
+
+        const risk =
+          pickValue(
+            source,
+            [
+              "risk",
+              "riskScore",
+              "score",
+              "threatScore"
+            ],
+            "—"
+          );
+
+        const blacklist =
+          pickValue(
+            source,
+            [
+              "blacklist",
+              "blacklisted"
+            ],
+            false
+          );
+
+        document
+          .getElementById(
+            "threatScore"
+          )
+          .textContent =
+          String(risk);
+
+        document
+          .getElementById(
+            "threatSources"
+          )
+          .textContent =
+          blacklist
+            ? "1"
+            : "0";
+
+        document
+          .getElementById(
+            "threatTypes"
+          )
+          .textContent =
+          "WAF";
+
+        document
+          .getElementById(
+            "threatRiskState"
+          )
+          .textContent =
+          blacklist
+            ? "HIGH"
+            : "NORMAL";
+
+        document
+          .getElementById(
+            "threatRiskState"
+          )
+          .className =
+          blacklist
+            ? "metric-value red"
+            : "metric-value green";
+
+      } catch(error) {
+
+        console.warn(
+          "Threat API unavailable:",
+          error
+        );
+
+      }
+
+    }
+
+
+    /* =========================================================
+       IP STATUS
+    ========================================================== */
+
+    async function checkIPStatus() {
+
+      const input =
+        document.getElementById(
+          "threatIpInput"
+        );
+
+      const ip =
+        input.value.trim();
+
+      const result =
+        document.getElementById(
+          "ipStatusResult"
+        );
+
+      if (!ip) {
+
+        result.innerHTML = `
+          <div class="notice">
+            أدخل عنوان IP أولاً.
+          </div>
+        `;
+
+        return;
+
+      }
+
+      if (!siteApiKey) {
+
+        result.innerHTML = `
+          <div class="notice">
+            اربط Site API Key أولاً.
+          </div>
+        `;
+
+        return;
+
+      }
+
+      try {
+
+        const {
+          response,
+          data
+        } = await siteRequest(
+          "/__waf/api/status?ip=" +
+          encodeURIComponent(ip)
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            "STATUS_FAILED"
+          );
+        }
+
+        result.innerHTML = `
+          <div class="client-card">
+
+            <div class="account-row">
+              <span>IP</span>
+              <strong>${escapeHTML(ip)}</strong>
+            </div>
+
+            <div class="account-row">
+              <span>Blacklist</span>
+              <strong class="${
+                data.blacklist ||
+                data.blacklisted
+                  ? "value-red"
+                  : "value-green"
+              }">
+                ${
+                  data.blacklist ||
+                  data.blacklisted
+                    ? "BLACKLISTED"
+                    : "NOT BLACKLISTED"
+                }
+              </strong>
+            </div>
+
+            <div class="account-row">
+              <span>Risk</span>
+              <strong>
+                ${escapeHTML(
+                  String(
+                    pickValue(
+                      data,
+                      [
+                        "risk",
+                        "riskScore",
+                        "score"
+                      ],
+                      "—"
+                    )
+                  )
+                )}
+              </strong>
+            </div>
+
+            <div class="account-row">
+              <span>Concurrent</span>
+              <strong>
+                ${escapeHTML(
+                  String(
+                    pickValue(
+                      data,
+                      [
+                        "concurrent",
+                        "concurrentRequests"
+                      ],
+                      "—"
+                    )
+                  )
+                )}
+              </strong>
+            </div>
+
+          </div>
+        `;
+
+      } catch(error) {
+
+        result.innerHTML = `
+          <div class="notice">
+            تعذر جلب حالة IP من السيرفر.
+          </div>
+        `;
+
+      }
+
+    }
+
+
+    async function checkBlacklistIP() {
+
+      const input =
+        document.getElementById(
+          "blacklistIpInput"
+        );
+
+      const result =
+        document.getElementById(
+          "blacklistResult"
+        );
+
+      const ip =
+        input.value.trim();
+
+      if (!ip) {
+
+        result.innerHTML = `
+          <div class="notice">
+            أدخل IP أولاً.
+          </div>
+        `;
+
+        return;
+
+      }
+
+      if (!siteApiKey) {
+
+        result.innerHTML = `
+          <div class="notice">
+            اربط Site API Key أولاً.
+          </div>
+        `;
+
+        return;
+
+      }
+
+      try {
+
+        const {
+          response,
+          data
+        } = await siteRequest(
+          "/__waf/status/" +
+          encodeURIComponent(ip)
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            "IP_STATUS_FAILED"
+          );
+        }
+
+        const blacklisted =
+          data.blacklist ||
+          data.blacklisted;
+
+        result.innerHTML = `
+
+          <div class="client-card">
+
+            <div class="account-row">
+              <span>IP</span>
+              <strong>
+                ${escapeHTML(ip)}
+              </strong>
+            </div>
+
+            <div class="account-row">
+              <span>Status</span>
+              <strong class="${
+                blacklisted
+                  ? "value-red"
+                  : "value-green"
+              }">
+                ${
+                  blacklisted
+                    ? "BLACKLISTED"
+                    : "CLEAR"
+                }
+              </strong>
+            </div>
+
+            <div class="account-row">
+              <span>Risk</span>
+              <strong>
+                ${escapeHTML(
+                  String(
+                    pickValue(
+                      data,
+                      [
+                        "risk",
+                        "riskScore",
+                        "score"
+                      ],
+                      "—"
+                    )
+                  )
+                )}
+              </strong>
+            </div>
+
+          </div>
+        `;
+
+      } catch(error) {
+
+        result.innerHTML = `
+          <div class="notice">
+            تعذر الوصول إلى حالة IP.
+          </div>
+        `;
+
+      }
+
+    }
+
+
+    /* =========================================================
+       ANALYTICS
+    ========================================================== */
+
+    async function loadAnalytics() {
+
+      if (!siteApiKey) {
+        return;
+      }
+
+      try {
+
+        const {
+          data
+        } = await siteRequest(
+          "/__waf/api/stats"
+        );
+
+        const stats =
+          extractStats(data);
+
+        document
+          .getElementById(
+            "analyticsRequests"
+          )
+          .textContent =
+          formatNumber(
+            stats.requests
+          );
+
+        document
+          .getElementById(
+            "analyticsAllowed"
+          )
+          .textContent =
+          formatNumber(
+            stats.allowed
+          );
+
+        document
+          .getElementById(
+            "analyticsBlocked"
+          )
+          .textContent =
+          formatNumber(
+            stats.blocked
+          );
+
+        document
+          .getElementById(
+            "analyticsHoneypot"
+          )
+          .textContent =
+          formatNumber(
+            stats.honeypot
+          );
+
+        const total =
+          Math.max(
+            stats.requests,
+            1
+          );
+
+        const allowedPct =
+          Math.round(
+            stats.allowed /
+            total *
+            100
+          );
+
+        const blockedPct =
+          Math.round(
+            stats.blocked /
+            total *
+            100
+          );
+
+        const honeypotPct =
+          Math.round(
+            stats.honeypot /
+            total *
+            100
+          );
+
+        setBar(
+          "analyticsAllowedBar",
+          allowedPct,
+          100
+        );
+
+        setBar(
+          "analyticsBlockedBar",
+          blockedPct,
+          100
+        );
+
+        setBar(
+          "analyticsHoneypotBar",
+          honeypotPct,
+          100
+        );
+
+        document
+          .getElementById(
+            "analyticsAllowedPct"
+          )
+          .textContent =
+          allowedPct + "%";
+
+        document
+          .getElementById(
+            "analyticsBlockedPct"
+          )
+          .textContent =
+          blockedPct + "%";
+
+        document
+          .getElementById(
+            "analyticsHoneypotPct"
+          )
+          .textContent =
+          honeypotPct + "%";
+
+      } catch(error) {
+
+        console.warn(
+          "Analytics error:",
+          error
+        );
+
+      }
+
+    }
+
+
+    /* =========================================================
+       ACCOUNT
+    ========================================================== */
+
+    async function loadAccount() {
+
+      try {
+
+        const {
+          response,
+          data
+        } = await authRequest(
+          "/api/profile"
+        );
+
+        if (
+          response.ok &&
+          data.success
+        ) {
+
+          currentUser =
+            data.user ||
+            currentUser;
+
+          currentEmail =
+            currentUser?.email ||
+            currentEmail;
+
+          updateAuthUI();
+
+          document
+            .getElementById(
+              "accountStatus"
+            )
+            .textContent =
+            "AUTHENTICATED";
+
+        }
+
+      } catch(error) {
+
+        console.warn(
+          "Account error:",
+          error
+        );
+
+      }
+
+    }
+
+
+    /* =========================================================
+       HTML ESCAPE
+    ========================================================== */
+
+    function escapeHTML(
+      value
+    ) {
+
+      return String(value)
+        .replace(
+          /&/g,
+          "&amp;"
+        )
+        .replace(
+          /</g,
+          "&lt;"
+        )
+        .replace(
+          />/g,
+          "&gt;"
+        )
+        .replace(
+          /"/g,
+          "&quot;"
+        )
+        .replace(
+          /'/g,
+          "&#039;"
+        );
+
+    }
+
+
+    /* =========================================================
+       MOBILE PUBLIC MENU
+    ========================================================== */
+
+    function toggleMenu() {
+
+      document
+        .getElementById(
+          "nav"
+        )
+        .classList.toggle(
+          "mobile-open"
+        );
+
+    }
+
+
     document
-      .querySelectorAll("#nav a")
+      .querySelectorAll(
+        "#nav a"
+      )
       .forEach(link => {
 
         link.addEventListener(
@@ -3329,7 +6968,9 @@ TARGET_URL الداخلي
           () => {
 
             document
-              .getElementById("nav")
+              .getElementById(
+                "nav"
+              )
               .classList.remove(
                 "mobile-open"
               );
@@ -3341,11 +6982,13 @@ TARGET_URL الداخلي
 
 
     /* =========================================================
-       CLOSE AUTH OUTSIDE
+       AUTH OUTSIDE
     ========================================================== */
 
     document
-      .getElementById("authOverlay")
+      .getElementById(
+        "authOverlay"
+      )
       .addEventListener(
         "click",
         event => {
@@ -3371,10 +7014,23 @@ TARGET_URL الداخلي
       "keydown",
       event => {
 
-        if (event.key === "Escape") {
+        if (
+          event.key ===
+          "Escape"
+        ) {
 
           document
-            .getElementById("nav")
+            .getElementById(
+              "nav"
+            )
+            .classList.remove(
+              "mobile-open"
+            );
+
+          document
+            .getElementById(
+              "clientSidebar"
+            )
             .classList.remove(
               "mobile-open"
             );
@@ -3392,31 +7048,44 @@ TARGET_URL الداخلي
     ========================================================== */
 
     document
-      .getElementById("loginOtp")
+      .getElementById(
+        "loginOtp"
+      )
       .addEventListener(
         "input",
         event => {
 
           event.target.value =
             event.target.value
-              .replace(/\D/g,"")
-              .slice(0,6);
+              .replace(
+                /\D/g,
+                ""
+              )
+              .slice(
+                0,
+                6
+              );
 
         }
       );
 
 
     /* =========================================================
-       EMAIL ENTER
+       ENTER KEYS
     ========================================================== */
 
     document
-      .getElementById("loginEmail")
+      .getElementById(
+        "loginEmail"
+      )
       .addEventListener(
         "keydown",
         event => {
 
-          if (event.key === "Enter") {
+          if (
+            event.key ===
+            "Enter"
+          ) {
 
             event.preventDefault();
 
@@ -3428,17 +7097,18 @@ TARGET_URL الداخلي
       );
 
 
-    /* =========================================================
-       PASSWORD ENTER
-    ========================================================== */
-
     document
-      .getElementById("loginPassword")
+      .getElementById(
+        "loginPassword"
+      )
       .addEventListener(
         "keydown",
         event => {
 
-          if (event.key === "Enter") {
+          if (
+            event.key ===
+            "Enter"
+          ) {
 
             event.preventDefault();
 
@@ -3450,17 +7120,18 @@ TARGET_URL الداخلي
       );
 
 
-    /* =========================================================
-       OTP ENTER
-    ========================================================== */
-
     document
-      .getElementById("loginOtp")
+      .getElementById(
+        "loginOtp"
+      )
       .addEventListener(
         "keydown",
         event => {
 
-          if (event.key === "Enter") {
+          if (
+            event.key ===
+            "Enter"
+          ) {
 
             event.preventDefault();
 
@@ -3473,14 +7144,13 @@ TARGET_URL الداخلي
 
 
     /* =========================================================
-       CYBER PARTICLES
+       PARTICLES
     ========================================================== */
 
     const particles =
       document.getElementById(
         "particles"
       );
-
 
     for (
       let i = 0;
@@ -3497,30 +7167,38 @@ TARGET_URL الداخلي
         "particle";
 
       p.style.left =
-        Math.random() * 100 + "%";
+        Math.random() *
+        100 +
+        "%";
 
       p.style.top =
-        (40 + Math.random() * 60) + "%";
+        40 +
+        Math.random() *
+        60 +
+        "%";
 
       p.style.animationDelay =
-        (Math.random() * 8) + "s";
+        Math.random() *
+        8 +
+        "s";
 
       p.style.animationDuration =
-        (5 + Math.random() * 7) + "s";
+        5 +
+        Math.random() *
+        7 +
+        "s";
 
-      particles.appendChild(p);
+      particles.appendChild(
+        p
+      );
 
     }
 
 
     /* =========================================================
-       INITIAL SESSION CHECK
+       INITIAL SESSION
     ========================================================== */
 
     checkSession();
 
-  </script>
-
-</body>
-
-</html>
+  </script></body></html>
