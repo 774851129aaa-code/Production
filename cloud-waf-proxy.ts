@@ -3565,6 +3565,39 @@ app.post(
 );
 
 /* ============================================================
+   AUTH TYPES
+============================================================ */
+
+interface IUser extends Document {
+  email: string;
+  passwordHash: string;
+  emailVerified: boolean;
+  createdAt: Date;
+  lastLoginAt: Date | null;
+}
+
+interface IOTP extends Document {
+  email: string;
+  otp: string;
+  passwordHash: string;
+  purpose: 'register' | 'reset_password';
+  createdAt: Date;
+}
+
+interface AuthJwtPayload extends JwtPayload {
+  userId: string;
+  email: string;
+}
+
+interface AuthenticatedRequest extends Request {
+  user?: IUser;
+}
+
+interface BrevoResponse {
+  [key: string]: unknown;
+}
+
+/* ============================================================
    OTP VERIFICATION
 ============================================================ */
 
