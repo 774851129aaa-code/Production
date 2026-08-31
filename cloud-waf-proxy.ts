@@ -3451,6 +3451,21 @@ req.body?.email,
         '',
     );
 
+  const forgotPassword =
+    req.body?.forgotPassword ===
+    true;
+
+  const otp =
+    getOtpFromRequest(
+      req,
+    );
+
+  const newPassword =
+    String(
+      req.body?.newPassword ||
+        '',
+    );
+
   if (
     !isValidEmail(email)
   ) {
@@ -3463,6 +3478,393 @@ req.body?.email,
       });
   }
 
+
+  /*
+   * ========================================================
+   * FORGOT PASSWORD
+   * ========================================================
+   */
+
+  if (forgotPassword) {
+    const user =
+      await UserModel.findOne({
+        email,
+      });
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({
+          success: false,
+          registered: false,
+          message:
+            'الحساب غير موجود',
+        });
+    }
+
+
+    /*
+     * --------------------------------------------------------
+     * المرحلة الأولى:
+     * إرسال رمز التحقق للبريد.
+     * --------------------------------------------------------
+     */
+
+    if (!otp) {
+      if (
+        !config.BREVO_API_KEY
+      ) {
+        console.error(
+          'BREVO_API_KEY is missing.',
+        );
+
+        return res
+          .status(500)
+          .json({
+            success: false,
+            message:
+              'خدمة البريد غير مهيأة على السيرفر',
+          });
+      }
+
+      const otpCode =
+        crypto
+          .randomInt(
+            100000,
+            1000000,
+          )
+          .toString();
+
+      const response =
+        await fetch(
+          'https://api.brevo.com/v3/smtp/email',
+          {
+            method: 'POST',
+
+            headers: {
+              accept:
+                'application/json',
+
+              'api-key':
+                config.BREVO_API_KEY,
+
+              'content-type':
+                'application/json',
+            },
+
+            body: JSON.stringify({
+              sender: {
+                name:
+                  'Routix Security',
+
+                email:
+                  config.SENDER_EMAIL,
+              },
+
+              to: [
+                {
+                  email,
+                },
+              ],
+
+              subject:
+                'رمز استعادة كلمة مرور Routix',
+
+              htmlContent: `
+
+<!doctype html>
+
+<html lang="ar" dir="rtl">
+<body style="font-family:Arial,sans-serif;background:#f4f7fb;padding:30px">
+<div style="max-width:520px;margin:auto;background:white;border-radius:16px;padding:30px;text-align:center"><h2>🔐 استعادة كلمة مرور Routix</h2><p>تم طلب استعادة كلمة المرور لحسابك.</p><p>رمز التحقق الخاص بك هو:</p><div style="font-size:36px;font-weight:bold;letter-spacing:8px;margin:25px 0">
+${otpCode}
+</div><p>هذا الرمز صالح لمدة 5 دقائق فقط.</p><p>
+إذا لم تطلب استعادة كلمة المرور، فتجاهل هذه الرسالة.
+</p></div>
+</body>
+</html>
+                  `,
+                }),
+              },
+            );      let data:
+        BrevoResponse = {};
+
+      try {
+        data =
+          (await response.json()) as
+            BrevoResponse;
+      } catch {
+        data = {};
+      }
+
+      if (!response.ok) {
+        console.error(
+          'Brevo error:',
+          data,
+        );
+
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message:
+              'فشل في إرسال رمز التحقق',
+          });
+      }
+
+
+      /*
+       * حذف OTP القديم لإعادة التعيين.
+       */
+      await OTPModel.deleteMany({
+        email,
+      });
+
+
+      /*
+       * مهم:
+       *
+       * الـSchema القديم عندك يجعل
+       * passwordHash مطلوبًا.
+       *
+       * لذلك نضع قيمة مؤقتة فقط
+       * حتى يتم قبول السجل.
+       *
+       * هذه القيمة لن تُستخدم أبدًا
+       * لإعادة تعيين كلمة المرور.
+       */
+      const temporaryHash =
+        await argon2.hash(
+          crypto.randomBytes(32)
+            .toString('hex'),
+          {
+            type:
+              argon2.argon2id,
+          },
+        );
+
+
+      await OTPModel.create({
+        email,
+
+        otp:
+          otpCode,
+
+        passwordHash:
+          temporaryHash,
+
+        createdAt:
+          new Date(),
+      });
+
+
+      return res.json({
+        success: true,
+
+        registered:
+          true,
+
+        requiresOtp:
+          true,
+
+        forgotPassword:
+          true,
+
+        message:
+          'تم إرسال رمز التحقق إلى بريدك',
+      });
+    }
+
+
+    /*
+     * --------------------------------------------------------
+     * المرحلة الثانية:
+     * التحقق من OTP.
+     * --------------------------------------------------------
+     */
+
+    if (
+      !/^\d{6}$/.test(otp)
+    ) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message:
+            'رمز التحقق غير صحيح',
+        });
+    }
+
+
+    const record =
+      await OTPModel.findOne({
+        email,
+      }).sort({
+        createdAt: -1,
+      });
+
+
+    if (!record) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message:
+            'انتهت صلاحية رمز التحقق أو لم يتم طلب رمز',
+        });
+    }
+
+
+    const otpAge =
+      Date.now() -
+      record.createdAt.getTime();
+
+
+    if (
+      otpAge >
+      5 * 60 * 1000
+    ) {
+      await OTPModel.deleteOne({
+        _id:
+          record._id,
+      });
+
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message:
+            'انتهت صلاحية رمز التحقق، اطلب رمزاً جديداً',
+        });
+    }
+
+
+    if (
+      !secureCompare(
+        record.otp,
+        otp,
+      )
+    ) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message:
+            'رمز التحقق غير صحيح',
+        });
+    }
+
+
+    /*
+     * --------------------------------------------------------
+     * OTP صحيح.
+     *
+     * نتجاهل record.passwordHash
+     * بالكامل.
+     *
+     * نأخذ newPassword وننشئ Hash جديد.
+     * --------------------------------------------------------
+     */
+
+    if (
+      !isValidPassword(
+        newPassword,
+      )
+    ) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+
+          otpVerified:
+            true,
+
+          message:
+            'كلمة المرور الجديدة يجب أن تكون بين 8 و128 حرفاً',
+        });
+    }
+
+
+    /*
+     * إنشاء Hash جديد من كلمة المرور
+     * التي أدخلها المستخدم.
+     */
+    const newPasswordHash =
+      await argon2.hash(
+        newPassword,
+        {
+          type:
+            argon2.argon2id,
+        },
+      );
+
+
+    /*
+     * حفظ كلمة المرور الجديدة
+     * في حساب المستخدم.
+     */
+    user.passwordHash =
+      newPasswordHash;
+
+    user.lastLoginAt =
+      new Date();
+
+    await user.save();
+
+
+    /*
+     * حذف OTP بعد نجاح العملية.
+     */
+    await OTPModel.deleteOne({
+      _id:
+        record._id,
+    });
+
+
+    /*
+     * تسجيل الدخول مباشرة.
+     */
+    createSession(
+      res,
+      user,
+    );
+
+
+    return res.json({
+      success: true,
+
+      registered:
+        true,
+
+      passwordReset:
+        true,
+
+      loggedIn:
+        true,
+
+      message:
+        'تم تغيير كلمة المرور وتسجيل الدخول بنجاح',
+
+      user: {
+        id:
+          user._id.toString(),
+
+        email:
+          user.email,
+
+        emailVerified:
+          user.emailVerified,
+      },
+    });
+  }
+
+
+  /*
+   * ========================================================
+   * NORMAL LOGIN
+   * ========================================================
+   */
+
   if (!password) {
     return res
       .status(400)
@@ -3473,19 +3875,15 @@ req.body?.email,
       });
   }
 
-  /*
-   * البحث عن الحساب.
-   */
+
   const user =
     await UserModel.findOne({
       email,
     });
 
+
   /*
    * الحساب غير موجود.
-   *
-   * الواجهة تستطيع هنا الرجوع
-   * لمسار التسجيل.
    */
   if (!user) {
     return res
@@ -3501,8 +3899,10 @@ req.body?.email,
       });
   }
 
+
   let passwordCorrect =
     false;
+
 
   try {
     passwordCorrect =
@@ -3515,12 +3915,13 @@ req.body?.email,
       false;
   }
 
+
   /*
    * كلمة المرور خاطئة.
    *
-   * لا نرسل OTP تلقائياً هنا.
-   * الواجهة تعرض للمستخدم
-   * خيار "نسيت كلمة المرور؟"
+   * لا نغير كلمة المرور.
+   * فقط نخبر الواجهة أن بإمكان
+   * المستخدم اختيار "نسيت كلمة المرور؟"
    */
   if (
     !passwordCorrect
@@ -3544,6 +3945,7 @@ req.body?.email,
       });
   }
 
+
   /*
    * كلمة المرور صحيحة.
    */
@@ -3552,13 +3954,12 @@ req.body?.email,
 
   await user.save();
 
-  /*
-   * إنشاء جلسة وتسجيل الدخول.
-   */
+
   createSession(
     res,
     user,
   );
+
 
   return res.json({
     success: true,
@@ -3603,7 +4004,7 @@ req.body?.email,
 
 },
 );
-
+  
 /* ============================================================
    SESSION VERIFICATION
 ============================================================ */
