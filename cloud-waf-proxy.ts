@@ -4340,6 +4340,99 @@ app.post(
 );
 
 /* ============================================================
+   SESSION VERIFICATION
+============================================================ */
+
+async function verifySession(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const token =
+      getCookie(
+        req,
+        SESSION_COOKIE,
+      );
+
+    if (!token) {
+      res.status(401).json({
+        success: false,
+        loggedIn: false,
+        message:
+          'مطلوب تسجيل الدخول',
+      });
+
+      return;
+    }
+
+    let decoded: AuthJwtPayload;
+
+    try {
+      decoded =
+        jwt.verify(
+          token,
+          config.JWT_SECRET,
+        ) as AuthJwtPayload;
+    } catch {
+      res.status(401).json({
+        success: false,
+        loggedIn: false,
+        message:
+          'انتهت صلاحية الجلسة أو رمز غير صالح',
+      });
+
+      return;
+    }
+
+    if (
+      !decoded ||
+      typeof decoded.userId !==
+        'string'
+    ) {
+      res.status(401).json({
+        success: false,
+        loggedIn: false,
+        message:
+          'بيانات الجلسة غير صالحة',
+      });
+
+      return;
+    }
+
+    const user =
+      await UserModel.findById(
+        decoded.userId,
+      );
+
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        loggedIn: false,
+        message:
+          'المستخدم غير موجود',
+      });
+
+      return;
+    }
+
+    req.user = user;
+
+    next();
+  } catch (error) {
+    console.error(
+      'Verify Session Error:',
+      error,
+    );
+
+    res.status(500).json({
+      success: false,
+      message:
+        'خطأ داخلي في الخادم',
+    });
+  }
+
+/* ============================================================
    PROFILE
 ============================================================ */
 
