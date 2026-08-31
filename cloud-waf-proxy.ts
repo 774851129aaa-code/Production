@@ -3434,132 +3434,174 @@ app.post(
 ============================================================ */
 
 app.post(
-  '/api/login',
-  async (
-    req: Request,
-    res: Response,
-  ) => {
-    try {
-      const email =
-        normalizeEmail(
-          req.body?.email,
-        );
+'/api/login',
+async (
+req: Request,
+res: Response,
+) => {
+try {
+const email =
+normalizeEmail(
+req.body?.email,
+);
 
-      const password =
-        String(
-          req.body?.password ||
-            '',
-        );
+  const password =
+    String(
+      req.body?.password ||
+        '',
+    );
 
-      if (
-        !isValidEmail(email)
-      ) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message:
-              'البريد الإلكتروني غير صالح',
-          });
-      }
+  if (
+    !isValidEmail(email)
+  ) {
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message:
+          'البريد الإلكتروني غير صالح',
+      });
+  }
 
-      if (!password) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message:
-              'كلمة المرور مطلوبة',
-          });
-      }
+  if (!password) {
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message:
+          'كلمة المرور مطلوبة',
+      });
+  }
 
-      const user =
-        await UserModel.findOne({
-          email,
-        });
+  /*
+   * البحث عن الحساب.
+   */
+  const user =
+    await UserModel.findOne({
+      email,
+    });
 
-      if (!user) {
-        return res
-          .status(401)
-          .json({
-            success: false,
-            registered: false,
-            message:
-              'البريد الإلكتروني أو كلمة المرور غير صحيحة',
-          });
-      }
+  /*
+   * الحساب غير موجود.
+   *
+   * الواجهة تستطيع هنا الرجوع
+   * لمسار التسجيل.
+   */
+  if (!user) {
+    return res
+      .status(401)
+      .json({
+        success: false,
 
-      let passwordCorrect =
-        false;
-
-      try {
-        passwordCorrect =
-          await argon2.verify(
-            user.passwordHash,
-            password,
-          );
-      } catch {
-        passwordCorrect =
-          false;
-      }
-
-      if (
-        !passwordCorrect
-      ) {
-        return res
-          .status(401)
-          .json({
-            success: false,
-            registered: true,
-            message:
-              'البريد الإلكتروني أو كلمة المرور غير صحيحة',
-          });
-      }
-
-      user.lastLoginAt =
-        new Date();
-
-      await user.save();
-
-      createSession(
-        res,
-        user,
-      );
-
-      return res.json({
-        success: true,
-        registered: true,
-        loggedIn: true,
+        registered:
+          false,
 
         message:
-          'تم تسجيل الدخول بنجاح',
-
-        user: {
-          id:
-            user._id.toString(),
-
-          email:
-            user.email,
-
-          emailVerified:
-            user.emailVerified,
-        },
+          'الحساب غير موجود',
       });
-    } catch (error) {
-      console.error(
-        'Login Error:',
-        error,
-      );
+  }
 
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message:
-            'خطأ داخلي في الخادم',
-        });
-    }
-  },
+  let passwordCorrect =
+    false;
+
+  try {
+    passwordCorrect =
+      await argon2.verify(
+        user.passwordHash,
+        password,
+      );
+  } catch {
+    passwordCorrect =
+      false;
+  }
+
+  /*
+   * كلمة المرور خاطئة.
+   *
+   * لا نرسل OTP تلقائياً هنا.
+   * الواجهة تعرض للمستخدم
+   * خيار "نسيت كلمة المرور؟"
+   */
+  if (
+    !passwordCorrect
+  ) {
+    return res
+      .status(401)
+      .json({
+        success: false,
+
+        registered:
+          true,
+
+        passwordCorrect:
+          false,
+
+        requiresPasswordReset:
+          true,
+
+        message:
+          'كلمة المرور غير صحيحة',
+      });
+  }
+
+  /*
+   * كلمة المرور صحيحة.
+   */
+  user.lastLoginAt =
+    new Date();
+
+  await user.save();
+
+  /*
+   * إنشاء جلسة وتسجيل الدخول.
+   */
+  createSession(
+    res,
+    user,
+  );
+
+  return res.json({
+    success: true,
+
+    registered:
+      true,
+
+    loggedIn:
+      true,
+
+    passwordCorrect:
+      true,
+
+    message:
+      'تم تسجيل الدخول بنجاح',
+
+    user: {
+      id:
+        user._id.toString(),
+
+      email:
+        user.email,
+
+      emailVerified:
+        user.emailVerified,
+    },
+  });
+} catch (error) {
+  console.error(
+    'Login Error:',
+    error,
+  );
+
+  return res
+    .status(500)
+    .json({
+      success: false,
+      message:
+        'خطأ داخلي في الخادم',
+    });
+}
+
+},
 );
 
 /* ============================================================
