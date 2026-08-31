@@ -2298,322 +2298,149 @@
        AUTH
   ========================================================== -->  <div class="auth-overlay" id="authOverlay" aria-hidden="true"><div class="auth-box" role="dialog" aria-modal="true">
 
-<button
-  class="auth-close"
-  type="button"
-  onclick="closeAuth()"
->
-  ×
-</button>
-
-<div class="auth-logo"></div>
-
-<div class="auth-header">
-
-  <span class="eyebrow">
-    ROUTIX AUTHENTICATION
-  </span>
-
-  <h2 id="authTitle">
-    تسجيل الدخول
-  </h2>
-
-  <p id="authDescription">
-    أدخل بريدك الإلكتروني وكلمة المرور للمتابعة.
-  </p>
-
-</div>
-
-
-<!-- ============================================================
-     STEP 1
-     البريد + كلمة المرور
-============================================================ -->
-
-<div class="auth-step active" id="emailStep">
-
-  <label class="auth-label" for="loginEmail">
-    البريد الإلكتروني
-  </label>
-
-  <input
-    class="auth-input"
-    id="loginEmail"
-    type="email"
-    inputmode="email"
-    autocomplete="email"
-    placeholder="example@email.com"
-    maxlength="150"
+  <button
+    class="auth-close"
+    type="button"
+    onclick="closeAuth()"
   >
+    ×
+  </button>
 
-  <label
-    class="auth-label"
-    for="loginPassword"
-    style="margin-top:13px;"
-  >
-    كلمة المرور
-  </label>
+  <div class="auth-logo"></div>
 
-  <div class="password-wrap">
+  <div class="auth-header">
+
+    <span class="eyebrow">
+      ROUTIX AUTHENTICATION
+    </span>
+
+    <h2 id="authTitle">
+      تسجيل الدخول
+    </h2>
+
+    <p id="authDescription">
+      أدخل بريدك الإلكتروني وكلمة المرور لإرسال رمز تحقق آمن.
+    </p>
+
+  </div>
+
+  <!-- STEP 1 -->
+
+  <div class="auth-step active" id="emailStep">
+
+    <label class="auth-label" for="loginEmail">
+      البريد الإلكتروني
+    </label>
 
     <input
       class="auth-input"
-      id="loginPassword"
-      type="password"
-      autocomplete="current-password"
-      placeholder="أدخل كلمة المرور"
-      maxlength="128"
+      id="loginEmail"
+      type="email"
+      inputmode="email"
+      autocomplete="email"
+      placeholder="example@email.com"
+      maxlength="150"
     >
+
+    <label
+      class="auth-label"
+      for="loginPassword"
+      style="margin-top:13px;"
+    >
+      كلمة المرور
+    </label>
+
+    <div class="password-wrap">
+
+      <input
+        class="auth-input"
+        id="loginPassword"
+        type="password"
+        autocomplete="current-password"
+        placeholder="أدخل كلمة المرور"
+        maxlength="128"
+      >
+
+      <button
+        class="password-toggle"
+        type="button"
+        onclick="togglePassword()"
+        id="passwordToggle"
+      >
+        ◉
+      </button>
+
+    </div>
 
     <button
-      class="password-toggle"
+      class="auth-btn"
+      id="sendOtpBtn"
       type="button"
-      onclick="togglePassword()"
-      id="passwordToggle"
+      onclick="sendOTP()"
     >
-      ◉
+      إرسال كود التحقق
     </button>
 
+    <div class="auth-message" id="emailMessage"></div>
+
+    <div class="auth-note">
+      سيتم التحقق من البريد وكلمة المرور ثم إنشاء
+      رمز تحقق مؤقت وإرساله إلى بريدك الإلكتروني.
+    </div>
+
   </div>
 
 
-  <button
-    class="auth-btn"
-    id="sendOtpBtn"
-    type="button"
-    onclick="sendOTP()"
-  >
-    متابعة
-  </button>
+  <!-- STEP 2 -->
 
+  <div class="auth-step" id="otpStep">
 
-  <button
-    class="auth-secondary"
-    id="forgotPasswordBtn"
-    type="button"
-    onclick="startForgotPassword()"
-    style="display:none;"
-  >
-    نسيت كلمة المرور؟
-  </button>
+    <div
+      class="auth-email-display"
+      id="authEmailDisplay"
+    ></div>
 
-
-  <div
-    class="auth-message"
-    id="emailMessage"
-  ></div>
-
-
-  <div class="auth-note">
-    سيتم البحث عن الحساب أولاً، ثم تحديد الإجراء المناسب.
-  </div>
-
-</div>
-
-
-<!-- ============================================================
-     STEP 2
-     OTP التسجيل
-     
-     يظهر عندما يكون الحساب غير موجود
-============================================================ -->
-
-<div
-  class="auth-step"
-  id="registerOtpStep"
->
-
-  <div
-    class="auth-email-display"
-    id="registerAuthEmailDisplay"
-  ></div>
-
-  <label
-    class="auth-label"
-    for="registerOtp"
-  >
-    رمز التحقق
-  </label>
-
-  <input
-    class="auth-input otp-input"
-    id="registerOtp"
-    type="text"
-    inputmode="numeric"
-    autocomplete="one-time-code"
-    maxlength="6"
-    placeholder="000000"
-  >
-
-  <button
-    class="auth-btn"
-    id="verifyRegisterOtpBtn"
-    type="button"
-    onclick="verifyRegisterOTP()"
-  >
-    تأكيد وإنشاء الحساب
-  </button>
-
-  <button
-    class="auth-secondary"
-    type="button"
-    onclick="backToEmail()"
-  >
-    تغيير البريد أو كلمة المرور
-  </button>
-
-  <div
-    class="auth-message"
-    id="registerOtpMessage"
-  ></div>
-
-  <div class="auth-note">
-    الرمز صالح لمدة 5 دقائق فقط.
-  </div>
-
-</div>
-
-
-<!-- ============================================================
-     STEP 3
-     OTP استعادة كلمة المرور
-     
-     يظهر عندما تكون كلمة المرور خاطئة
-     ويختار المستخدم "نسيت كلمة المرور؟"
-============================================================ -->
-
-<div
-  class="auth-step"
-  id="forgotOtpStep"
->
-
-  <div
-    class="auth-email-display"
-    id="forgotAuthEmailDisplay"
-  ></div>
-
-  <label
-    class="auth-label"
-    for="forgotOtp"
-  >
-    رمز التحقق
-  </label>
-
-  <input
-    class="auth-input otp-input"
-    id="forgotOtp"
-    type="text"
-    inputmode="numeric"
-    autocomplete="one-time-code"
-    maxlength="6"
-    placeholder="000000"
-  >
-
-  <button
-    class="auth-btn"
-    id="verifyForgotOtpBtn"
-    type="button"
-    onclick="verifyForgotOTP()"
-  >
-    تأكيد الرمز
-  </button>
-
-  <button
-    class="auth-secondary"
-    type="button"
-    onclick="backToEmail()"
-  >
-    العودة
-  </button>
-
-  <div
-    class="auth-message"
-    id="forgotOtpMessage"
-  ></div>
-
-  <div class="auth-note">
-    تم إرسال رمز تحقق إلى بريدك الإلكتروني.
-    الرمز صالح لمدة 5 دقائق فقط.
-  </div>
-
-</div>
-
-
-<!-- ============================================================
-     STEP 4
-     تغيير كلمة المرور
-============================================================ -->
-
-<div
-  class="auth-step"
-  id="resetPasswordStep"
->
-
-  <label
-    class="auth-label"
-    for="newPassword"
-  >
-    كلمة المرور الجديدة
-  </label>
-
-  <div class="password-wrap">
+    <label class="auth-label" for="loginOtp">
+      رمز التحقق
+    </label>
 
     <input
-      class="auth-input"
-      id="newPassword"
-      type="password"
-      autocomplete="new-password"
-      placeholder="أدخل كلمة المرور الجديدة"
-      maxlength="128"
+      class="auth-input otp-input"
+      id="loginOtp"
+      type="text"
+      inputmode="numeric"
+      autocomplete="one-time-code"
+      maxlength="6"
+      placeholder="000000"
     >
 
     <button
-      class="password-toggle"
+      class="auth-btn"
+      id="verifyOtpBtn"
       type="button"
-      onclick="toggleNewPassword()"
-      id="newPasswordToggle"
+      onclick="verifyOTP()"
     >
-      ◉
+      تأكيد تسجيل الدخول
     </button>
+
+    <button
+      class="auth-secondary"
+      type="button"
+      onclick="backToEmail()"
+    >
+      تغيير البريد أو كلمة المرور
+    </button>
+
+    <div class="auth-message" id="otpMessage"></div>
+
+    <div class="auth-note">
+      الرمز صالح لمدة 5 دقائق فقط.
+    </div>
 
   </div>
 
-
-  <label
-    class="auth-label"
-    for="confirmNewPassword"
-    style="margin-top:13px;"
-  >
-    تأكيد كلمة المرور
-  </label>
-
-  <input
-    class="auth-input"
-    id="confirmNewPassword"
-    type="password"
-    autocomplete="new-password"
-    placeholder="أعد إدخال كلمة المرور"
-    maxlength="128"
-  >
-
-
-  <button
-    class="auth-btn"
-    id="resetPasswordBtn"
-    type="button"
-    onclick="resetPassword()"
-  >
-    حفظ كلمة المرور وتسجيل الدخول
-  </button>
-
-
-  <div
-    class="auth-message"
-    id="resetPasswordMessage"
-  ></div>
-
 </div>
-  
+
   </div>  <!-- =========================================================
        PUBLIC HEADER
   ========================================================== -->  <header><a href="#home" class="brand">
