@@ -10136,19 +10136,21 @@ const proxyMiddleware = createProxyMiddleware({
 });
 
 /* ============================================================
-   SAFE SERVER INITIALIZATION & EXPORTS
+   SERVER INITIALIZATION & CONFIGURATION
 ============================================================ */
 
-// استخدام var بدلاً من const يمنع خطأ "التعريف المكرر" في TypeScript
-var server = (global as any).__waf_server || http.createServer(app);
-if (!(global as any).__waf_server) {
-  (global as any).__waf_server = server;
-
+// لا تقم بتعريف server جديد بـ const أو var، بل افحص إذا كان معرفاً أو استخدمه مباشرة
+if (typeof server !== 'undefined' && server) {
   server.on('clientError', (err, socket) => {
     if (socket.writable) {
       socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
     }
   });
+
+  server.keepAliveTimeout = config.KEEP_ALIVE_TIMEOUT_MS;
+  server.headersTimeout = config.HEADERS_TIMEOUT_MS;
+  server.requestTimeout = config.REQUEST_TIMEOUT_MS;
+}
 
   server.keepAliveTimeout = config.KEEP_ALIVE_TIMEOUT_MS;
   server.headersTimeout = config.HEADERS_TIMEOUT_MS;
