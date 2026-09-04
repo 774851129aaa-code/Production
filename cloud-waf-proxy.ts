@@ -10165,5 +10165,5 @@ async function startServer() {
   }
 }
 
-void startServer();
+void start();
 
