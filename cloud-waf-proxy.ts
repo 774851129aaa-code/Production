@@ -10136,10 +10136,9 @@ const proxyMiddleware = createProxyMiddleware({
 });
 
 /* ============================================================
-   SERVER INITIALIZATION & CONFIGURATION
+   FINAL SERVER CONFIGURATION & EXPORTS
 ============================================================ */
 
-// لا تقم بتعريف server جديد بـ const أو var، بل افحص إذا كان معرفاً أو استخدمه مباشرة
 if (typeof server !== 'undefined' && server) {
   server.on('clientError', (err, socket) => {
     if (socket.writable) {
@@ -10152,22 +10151,16 @@ if (typeof server !== 'undefined' && server) {
   server.requestTimeout = config.REQUEST_TIMEOUT_MS;
 }
 
-  server.keepAliveTimeout = config.KEEP_ALIVE_TIMEOUT_MS;
-  server.headersTimeout = config.HEADERS_TIMEOUT_MS;
-  server.requestTimeout = config.REQUEST_TIMEOUT_MS;
-}
-
 export async function initializeWaf() {
   await connectDatabase();
   db = await loadDb();
   return server;
 }
 
-if (process.env.NODE_ENV !== 'test' && !IglobalInitialized(global)) {
+if (process.env.NODE_ENV !== 'test' && !globalInitialized(global)) {
   initializeWaf()
     .then((srv) => {
-      // التأكد من عدم تكرار الاستماع على البورت إذا كان السيرفر يعمل مسبقاً
-      if (!srv.listening) {
+      if (srv && !srv.listening) {
         srv.listen(config.PORT, () => {
           console.log(`[Routix WAF] Server running on port ${config.PORT}`);
         });
@@ -10182,8 +10175,10 @@ if (process.env.NODE_ENV !== 'test' && !IglobalInitialized(global)) {
 function globalInitialized(g: any) {
   return g.__waf_listening;
 }
-if (global) {
+
+if (typeof global !== 'undefined') {
   (global as any).__waf_listening = true;
 }
 
 export { app, server };
+
