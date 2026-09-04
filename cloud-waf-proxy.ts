@@ -9553,7 +9553,617 @@ process.on(
 );
 
 /* ============================================================
-   START APPLICATION
+   USER SITES API (JWT AUTHENTICATED)
 ============================================================ */
 
-void start();
+const userSiteCreateSchema = z.object({
+  client_domain: z.string().min(1).max(253),
+  domains: z.array(z.string().min(1).max(253)).max(100).optional(),
+  target_url: z.string().url().max(2048),
+  settings: z.record(z.string(), z.unknown()).default({}),
+});
+
+// GET /api/sites
+app.get(
+  '/api/sites',
+  verifySession,
+  async (req: AuthenticatedRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'مطلوب تسجيل الدخول',
+      });
+    }
+
+    const userSites = db.sites.filter(
+      (site) => site.owner_id === req.user!._id.toString()
+    );
+
+    const sitesWithVisitors = await Promise.all(
+      userSites.map(async (site) => ({
+        ...site,
+        visitors: await getSiteVisitorCount(site.id),
+      }))
+    );
+
+    return res.json({
+      success: true,
+      sites: sitesWithVisitors,
+    });
+  }
+);
+
+// POST /api/sites
+app.post(
+  '/api/sites',
+  verifySession,
+  async (req: AuthenticatedRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'مطلوب تسجيل الدخول',
+      });
+    }
+
+    const parsed = userSiteCreateSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        message: 'بيانات الموقع غير صالحة',
+        details: parsed.error.flatten(),
+      });
+    }
+
+    const ownerId = req.user._id.toString();
+    const incomingDomains = normalizeDomains([
+      parsed.data.client_domain,
+      ...(parsed.data.domains || []),
+    ]);
+
+    if (!incomingDomains.length) {
+      return res.status(400).json({
+        success: false,
+        message: 'مطلوب نطاق واحد على الأقل',
+      });
+    }
+
+    let targetUrl: URL;
+    try {
+      targetUrl = new URL(parsed.data.target_url);
+    } catch {
+      return res.status(400).json({
+        success: false,
+        message: 'رابط الهدف (Target URL) غير صالح',
+      });
+    }
+
+    if (!['http:', 'https:'].includes(targetUrl.protocol)) {
+      return res.status(400).json({
+        success: false,
+        message: 'يجب أن يستخدم رابط الهدف HTTP أو HTTPS',
+      });
+    }
+
+    const conflict = incomingDomains.find((domain) =>
+      db.sites.some((site) =>
+        normalizeDomains([
+          site.client_domain,
+          ...(site.domains || []),
+        ]).includes(domain)
+      )
+    );
+
+    if (conflict) {
+      return res.status(409).json({
+        success: false,
+        message: `النطاق ${conflict} مسجل مسبقاً`,
+      });
+    }
+
+    const settings = parsed.data.settings as SiteSettings;
+    if (typeof settings.enableChallenge !== 'boolean') {
+      settings.enableChallenge = true;
+    }
+
+    const site: Site = {
+      id: crypto.randomUUID(),
+      owner_id: ownerId,
+      client_domain: incomingDomains[0],
+      domains: incomingDomains,
+      target_url: targetUrl.toString(),
+      api_key: crypto.randomBytes(32).toString('hex'),
+      settings,
+      stats: createSiteStats(),
+    };
+
+    db.sites.push(site);
+    dbDirty = true;
+    await saveDb();
+
+    return res.status(201).json({
+      success: true,
+      site,
+      visitors: 0,
+    });
+  }
+);
+
+// GET /api/sites/:id
+app.get(
+  '/api/sites/:id',
+  verifySession,
+  async (req: AuthenticatedRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'مطلوب تسجيل الدخول',
+      });
+    }
+
+    const site = getSiteById(req.params.id);
+    if (!site || site.owner_id !== req.user._id.toString()) {
+      return res.status(404).json({
+        success: false,
+        message: 'الموقع غير موجود',
+      });
+    }
+
+    const visitors = await getSiteVisitorCount(site.id);
+
+    return res.json({
+      success: true,
+      site,
+      visitors,
+    });
+  }
+);
+
+// DELETE /api/sites/:id
+app.delete(
+  '/api/sites/:id',
+  verifySession,
+  async (req: AuthenticatedRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'مطلوب تسجيل الدخول',
+      });
+    }
+
+    const index = db.sites.findIndex(
+      (s) => s.id === req.params.id && s.owner_id === req.user!._id.toString()
+    );
+
+    if (index < 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'الموقع غير موجود',
+      });
+    }
+
+    const removed = db.sites.splice(index, 1)[0];
+
+    for (const key of Object.keys(db.blacklists)) {
+      if (key.startsWith(`${removed.id}:`)) {
+        delete db.blacklists[key];
+      }
+    }
+
+    for (const key of Object.keys(db.risks)) {
+      if (key.startsWith(`${removed.id}:`)) {
+        delete db.risks[key];
+      }
+    }
+
+    db.alerts = db.alerts.filter((alert) => alert.siteId !== removed.id);
+    await visitorsCollection.deleteMany({ siteId: removed.id });
+
+    dbDirty = true;
+    await saveDb();
+
+    return res.json({
+      success: true,
+      message: 'تم حذف الموقع بنجاح',
+    });
+  }
+);
+
+// GET /api/sites/:id/stats
+app.get(
+  '/api/sites/:id/stats',
+  verifySession,
+  async (req: AuthenticatedRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'مطلوب تسجيل الدخول',
+      });
+    }
+
+    const site = getSiteById(req.params.id);
+    if (!site || site.owner_id !== req.user._id.toString()) {
+      return res.status(404).json({
+        success: false,
+        message: 'الموقع غير موجود',
+      });
+    }
+
+    const visitors = await getSiteVisitorCount(site.id);
+
+    return res.json({
+      success: true,
+      site_id: site.id,
+      stats: site.stats,
+      visitors,
+    });
+  }
+);
+
+// GET /api/sites/:id/visitors
+app.get(
+  '/api/sites/:id/visitors',
+  verifySession,
+  async (req: AuthenticatedRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'مطلوب تسجيل الدخول',
+      });
+    }
+
+    const site = getSiteById(req.params.id);
+    if (!site || site.owner_id !== req.user._id.toString()) {
+      return res.status(404).json({
+        success: false,
+        message: 'الموقع غير موجود',
+      });
+    }
+
+    const visitors = await getSiteVisitorCount(site.id);
+
+    return res.json({
+      success: true,
+      site_id: site.id,
+      domain: site.client_domain,
+      visitors,
+    });
+  }
+);
+
+// GET /api/sites/:id/alerts
+app.get(
+  '/api/sites/:id/alerts',
+  verifySession,
+  async (req: AuthenticatedRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'مطلوب تسجيل الدخول',
+      });
+    }
+
+    const site = getSiteById(req.params.id);
+    if (!site || site.owner_id !== req.user._id.toString()) {
+      return res.status(404).json({
+        success: false,
+        message: 'الموقع غير موجود',
+      });
+    }
+
+    const raw = Number(req.query.limit);
+    const limit = Math.min(Math.max(Number.isFinite(raw) ? raw : 100, 1), 500);
+
+    const alerts = db.alerts
+      .filter((alert) => alert.siteId === site.id)
+      .slice(0, limit);
+
+    return res.json({
+      success: true,
+      site_id: site.id,
+      alerts,
+    });
+  }
+);
+
+// GET /api/sites/:id/status
+app.get(
+  '/api/sites/:id/status',
+  verifySession,
+  async (req: AuthenticatedRequest, res: Response) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: 'مطلوب تسجيل الدخول',
+      });
+    }
+
+    const site = getSiteById(req.params.id);
+    if (!site || site.owner_id !== req.user._id.toString()) {
+      return res.status(404).json({
+        success: false,
+        message: 'الموقع غير موجود',
+      });
+    }
+
+    const ip = normalizeIp(String(req.query.ip || getClientIp(req)));
+
+    return res.json({
+      success: true,
+      site_id: site.id,
+      client_domain: site.client_domain,
+      ip,
+      blacklisted: isBlacklisted(site, ip),
+      risk: getRisk(site, ip),
+      concurrent: concurrentByIp.get(`${site.id}:${ip}`) || 0,
+    });
+  }
+);
+
+/* ============================================================
+   WAF PROXY & EVALUATION ENGINE
+============================================================ */
+
+app.use(async (req: Request, res: Response, next: NextFunction) => {
+  const host = normalizeHost(req.headers.host || '');
+
+  if (SERVER_HOSTS.has(host) || host === '') {
+    return next();
+  }
+
+  const site = getSiteByHost(host);
+  if (!site) {
+    res.status(404).send('Site not found on WAF');
+    return;
+  }
+
+  const settings = site.settings;
+  if (settings.enabled === false) {
+    return proxyMiddleware(req, res, next);
+  }
+
+  const ip = getClientIp(req);
+  const requestId = crypto.randomUUID();
+
+  (req as WafRequest).wafSite = site;
+  (req as WafRequest).wafRequestId = requestId;
+
+  registerSiteRequest(site);
+  void registerVisitor(site, ip);
+
+  if (isBlacklisted(site, ip)) {
+    registerSiteAction(site, 'block', true);
+    addAlert({
+      site,
+      ip,
+      path: req.originalUrl,
+      risk: 100,
+      action: 'block',
+      reasons: ['ip_blacklisted'],
+    });
+    res.status(403).send('Access Denied (Blacklisted)');
+    return;
+  }
+
+  if (settings.enableChallenge !== false && !isChallengeCookieValid(req)) {
+    registerSiteAction(site, 'block', false);
+    return sendChallengePage(req, res);
+  }
+
+  if (!checkGlobalRate(site)) {
+    registerSiteAction(site, 'block', true);
+    addAlert({
+      site,
+      ip,
+      path: req.originalUrl,
+      risk: 80,
+      action: 'block',
+      reasons: ['global_rate_limit_exceeded'],
+    });
+    res.status(429).send('Too Many Requests (Global)');
+    return;
+  }
+
+  const rateCheck = checkRateLimit(site, ip);
+  res.setHeader('X-RateLimit-Remaining', String(rateCheck.remaining));
+
+  if (!rateCheck.allowed) {
+    registerSiteAction(site, 'block', true);
+    addAlert({
+      site,
+      ip,
+      path: req.originalUrl,
+      risk: 80,
+      action: 'block',
+      reasons: ['rate_limit_exceeded'],
+    });
+    res.status(429).send('Too Many Requests');
+    return;
+  }
+
+  if (!checkBurst(site, ip)) {
+    registerSiteAction(site, 'block', true);
+    addAlert({
+      site,
+      ip,
+      path: req.originalUrl,
+      risk: 90,
+      action: 'block',
+      reasons: ['burst_limit_exceeded'],
+    });
+    res.status(429).send('Too Many Requests (Burst)');
+    return;
+  }
+
+  if (!acquireConcurrency(site, ip)) {
+    registerSiteAction(site, 'block', true);
+    addAlert({
+      site,
+      ip,
+      path: req.originalUrl,
+      risk: 75,
+      action: 'block',
+      reasons: ['concurrency_limit_exceeded'],
+    });
+    res.status(503).send('Service Unavailable (Concurrency)');
+    return;
+  }
+
+  (req as WafRequest).wafAcquired = true;
+
+  const inspection = inspectRequest(site, req);
+  const currentRisk = addRisk(site, ip, inspection.score);
+
+  const blockThreshold = settingNumber(
+    site,
+    'riskBlockThreshold',
+    config.RISK_BLOCK_THRESHOLD
+  );
+
+  const honeypotThreshold = settingNumber(
+    site,
+    'riskHoneypotThreshold',
+    config.RISK_HONEYPOT_THRESHOLD
+  );
+
+  let action: Action = 'allow';
+  if (currentRisk >= blockThreshold || inspection.score >= blockThreshold) {
+    action = 'block';
+  } else if (currentRisk >= honeypotThreshold) {
+    action = 'honeypot';
+  }
+
+  if (action === 'block') {
+    if ((req as WafRequest).wafAcquired) {
+      releaseConcurrency(site, ip);
+      (req as WafRequest).wafAcquired = false;
+    }
+
+    const violationsCount = registerViolation(site, ip);
+    const violationLimit = settingNumber(
+      site,
+      'violationLimit',
+      config.VIOLATION_LIMIT
+    );
+
+    if (violationsCount >= violationLimit) {
+      blacklist(site, ip, 'automatic_violation_limit_reached');
+    }
+
+    registerSiteAction(site, 'block', true);
+    addAlert({
+      site,
+      ip,
+      path: req.originalUrl,
+      risk: Math.max(currentRisk, inspection.score),
+      action: 'block',
+      reasons: inspection.reasons.length ? inspection.reasons : ['high_risk_score'],
+    });
+
+    res.status(403).send('Access Denied by WAF');
+    return;
+  }
+
+  if (action === 'honeypot') {
+    registerSiteAction(site, 'honeypot', true);
+    addAlert({
+      site,
+      ip,
+      path: req.originalUrl,
+      risk: currentRisk,
+      action: 'honeypot',
+      reasons: inspection.reasons,
+    });
+  } else {
+    registerSiteAction(site, 'allow', false);
+  }
+
+  return proxyMiddleware(req, res, next);
+});
+
+/* ============================================================
+   PROXY SETUP
+============================================================ */
+
+const proxyMiddleware = createProxyMiddleware({
+  target: 'http://127.0.0.1:80',
+  changeOrigin: true,
+  ws: true,
+  xfwd: true,
+  proxyTimeout: config.PROXY_TIMEOUT_MS,
+  timeout: config.PROXY_TIMEOUT_MS,
+
+  router: (req) => {
+    const wafReq = req as WafRequest;
+    if (wafReq.wafSite?.target_url) {
+      return wafReq.wafSite.target_url;
+    }
+    const host = normalizeHost(req.headers.host || '');
+    const site = getSiteByHost(host);
+    return site ? site.target_url : 'http://127.0.0.1:80';
+  },
+
+  on: {
+    proxyReq: (proxyReq, req) => {
+      fixRequestBody(proxyReq, req);
+      const wafReq = req as WafRequest;
+      if (wafReq.wafRequestId) {
+        proxyReq.setHeader('X-Waf-Request-Id', wafReq.wafRequestId);
+      }
+    },
+    proxyRes: (proxyRes, req) => {
+      const wafReq = req as WafRequest;
+      const site = wafReq.wafSite;
+      const ip = getClientIp(req);
+      if (site && wafReq.wafAcquired) {
+        releaseConcurrency(site, ip);
+        wafReq.wafAcquired = false;
+      }
+    },
+    error: (err, req, res) => {
+      const wafReq = req as WafRequest;
+      const site = wafReq.wafSite;
+      const ip = getClientIp(req);
+      if (site && wafReq.wafAcquired) {
+        releaseConcurrency(site, ip);
+        wafReq.wafAcquired = false;
+      }
+      if ('writeHead' in res && !res.headersSent) {
+        (res as Response).status(502).send('Bad Gateway (Proxy Error)');
+      }
+    },
+  },
+});
+
+/* ============================================================
+   SERVER INITIALIZATION
+============================================================ */
+
+const server = http.createServer(app);
+
+server.on('clientError', (err, socket) => {
+  if (socket.writable) {
+    socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+  }
+});
+
+server.keepAliveTimeout = config.KEEP_ALIVE_TIMEOUT_MS;
+server.headersTimeout = config.HEADERS_TIMEOUT_MS;
+server.requestTimeout = config.REQUEST_TIMEOUT_MS;
+
+async function startServer() {
+  try {
+    await connectDatabase();
+    db = await loadDb();
+
+    server.listen(config.PORT, () => {
+      console.log(`[Routix WAF] Server running on port ${config.PORT}`);
+    });
+  } catch (error) {
+    console.error('[Routix WAF] Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+void startServer();
+
