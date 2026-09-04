@@ -10136,20 +10136,24 @@ const proxyMiddleware = createProxyMiddleware({
 });
 
 /* ============================================================
-   SERVER INITIALIZATION & EXPORTS
+   SAFE SERVER INITIALIZATION & EXPORTS
 ============================================================ */
 
-const server = http.createServer(app);
+// استخدام var بدلاً من const يمنع خطأ "التعريف المكرر" في TypeScript
+var server = (global as any).__waf_server || http.createServer(app);
+if (!(global as any).__waf_server) {
+  (global as any).__waf_server = server;
 
-server.on('clientError', (err, socket) => {
-  if (socket.writable) {
-    socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
-  }
-});
+  server.on('clientError', (err, socket) => {
+    if (socket.writable) {
+      socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+    }
+  });
 
-server.keepAliveTimeout = config.KEEP_ALIVE_TIMEOUT_MS;
-server.headersTimeout = config.HEADERS_TIMEOUT_MS;
-server.requestTimeout = config.REQUEST_TIMEOUT_MS;
+  server.keepAliveTimeout = config.KEEP_ALIVE_TIMEOUT_MS;
+  server.headersTimeout = config.HEADERS_TIMEOUT_MS;
+  server.requestTimeout = config.REQUEST_TIMEOUT_MS;
+}
 
 export async function initializeWaf() {
   await connectDatabase();
@@ -10157,17 +10161,27 @@ export async function initializeWaf() {
   return server;
 }
 
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' && !IglobalInitialized(global)) {
   initializeWaf()
     .then((srv) => {
-      srv.listen(config.PORT, () => {
-        console.log(`[Routix WAF] Server running on port ${config.PORT}`);
-      });
+      // التأكد من عدم تكرار الاستماع على البورت إذا كان السيرفر يعمل مسبقاً
+      if (!srv.listening) {
+        srv.listen(config.PORT, () => {
+          console.log(`[Routix WAF] Server running on port ${config.PORT}`);
+        });
+      }
     })
     .catch((error) => {
       console.error('[Routix WAF] Failed to start server:', error);
       process.exit(1);
     });
+}
+
+function globalInitialized(g: any) {
+  return g.__waf_listening;
+}
+if (global) {
+  (global as any).__waf_listening = true;
 }
 
 export { app, server };
