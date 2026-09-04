@@ -10136,7 +10136,7 @@ const proxyMiddleware = createProxyMiddleware({
 });
 
 /* ============================================================
-   SERVER INITIALIZATION
+   SERVER INITIALIZATION & EXPORTS
 ============================================================ */
 
 const server = http.createServer(app);
@@ -10151,18 +10151,23 @@ server.keepAliveTimeout = config.KEEP_ALIVE_TIMEOUT_MS;
 server.headersTimeout = config.HEADERS_TIMEOUT_MS;
 server.requestTimeout = config.REQUEST_TIMEOUT_MS;
 
-async function startServer() {
-  try {
-    await connectDatabase();
-    db = await loadDb();
-
-    server.listen(config.PORT, () => {
-      console.log(`[Routix WAF] Server running on port ${config.PORT}`);
-    });
-  } catch (error) {
-    console.error('[Routix WAF] Failed to start server:', error);
-    process.exit(1);
-  }
+export async function initializeWaf() {
+  await connectDatabase();
+  db = await loadDb();
+  return server;
 }
 
-void start();
+if (process.env.NODE_ENV !== 'test') {
+  initializeWaf()
+    .then((srv) => {
+      srv.listen(config.PORT, () => {
+        console.log(`[Routix WAF] Server running on port ${config.PORT}`);
+      });
+    })
+    .catch((error) => {
+      console.error('[Routix WAF] Failed to start server:', error);
+      process.exit(1);
+    });
+}
+
+export { app, server };
