@@ -10095,22 +10095,7 @@ if (typeof global !== 'undefined' && !globalInitialized(global)) {
       });
   }
 }
-    .catch((error) => {
-      console.error('[Routix WAF] Failed to start server:', error);
-      process.exit(1);
-    });
-  }
-}
 
-// حماية السيرفر من أخطاء الاستدعاء المكرر للبورت
-if (typeof server !== 'undefined' && server) {
-  const originalListen = server.listen;
-  (server as any).listen = function (...args: any[]) {
-    if (server.listening) {
-      console.log('[Routix WAF] Server is already listening, skipping duplicate call.');
-      return server;
-    }
-    return originalListen.apply(this, args);
-  };
+if (process.env.NODE_ENV !== 'test') {
+  start();
 }
-
