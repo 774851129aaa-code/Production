@@ -9037,151 +9037,72 @@ app.use(
 );
 
 /* ============================================================
-   REVERSE PROXY
+   REVERSE PROXY (FIXED)
 ============================================================ */
 
-const proxy =
-  createProxyMiddleware({
-    changeOrigin: true,
+const proxy = createProxyMiddleware({
+  changeOrigin: true,
+  xfwd: true,
+  ws: true,
+  proxyTimeout: config.PROXY_TIMEOUT_MS,
+  timeout: config.PROXY_TIMEOUT_MS,
 
-    xfwd: true,
+  router: (req) => (req as WafRequest)?.wafSite?.target_url,
 
-    ws: true,
+  on: {
+    proxyReq: (proxyReq, req) => {
+      if (!req) return;
+      const wafReq = req as WafRequest;
+      const site = wafReq.wafSite;
 
-    proxyTimeout:
-      config.PROXY_TIMEOUT_MS,
+      proxyReq.setHeader('x-waf-protected', 'true');
+      proxyReq.setHeader('x-waf-site-id', site?.id || '');
+      proxyReq.setHeader('x-waf-client-domain', site?.client_domain || '');
+      proxyReq.setHeader('x-waf-owner-id', site?.owner_id || '');
+      proxyReq.setHeader('x-waf-request-id', wafReq.wafRequestId || crypto.randomUUID());
+      proxyReq.setHeader('x-forwarded-for', getClientIp(req));
+      proxyReq.setHeader('x-forwarded-host', req.headers?.host || '');
+      proxyReq.setHeader('x-forwarded-proto', req.protocol || 'http');
 
-    timeout:
-      config.PROXY_TIMEOUT_MS,
+      fixRequestBody(proxyReq, req);
+    },
 
-    router: (
-      req,
-    ) =>
-      (
-        req as WafRequest
-      ).wafSite
-        ?.target_url,
+    error: (error, req, res) => {
+      console.error('Proxy error:', error);
 
-    on: {
-      proxyReq: (
-        proxyReq,
-        req,
-      ) => {
-        const wafReq =
-          req as WafRequest;
+      // 1. الفحص الآمن لـ req و wafSite
+      const wafReq = req as WafRequest | undefined;
+      const site = wafReq?.wafSite;
 
-        const site =
-          wafReq.wafSite;
-
-        proxyReq.setHeader(
-          'x-waf-protected',
-          'true',
-        );
-
-        proxyReq.setHeader(
-          'x-waf-site-id',
-          site?.id || '',
-        );
-
-        proxyReq.setHeader(
-          'x-waf-client-domain',
-          site?.client_domain ||
-            '',
-        );
-
-        proxyReq.setHeader(
-          'x-waf-owner-id',
-          site?.owner_id ||
-            '',
-        );
-
-        proxyReq.setHeader(
-          'x-waf-request-id',
-          wafReq.wafRequestId ||
-            crypto.randomUUID(),
-        );
-
-        proxyReq.setHeader(
-          'x-forwarded-for',
-          getClientIp(
-            req,
-          ),
-        );
-
-        proxyReq.setHeader(
-          'x-forwarded-host',
-          req.headers.host ||
-            '',
-        );
-
-        proxyReq.setHeader(
-          'x-forwarded-proto',
-          req.protocol ||
-            'http',
-        );
-
-        fixRequestBody(
-          proxyReq,
-          req,
-        );
-      },
-
-      error: (
-        error,
-        req,
-        res,
-      ) => {
-        const site =
-          (
-            req as WafRequest
-          ).wafSite;
-
-        console.error(
-          'Proxy error:',
-          error,
-        );
-
-        if (site) {
+      if (site && req) {
+        try {
           addAlert({
             site,
-
-            ip:
-              getClientIp(
-                req,
-              ),
-
-            path:
-              req.originalUrl,
-
+            ip: getClientIp(req),
+            path: req.originalUrl || req.url || '/',
             risk: 0,
-
-            action:
-              'block',
-
-            reasons: [
-              'proxy_error',
-            ],
+            action: 'block',
+            reasons: ['proxy_error'],
           });
+        } catch (alertErr) {
+          console.error('Failed to add alert on proxy error:', alertErr);
         }
+      }
 
-        if (
-          !res.headersSent
-        ) {
-          res
-            .status(502)
-            .json({
-              error:
-                'protected_site_unavailable',
-            });
-        }
-      },
+      // 2. الفحص الآمن لـ res قبل إرسال الاستجابة (يدعم HTTP و WebSockets)
+      if (res && 'headersSent' in res && !res.headersSent) {
+        res.status(502).json({
+          error: 'protected_site_unavailable',
+        });
+      } else if (res && 'destroy' in res && typeof (res as any).destroy === 'function') {
+        // في حال كان الاتصال عبر Socket/WebSocket
+        (res as any).destroy();
+      }
     },
-  });
+  },
+});
 
-app.use(
-  '/',
-  proxy,
-);
+app.use('/', proxy);
 
 /* ============================================================
    GLOBAL ERROR HANDLER
