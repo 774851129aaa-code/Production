@@ -3925,10 +3925,9 @@ ADMIN APIs
       }
 
     }
-
-    /* ============================================================
+/* ============================================================
        CHANGE PASSWORD
-       POST /api/change-password
+       POST /api/login (forgotPassword: true)
     ============================================================ */
 
     async function changeCustomerPassword(event) {
@@ -3956,10 +3955,11 @@ ADMIN APIs
 
       try {
 
-        const data = await apiFetch("/api/change-password", {
+        const data = await apiFetch("/api/login", {
           method: "POST",
           body: {
             email,
+            forgotPassword: true,
             otp,
             newPassword
           }
