@@ -10143,7 +10143,7 @@ const proxyMiddleware = createProxyMiddleware({
   },
 });
 /* ============================================================
-   FINAL SERVER CONFIGURATION
+   FINAL SERVER CONFIGURATION & EXPORTS
 ============================================================ */
 
 if (typeof server !== 'undefined' && server) {
@@ -10158,27 +10158,17 @@ if (typeof server !== 'undefined' && server) {
   server.requestTimeout = config.REQUEST_TIMEOUT_MS;
 }
 
-async function initializeWaf() {
+export async function initializeWaf() {
   await connectDatabase();
   db = await loadDb();
   return server;
 }
 
-function globalInitialized(g: any) {
-  return g?.__waf_listening;
-}
-
-if (
-  typeof global !== 'undefined' &&
-  process.env.NODE_ENV !== 'test' &&
-  !globalInitialized(global)
-) {
-  (global as any).__waf_listening = true;
-
+if (process.env.NODE_ENV !== 'test' && !globalInitialized(global)) {
   initializeWaf()
     .then((srv) => {
       if (srv && !srv.listening) {
-        srv.listen(config.PORT, '0.0.0.0', () => {
+        srv.listen(config.PORT, () => {
           console.log(`[Routix WAF] Server running on port ${config.PORT}`);
         });
       }
@@ -10188,3 +10178,13 @@ if (
       process.exit(1);
     });
 }
+
+function globalInitialized(g: any) {
+  return g.__waf_listening;
+}
+
+if (typeof global !== 'undefined') {
+  (global as any).__waf_listening = true;
+}
+
+export { app, server };
