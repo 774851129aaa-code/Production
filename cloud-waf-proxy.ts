@@ -9314,6 +9314,14 @@ server.on(
    START
 ============================================================ */
 
+let isStarted = false;
+
+async function start(): Promise<void> {
+  if (isStarted) return; // منع التكرار إذا تم استدعاء الدالة مرتين
+  isStarted = true;
+
+  try {
+    
 async function start(): Promise<void> {
   try {
     await connectDatabase();
