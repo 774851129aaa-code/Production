@@ -10142,9 +10142,8 @@ const proxyMiddleware = createProxyMiddleware({
     },
   },
 });
-
 /* ============================================================
-   FINAL SERVER CONFIGURATION & EXPORTS
+   FINAL SERVER CONFIGURATION
 ============================================================ */
 
 if (typeof server !== 'undefined' && server) {
@@ -10159,7 +10158,7 @@ if (typeof server !== 'undefined' && server) {
   server.requestTimeout = config.REQUEST_TIMEOUT_MS;
 }
 
-export async function initializeWaf() {
+async function initializeWaf() {
   await connectDatabase();
   db = await loadDb();
   return server;
@@ -10170,8 +10169,8 @@ function globalInitialized(g: any) {
 }
 
 if (
-  process.env.NODE_ENV !== 'test' &&
   typeof global !== 'undefined' &&
+  process.env.NODE_ENV !== 'test' &&
   !globalInitialized(global)
 ) {
   (global as any).__waf_listening = true;
@@ -10189,5 +10188,3 @@ if (
       process.exit(1);
     });
 }
-
-export { app, server };
