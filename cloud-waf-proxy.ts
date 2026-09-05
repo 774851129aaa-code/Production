@@ -10180,5 +10180,6 @@ if (typeof global !== 'undefined') {
   (global as any).__waf_listening = true;
 }
 
-export { app, server };
+void start();
+                   
 
