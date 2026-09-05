@@ -1,10 +1,14 @@
-<!DOCTYPE html><html lang="ar" dir="rtl">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#02060b">
   <meta name="description" content="Routix — Web Application Firewall & Traffic Protection">
-  <title>Routix — Cloud WAF</title>  <style>
+  <title>Routix — Cloud WAF</title>
+
+  <style>
     :root {
       --bg: #02050a;
       --bg2: #06101a;
@@ -988,11 +992,6 @@
       color: var(--cyan);
     }
 
-    /* =========================================================
-       ROUTIX CUSTOMER AUTHENTICATION
-       إضافة نظام العملاء فقط
-       ========================================================= */
-
     .customer-auth {
       display: flex;
       align-items: center;
@@ -1120,8 +1119,6 @@
       background: rgba(255,82,109,.08);
       transform: translateY(-2px);
     }
-
-    /* AUTH OVERLAY */
 
     .auth-overlay {
       position: fixed;
@@ -1795,7 +1792,6 @@
         font-size: 14px;
       }
 
-      /* Login mobile */
       .customer-auth {
         margin-right: auto;
         margin-left: 10px;
@@ -1893,406 +1889,421 @@
 
     @media (prefers-reduced-motion: reduce) {
       *,
-      *::before,
-      *::after {
+      *::before {
         animation-duration: .001ms !important;
         animation-iteration-count: 1 !important;
         scroll-behavior: auto !important;
       }
     }
-  </style></head><body class="locked">  <div class="cyber-bg"></div>
+  </style>
+</head>
+
+<body class="locked">
+
+  <div class="cyber-bg"></div>
   <div class="orb one"></div>
   <div class="orb two"></div>
   <div class="particles" id="particles"></div>
-  <div class="scanlines"></div>  <section class="intro" id="intro"><div class="intro-tech">
-  <div class="intro-grid"></div>
-</div>
+  <div class="scanlines"></div>
 
-<div class="intro-content">
+  <section class="intro" id="intro">
 
-  <div class="intro-status">
-    <span class="live-dot"></span>
-    ROUTIX WAF SYSTEM • PROTECTION LAYER READY
-  </div>
-
-  <div class="intro-logo"></div>
-
-  <h1>
-    Routix<span>.</span>
-  </h1>
-
-  <p>
-    Web Application Firewall مصمم لمراقبة وحماية
-    تطبيقات الويب من الترافيك المشبوه، الهجمات
-    على مستوى L7، تجاوز المعدلات، والمصادر عالية الخطورة.
-  </p>
-
-  <button class="enter-btn" onclick="enterPlatform()">
-    دخول إلى المنصة
-    <span>←</span>
-  </button>
-
-</div>
-
-<div class="intro-corner">
-  ROUTIX / SECURITY INFRASTRUCTURE / 2026
-</div>
-
-  </section>  <header><a href="#home" class="brand">
-  <span class="brand-logo"></span>
-  <span class="brand-name">Routix</span>
-</a>
-
-<nav id="nav">
-  <a href="#home">الرئيسية</a>
-  <a href="#features">المميزات</a>
-  <a href="#api">API</a>
-  <a href="#integration">طريقة الربط</a>
-  <a href="#settings">الإعدادات</a>
-  <a href="#about">من نحن</a>
-</nav>
-
-<!-- ROUTIX CUSTOMER LOGIN -->
-<div class="customer-auth">
-
-  <button
-    type="button"
-    class="customer-login-btn"
-    id="customerLoginButton"
-    onclick="openAuth()"
-  >
-    <span class="customer-login-icon">◉</span>
-    <span class="customer-login-text">تسجيل دخول العملاء</span>
-  </button>
-
-  <div class="customer-session" id="customerSession">
-
-    <div class="customer-profile">
-      <span class="customer-profile-dot"></span>
-      <span id="customerEmailDisplay">CLIENT</span>
+    <div class="intro-tech">
+      <div class="intro-grid"></div>
     </div>
 
-    <button
-      type="button"
-      class="customer-logout"
-      onclick="logoutCustomer()"
-      title="تسجيل الخروج"
-    >
-      ⎋
+    <div class="intro-content">
+
+      <div class="intro-status">
+        <span class="live-dot"></span>
+        ROUTIX WAF SYSTEM • PROTECTION LAYER READY
+      </div>
+
+      <div class="intro-logo"></div>
+
+      <h1>
+        Routix<span>.</span>
+      </h1>
+
+      <p>
+        Web Application Firewall مصمم لمراقبة وحماية
+        تطبيقات الويب من الترافيك المشبوه، الهجمات
+        على مستوى L7، تجاوز المعدلات، والمصادر عالية الخطورة.
+      </p>
+
+      <button class="enter-btn" onclick="enterPlatform()">
+        دخول إلى المنصة
+        <span>←</span>
+      </button>
+
+    </div>
+
+    <div class="intro-corner">
+      ROUTIX / SECURITY INFRASTRUCTURE / 2026
+    </div>
+
+  </section>
+
+  <header>
+
+    <a href="#home" class="brand">
+      <span class="brand-logo"></span>
+      <span class="brand-name">Routix</span>
+    </a>
+
+    <nav id="nav">
+      <a href="#home">الرئيسية</a>
+      <a href="#features">المميزات</a>
+      <a href="#api">API</a>
+      <a href="#integration">طريقة الربط</a>
+      <a href="#settings">الإعدادات</a>
+      <a href="#about">من نحن</a>
+    </nav>
+
+    <div class="customer-auth">
+
+      <button
+        type="button"
+        class="customer-login-btn"
+        id="customerLoginButton"
+        onclick="openAuth()"
+      >
+        <span class="customer-login-icon">◉</span>
+        <span class="customer-login-text">تسجيل دخول العملاء</span>
+      </button>
+
+      <div class="customer-session" id="customerSession">
+
+        <div class="customer-profile">
+          <span class="customer-profile-dot"></span>
+          <span id="customerEmailDisplay">CLIENT</span>
+        </div>
+
+        <button
+          type="button"
+          class="customer-logout"
+          onclick="logoutCustomer()"
+          title="تسجيل الخروج"
+        >
+          ⎋
+        </button>
+
+      </div>
+
+    </div>
+
+    <button class="mobile-menu" onclick="toggleMenu()">
+      ☰
     </button>
 
-  </div>
-
-</div>
-
-<button class="mobile-menu" onclick="toggleMenu()">
-  ☰
-</button>
-
-  </header>  <main id="home"><section class="section dashboard">
-
-  <div class="dashboard-copy">
-
-    <span class="eyebrow">
-      ROUTIX / CLOUD WAF
-    </span>
-
-    <h1>
-      حماية موقعك تبدأ<br>
-      من أول <span>Request.</span>
-    </h1>
-
-    <p>
-      Routix يعمل كطبقة حماية أمام تطبيقك،
-      يراقب الترافيك وطلبات HTTP، يحد من
-      المعدلات المرتفعة، يكتشف أنماط الهجمات
-      ويمنحك رؤية مباشرة لما يحدث على مستوى
-      البنية التحتية والتطبيق.
-    </p>
-
-    <div class="dashboard-actions">
-      <a href="#features" class="btn">
-        استكشف المميزات
-      </a>
-    </div>
-
-    <div class="stats">
-
-      <div class="stat">
-        <div class="stat-label">WAF STATUS</div>
-        <div class="stat-value green">ACTIVE</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">LAYER</div>
-        <div class="stat-value cyan">L7</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">RATE CONTROL</div>
-        <div class="stat-value">ON</div>
-      </div>
-
-      <div class="stat">
-        <div class="stat-label">LIVE EVENTS</div>
-        <div class="stat-value green">READY</div>
-      </div>
-
-    </div>
-
-  </div>
-
-  <div class="radar-card">
-
-    <div class="radar">
-      <div class="radar-ring"></div>
-      <div class="radar-sweep"></div>
-    </div>
-
-    <div class="radar-label">
-      <span>TRAFFIC_MONITOR</span>
-      <strong>● PROTECTED</strong>
-    </div>
-
-  </div>
-
-</section>
-
-<section id="features" class="section">
-
-  <div class="section-title">
-
-    <span class="eyebrow">
-      SECURITY ENGINE
-    </span>
-
-    <h2>
-      حماية متعددة الطبقات للترافيك
-    </h2>
-
-    <p>
-      Routix يجمع بين التحكم بالترافيك،
-      تحليل الطلبات، تقييم المخاطر وآليات
-      الحماية المختلفة داخل طبقة واحدة.
-    </p>
-
-  </div>
-
-  <div class="features">
-
-    <article class="feature">
-      <div class="feature-icon">◈</div>
-      <h3>Rate Limiting</h3>
-      <p>تحديد عدد الطلبات المسموح بها لكل IP خلال نافذة زمنية وتقليل إساءة استخدام الموارد.</p>
-      <span class="tag">TRAFFIC_CONTROL</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">⚡</div>
-      <h3>Burst Protection</h3>
-      <p>التعامل مع الارتفاعات المفاجئة والسريعة في الطلبات قبل انتقال الضغط إلى التطبيق الأصلي.</p>
-      <span class="tag">BURST_DETECTION</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">L7</div>
-      <h3>Layer 7 Protection</h3>
-      <p>فحص طلبات HTTP على مستوى التطبيق وتحليل المسارات والرؤوس والبيانات وفق قواعد الحماية.</p>
-      <span class="tag">HTTP_INSPECTION</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">SQL</div>
-      <h3>SQLi Detection</h3>
-      <p>كشف أنماط شائعة مرتبطة بمحاولات SQL Injection داخل الطلبات.</p>
-      <span class="tag">ATTACK_DETECTION</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">X</div>
-      <h3>XSS Detection</h3>
-      <p>فحص الأنماط المعروفة المرتبطة بمحاولات Cross-Site Scripting.</p>
-      <span class="tag">WEB_SECURITY</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">R</div>
-      <h3>Risk Scoring</h3>
-      <p>بناء درجة خطورة للمصادر والطلبات للمساعدة في اتخاذ قرار الحظر أو التقييد أو المراقبة.</p>
-      <span class="tag">RISK_ENGINE</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">H</div>
-      <h3>Honeypot</h3>
-      <p>مسارات طُعم يمكن استخدامها لرصد المصادر التي تتفاعل مع نقاط لا يفترض أن يستخدمها المستخدم الطبيعي.</p>
-      <span class="tag">THREAT_INTELLIGENCE</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">⊘</div>
-      <h3>Blacklist</h3>
-      <p>التعامل مع المصادر التي تتجاوز سياسات الحماية وإبقاؤها ضمن قائمة الحظر حسب منطق النظام.</p>
-      <span class="tag">IP_CONTROL</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">↯</div>
-      <h3>Concurrency Control</h3>
-      <p>التحكم في عدد الاتصالات المتزامنة لكل IP وعلى مستوى الخدمة لتقليل الضغط غير الطبيعي.</p>
-      <span class="tag">CONNECTION_LIMIT</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">◌</div>
-      <h3>Live Alerts</h3>
-      <p>مراقبة الأحداث والتنبيهات بشكل مباشر من خلال قناة الأحداث الخاصة بالـWAF دون الحاجة لتحديث الصفحة.</p>
-      <span class="tag">REAL_TIME</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">▣</div>
-      <h3>Security Headers</h3>
-      <p>تحسين طبقة HTTP الأمنية باستخدام إعدادات Security Headers المناسبة للسيرفر.</p>
-      <span class="tag">HTTP_SECURITY</span>
-    </article>
-
-    <article class="feature">
-      <div class="feature-icon">↗</div>
-      <h3>Reverse Proxy</h3>
-      <p>تمرير الطلبات الطبيعية إلى التطبيق الأصلي مع إبقاء التطبيق خلف طبقة Routix.</p>
-      <span class="tag">PROXY_LAYER</span>
-    </article>
-
-  </div>
-
-</section>
-
-<section id="api" class="section">
-
-  <div class="section-title">
-
-    <span class="eyebrow">
-      REQUEST PIPELINE
-    </span>
-
-    <h2>
-      كيف يمر الطلب داخل Routix؟
-    </h2>
-
-    <p>
-      الفكرة الأساسية هي أن Routix يصبح نقطة
-      الدخول العامة، بينما يبقى التطبيق الأصلي
-      خلفه.
-    </p>
-
-  </div>
-
-  <div class="flow">
-
-    <div class="flow-node">
-      <b>CLIENT</b>
-      <span>المستخدم يرسل HTTP Request</span>
-    </div>
-
-    <div class="flow-arrow">→</div>
-
-    <div class="flow-node">
-      <b>ROUTIX</b>
-      <span>استقبال وفحص الطلب</span>
-    </div>
-
-    <div class="flow-arrow">→</div>
-
-    <div class="flow-node">
-      <b>WAF ENGINE</b>
-      <span>Rate / L7 / Risk / Rules</span>
-    </div>
-
-    <div class="flow-arrow">→</div>
-
-    <div class="flow-node">
-      <b>DECISION</b>
-      <span>Allow / Block / Limit</span>
-    </div>
-
-    <div class="flow-arrow">→</div>
-
-    <div class="flow-node">
-      <b>TARGET</b>
-      <span>تمرير الطلب الطبيعي للتطبيق</span>
-    </div>
-
-  </div>
-
-</section>
-
-<section id="integration" class="section">
-
-  <div class="section-title">
-
-    <span class="eyebrow">
-      API & INTEGRATION
-    </span>
-
-    <h2>
-      اربط Routix بموقع العميل
-    </h2>
-
-    <p>
-      Routix يعمل كطبقة حماية أمام تطبيق العميل،
-      بحيث تمر الطلبات عبر طبقة الحماية أولًا قبل
-      الوصول إلى التطبيق الأصلي.
-    </p>
-
-  </div>
-
-  <div class="integration">
-
-    <div class="steps">
-
-      <div class="step">
-        <b class="step-number">01</b>
-        <div>
-          <strong>أضف موقعك إلى Routix</strong>
-          <span>أنشئ إعداد الموقع من خلال النظام وحدد النطاق والتطبيق المرتبط به.</span>
+  </header>
+
+  <main id="home">
+
+    <section class="section dashboard">
+
+      <div class="dashboard-copy">
+
+        <span class="eyebrow">
+          ROUTIX / CLOUD WAF
+        </span>
+
+        <h1>
+          حماية موقعك تبدأ<br>
+          من أول <span>Request.</span>
+        </h1>
+
+        <p>
+          Routix يعمل كطبقة حماية أمام تطبيقك،
+          يراقب الترافيك وطلبات HTTP، يحد من
+          المعدلات المرتفعة، يكتشف أنماط الهجمات
+          ويمنحك رؤية مباشرة لما يحدث على مستوى
+          البنية التحتية والتطبيق.
+        </p>
+
+        <div class="dashboard-actions">
+          <a href="#features" class="btn">
+            استكشف المميزات
+          </a>
         </div>
-      </div>
 
-      <div class="step">
-        <b class="step-number">02</b>
-        <div>
-          <strong>التحقق من حالة الربط</strong>
-          <span>تحديد رابط موقع العميل في ملف البيئة، ثم توجيه الدومين إلى سيرفرك.</span>
+        <div class="stats">
+
+          <div class="stat">
+            <div class="stat-label">WAF STATUS</div>
+            <div class="stat-value green">ACTIVE</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">LAYER</div>
+            <div class="stat-value cyan">L7</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">RATE CONTROL</div>
+            <div class="stat-value">ON</div>
+          </div>
+
+          <div class="stat">
+            <div class="stat-label">LIVE EVENTS</div>
+            <div class="stat-value green">READY</div>
+          </div>
+
         </div>
+
       </div>
 
-      <div class="step">
-        <b class="step-number">03</b>
-        <div>
-          <strong>وجّه الدومين إلى Routix</strong>
-          <span>بعد إعداد الموقع، وجّه حركة المرور الخاصة بالدومين إلى نقطة الدخول الخاصة بـRoutix.</span>
+      <div class="radar-card">
+
+        <div class="radar">
+          <div class="radar-ring"></div>
+          <div class="radar-sweep"></div>
         </div>
-      </div>
 
-      <div class="step">
-        <b class="step-number">04</b>
-        <div>
-          <strong>احتفظ بإعدادات السيرفر بشكل آمن</strong>
-          <span>مفاتيح النظام وبيانات الإدارة وإعدادات التطبيق الداخلي تبقى على السيرفر ولا تظهر في الواجهة العامة.</span>
+        <div class="radar-label">
+          <span>TRAFFIC_MONITOR</span>
+          <strong>● PROTECTED</strong>
         </div>
+
       </div>
 
-    </div>
+    </section>
 
-    <div class="code-card">
+    <section id="features" class="section">
 
-      <div class="code-title">
-        <span class="code-dot"></span>
-        ROUTIX / SITE CONFIGURATION
+      <div class="section-title">
+
+        <span class="eyebrow">
+          SECURITY ENGINE
+        </span>
+
+        <h2>
+          حماية متعددة الطبقات للترافيك
+        </h2>
+
+        <p>
+          Routix يجمع بين التحكم بالترافيك،
+          تحليل الطلبات، تقييم المخاطر وآليات
+          الحماية المختلفة داخل طبقة واحدة.
+        </p>
+
       </div>
 
-      <pre># Routix Site Configuration
+      <div class="features">
+
+        <article class="feature">
+          <div class="feature-icon">◈</div>
+          <h3>Rate Limiting</h3>
+          <p>تحديد عدد الطلبات المسموح بها لكل IP خلال نافذة زمنية وتقليل إساءة استخدام الموارد.</p>
+          <span class="tag">TRAFFIC_CONTROL</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">⚡</div>
+          <h3>Burst Protection</h3>
+          <p>التعامل مع الارتفاعات المفاجئة والسريعة في الطلبات قبل انتقال الضغط إلى التطبيق الأصلي.</p>
+          <span class="tag">BURST_DETECTION</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">L7</div>
+          <h3>Layer 7 Protection</h3>
+          <p>فحص طلبات HTTP على مستوى التطبيق وتحليل المسارات والرؤوس والبيانات وفق قواعد الحماية.</p>
+          <span class="tag">HTTP_INSPECTION</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">SQL</div>
+          <h3>SQLi Detection</h3>
+          <p>كشف أنماط شائعة مرتبطة بمحاولات SQL Injection داخل الطلبات.</p>
+          <span class="tag">ATTACK_DETECTION</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">X</div>
+          <h3>XSS Detection</h3>
+          <p>فحص الأنماط المعروفة المرتبطة بمحاولات Cross-Site Scripting.</p>
+          <span class="tag">WEB_SECURITY</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">R</div>
+          <h3>Risk Scoring</h3>
+          <p>بناء درجة خطورة للمصادر والطلبات للمساعدة في اتخاذ قرار الحظر أو التقييد أو المراقبة.</p>
+          <span class="tag">RISK_ENGINE</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">H</div>
+          <h3>Honeypot</h3>
+          <p>مسارات طُعم يمكن استخدامها لرصد المصادر التي تتفاعل مع نقاط لا يفترض أن يستخدمها المستخدم الطبيعي.</p>
+          <span class="tag">THREAT_INTELLIGENCE</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">⊘</div>
+          <h3>Blacklist</h3>
+          <p>التعامل مع المصادر التي تتجاوز سياسات الحماية وإبقاؤها ضمن قائمة الحظر حسب منطق النظام.</p>
+          <span class="tag">IP_CONTROL</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">↯</div>
+          <h3>Concurrency Control</h3>
+          <p>التحكم في عدد الاتصالات المتزامنة لكل IP وعلى مستوى الخدمة لتقليل الضغط غير الطبيعي.</p>
+          <span class="tag">CONNECTION_LIMIT</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">◌</div>
+          <h3>Live Alerts</h3>
+          <p>مراقبة الأحداث والتنبيهات بشكل مباشر من خلال قناة الأحداث الخاصة بالـWAF دون الحاجة لتحديث الصفحة.</p>
+          <span class="tag">REAL_TIME</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">▣</div>
+          <h3>Security Headers</h3>
+          <p>تحسين طبقة HTTP الأمنية باستخدام إعدادات Security Headers المناسبة للسيرفر.</p>
+          <span class="tag">HTTP_SECURITY</span>
+        </article>
+
+        <article class="feature">
+          <div class="feature-icon">↗</div>
+          <h3>Reverse Proxy</h3>
+          <p>تمرير الطلبات الطبيعية إلى التطبيق الأصلي مع إبقاء التطبيق خلف طبقة Routix.</p>
+          <span class="tag">PROXY_LAYER</span>
+        </article>
+
+      </div>
+
+    </section>
+
+    <section id="api" class="section">
+
+      <div class="section-title">
+
+        <span class="eyebrow">
+          REQUEST PIPELINE
+        </span>
+
+        <h2>
+          كيف يمر الطلب داخل Routix؟
+        </h2>
+
+        <p>
+          الفكرة الأساسية هي أن Routix يصبح نقطة
+          الدخول العامة، بينما يبقى التطبيق الأصلي
+          خلفه.
+        </p>
+
+      </div>
+
+      <div class="flow">
+
+        <div class="flow-node">
+          <b>CLIENT</b>
+          <span>المستخدم يرسل HTTP Request</span>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+          <b>ROUTIX</b>
+          <span>استقبال وفحص الطلب</span>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+          <b>WAF ENGINE</b>
+          <span>Rate / L7 / Risk / Rules</span>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+          <b>DECISION</b>
+          <span>Allow / Block / Limit</span>
+        </div>
+
+        <div class="flow-arrow">→</div>
+
+        <div class="flow-node">
+          <b>TARGET</b>
+          <span>تمرير الطلب الطبيعي للتطبيق</span>
+        </div>
+
+      </div>
+
+    </section>
+
+    <section id="integration" class="section">
+
+      <div class="section-title">
+
+        <span class="eyebrow">
+          API & INTEGRATION
+        </span>
+
+        <h2>
+          اربط Routix بموقع العميل
+        </h2>
+
+        <p>
+          Routix يعمل كطبقة حماية أمام تطبيق العميل،
+          بحيث تمر الطلبات عبر طبقة الحماية أولًا قبل
+          الوصول إلى التطبيق الأصلي.
+        </p>
+
+      </div>
+
+      <div class="integration">
+
+        <div class="steps">
+
+          <div class="step">
+            <b class="step-number">01</b>
+            <div>
+              <strong>أضف موقعك إلى Routix</strong>
+              <span>أنشئ إعداد الموقع من خلال النظام وحدد النطاق والتطبيق المرتبط به.</span>
+            </div>
+          </div>
+
+          <div class="step">
+            <b class="step-number">02</b>
+            <div>
+              <strong>التحقق من حالة الربط</strong>
+              <span>تحديد رابط موقع العميل في ملف البيئة، ثم توجيه الدومين إلى سيرفرك.</span>
+            </div>
+          </div>
+
+          <div class="step">
+            <b class="step-number">03</b>
+            <div>
+              <strong>وجّه الدومين إلى Routix</strong>
+              <span>بعد إعداد الموقع، وجّه حركة المرور الخاصة بالدومين إلى نقطة الدخول الخاصة بـRoutix.</span>
+            </div>
+          </div>
+
+          <div class="step">
+            <b class="step-number">04</b>
+            <div>
+              <strong>احتفظ بإعدادات السيرفر بشكل آمن</strong>
+              <span>مفاتيح النظام وبيانات الإدارة وإعدادات التطبيق الداخلي تبقى على السيرفر ولا تظهر في الواجهة العامة.</span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="code-card">
+
+          <div class="code-title">
+            <span class="code-dot"></span>
+            ROUTIX / SITE CONFIGURATION
+          </div>
+
+          <pre># Routix Site Configuration
 
 SITE_DOMAIN=your-domain.com
 
@@ -2314,715 +2325,710 @@ TARGET_URL الداخلي
 
 داخل كود الواجهة العامة.</pre>
 
-      <div class="warning">
-        لأسباب أمنية، لا يتم عرض مفاتيح النظام أو بيانات
-        الإدارة أو إعدادات البنية الداخلية في الصفحة العامة.
-        استخدم Token الموقع الذي يتم إنشاؤه من النظام
-        لربط موقعك بخدمة Routix.
+          <div class="warning">
+            لأسباب أمنية، لا يتم عرض مفاتيح النظام أو بيانات
+            الإدارة أو إعدادات البنية الداخلية في الصفحة العامة.
+            استخدم Token الموقع الذي يتم إنشاؤه من النظام
+            لربط موقعك بخدمة Routix.
+          </div>
+
+        </div>
+
       </div>
 
-    </div>
+    </section>
 
-  </div>
-
-</section>
-
-<section id="settings" class="section">
-
-  <div class="section-title">
-
-    <span class="eyebrow">
-      WAF CONFIGURATION
-    </span>
-
-    <h2>
-      الإعدادات التشغيلية
-    </h2>
-
-    <p>
-      يتم التحكم في السلوك التشغيلي للـWAF
-      من خلال إعدادات البيئة الموجودة على السيرفر.
-    </p>
-
-  </div>
-
-  <div class="settings-grid">
-
-    <article class="setting">
-      <h3>Traffic Control</h3>
-      <p>التحكم في معدل الطلبات والحدود العامة وحدود الـBurst.</p>
-      <code>RATE LIMITING<br>BURST PROTECTION<br>GLOBAL TRAFFIC</code>
-    </article>
-
-    <article class="setting">
-      <h3>Risk Engine</h3>
-      <p>تقييم مستوى خطورة الطلبات والمصادر واتخاذ الإجراء المناسب وفق سياسة النظام.</p>
-      <code>RISK ENGINE<br>THREAT DETECTION<br>SECURITY RULES</code>
-    </article>
-
-    <article class="setting">
-      <h3>Concurrency</h3>
-      <p>التحكم في عدد الاتصالات المتزامنة لكل مصدر وعلى مستوى الخدمة.</p>
-      <code>PER-IP LIMIT<br>GLOBAL LIMIT<br>CONNECTION CONTROL</code>
-    </article>
-
-    <article class="setting">
-      <h3>Proxy</h3>
-      <p>إدارة الاتصال بين Routix والتطبيق الأصلي الموجود خلف طبقة الحماية.</p>
-      <code>REVERSE PROXY<br>UPSTREAM<br>CONNECTION ROUTING</code>
-    </article>
-
-    <article class="setting">
-      <h3>Request Limits</h3>
-      <p>التحكم في حدود ومهلات الطلبات والاتصال مع التطبيق الأصلي.</p>
-      <code>REQUEST LIMITS<br>TIMEOUT CONTROL<br>HEADER LIMITS</code>
-    </article>
-
-    <article class="setting">
-      <h3>Security</h3>
-      <p>مفاتيح النظام وبيانات الإدارة والإعدادات الحساسة تتم إدارتها داخليًا على السيرفر.</p>
-      <code>SERVER SIDE ONLY<br>PRIVATE CONFIGURATION<br>SECRET STORAGE</code>
-    </article>
-
-  </div>
-
-</section>
-
-<section id="about" class="section">
-
-  <div class="about">
-
-    <div class="about-copy">
-
-      <span class="eyebrow">
-        ABOUT ROUTIX
-      </span>
+    <section id="settings" class="section">
 
       <div class="section-title">
 
+        <span class="eyebrow">
+          WAF CONFIGURATION
+        </span>
+
         <h2>
-          نبني الحماية بعقلية
-          البنية التحتية.
+          الإعدادات التشغيلية
         </h2>
 
         <p>
-          Routix مشروع تقني طوره مطورون شغوفون
-          بالأمن السيبراني، البنية التحتية وتطوير
-          الأنظمة.
-          <br><br>
-          نؤمن أن طبقة الحماية الجيدة يجب أن تكون
-          عملية، واضحة وقابلة للمراقبة، وأن تمنح
-          المطور رؤية أفضل لما يحدث على مستوى
-          الترافيك والطلبات بدل أن تكون مجرد طبقة
-          غير مرئية أمام التطبيق.
-          <br><br>
-          هدف Routix هو توفير طبقة WAF قابلة للدمج
-          مع المواقع والتطبيقات، مع أدوات للتحكم
-          بالترافيك ومراقبة الأحداث الأمنية.
+          يتم التحكم في السلوك التشغيلي للـWAF
+          من خلال إعدادات البيئة الموجودة على السيرفر.
         </p>
 
       </div>
 
-      <a href="#features" class="btn btn-primary">
-        استكشف Routix ←
-      </a>
+      <div class="settings-grid">
 
-    </div>
+        <article class="setting">
+          <h3>Traffic Control</h3>
+          <p>التحكم في معدل الطلبات والحدود العامة وحدود الـBurst.</p>
+          <code>RATE LIMITING<br>BURST PROTECTION<br>GLOBAL TRAFFIC</code>
+        </article>
 
-    <div class="terminal">
+        <article class="setting">
+          <h3>Risk Engine</h3>
+          <p>تقييم مستوى خطورة الطلبات والمصادر واتخاذ الإجراء المناسب وفق سياسة النظام.</p>
+          <code>RISK ENGINE<br>THREAT DETECTION<br>SECURITY RULES</code>
+        </article>
 
-      <div>
-        <span class="white">$</span>
-        routix start
+        <article class="setting">
+          <h3>Concurrency</h3>
+          <p>التحكم في عدد الاتصالات المتزامنة لكل مصدر وعلى مستوى الخدمة.</p>
+          <code>PER-IP LIMIT<br>GLOBAL LIMIT<br>CONNECTION CONTROL</code>
+        </article>
+
+        <article class="setting">
+          <h3>Proxy</h3>
+          <p>إدارة الاتصال بين Routix والتطبيق الأصلي الموجود خلف طبقة الحماية.</p>
+          <code>REVERSE PROXY<br>UPSTREAM<br>CONNECTION ROUTING</code>
+        </article>
+
+        <article class="setting">
+          <h3>Request Limits</h3>
+          <p>التحكم في حدود ومهلات الطلبات والاتصال مع التطبيق الأصلي.</p>
+          <code>REQUEST LIMITS<br>TIMEOUT CONTROL<br>HEADER LIMITS</code>
+        </article>
+
+        <article class="setting">
+          <h3>Security</h3>
+          <p>مفاتيح النظام وبيانات الإدارة والإعدادات الحساسة تتم إدارتها داخليًا على السيرفر.</p>
+          <code>SERVER SIDE ONLY<br>PRIVATE CONFIGURATION<br>SECRET STORAGE</code>
+        </article>
+
       </div>
 
-      <div class="green">✓ WAF protection enabled</div>
-      <div class="green">✓ L7 inspection enabled</div>
-      <div class="green">✓ Rate limiting enabled</div>
-      <div class="green">✓ Risk engine enabled</div>
-      <div class="green">✓ Honeypot monitoring enabled</div>
-      <div class="green">✓ Blacklist engine enabled</div>
-      <div class="green">✓ Live admin events enabled</div>
+    </section>
 
-      <div>
-        <span class="cyan">→</span>
-        proxying through Routix
+    <section id="about" class="section">
+
+      <div class="about">
+
+        <div class="about-copy">
+
+          <span class="eyebrow">
+            ABOUT ROUTIX
+          </span>
+
+          <div class="section-title">
+
+            <h2>
+              نبني الحماية بعقلية
+              البنية التحتية.
+            </h2>
+
+            <p>
+              Routix مشروع تقني طوره مطورون شغوفون
+              بالأمن السيبراني، البنية التحتية وتطوير
+              الأنظمة.
+              <br><br>
+              نؤمن أن طبقة الحماية الجيدة يجب أن تكون
+              عملية، واضحة وقابلة للمراقبة، وأن تمنح
+              المطور رؤية أفضل لما يحدث على مستوى
+              الترافيك والطلبات بدل أن تكون مجرد طبقة
+              غير مرئية أمام التطبيق.
+              <br><br>
+              هدف Routix هو توفير طبقة WAF قابلة للدمج
+              مع المواقع والتطبيقات، مع أدوات للتحكم
+              بالترافيك ومراقبة الأحداث الأمنية.
+            </p>
+
+          </div>
+
+          <a href="#features" class="btn btn-primary">
+            استكشف Routix ←
+          </a>
+
+        </div>
+
+        <div class="terminal">
+
+          <div>
+            <span class="white">$</span>
+            routix start
+          </div>
+
+          <div class="green">✓ WAF protection enabled</div>
+          <div class="green">✓ L7 inspection enabled</div>
+          <div class="green">✓ Rate limiting enabled</div>
+          <div class="green">✓ Risk engine enabled</div>
+          <div class="green">✓ Honeypot monitoring enabled</div>
+          <div class="green">✓ Blacklist engine enabled</div>
+          <div class="green">✓ Live admin events enabled</div>
+
+          <div>
+            <span class="cyan">→</span>
+            proxying through Routix
+          </div>
+
+          <div>
+            <span class="cyan">→</span>
+            protection layer active
+          </div>
+
+        </div>
+
       </div>
 
-      <div>
-        <span class="cyan">→</span>
-        protection layer active
-      </div>
+    </section>
 
-    </div>
+  </main>
 
-  </div>
-
-</section>
-
-  </main>  <footer>
+  <footer>
     © 2026 <span>Routix</span> — Cloud WAF & Application Protection
-  </footer>  <!-- =========================================================
-       ROUTIX AUTHENTICATION MODAL
-       ========================================================= -->  <div class="auth-overlay" id="authOverlay"><div class="auth-grid"></div>
-<div class="auth-ring"></div>
+  </footer>
 
-<div class="auth-modal">
+  <div class="auth-overlay" id="authOverlay">
 
-  <button
-    type="button"
-    class="auth-close"
-    onclick="closeAuth()"
-    aria-label="إغلاق"
-  >
-    ×
-  </button>
+    <div class="auth-grid"></div>
+    <div class="auth-ring"></div>
 
-  <div class="auth-header">
+    <div class="auth-modal">
 
-    <div class="auth-logo"></div>
+      <button
+        type="button"
+        class="auth-close"
+        onclick="closeAuth()"
+        aria-label="إغلاق"
+      >
+        ×
+      </button>
 
-    <h2>
-      ROUTIX<span>.</span> CLIENT
-    </h2>
+      <div class="auth-header">
 
-    <p>
-      بوابة العملاء الآمنة للوصول إلى
-      خدمات وإعدادات منصتك.
-    </p>
+        <div class="auth-logo"></div>
 
-    <div class="auth-status-line">
-      <i></i>
-      SECURE CLIENT AUTHENTICATION
-    </div>
+        <h2>
+          ROUTIX<span>.</span> CLIENT
+        </h2>
 
-  </div>
+        <p>
+          بوابة العملاء الآمنة للوصول إلى
+          خدمات وإعدادات منصتك.
+        </p>
 
-  <div class="auth-body">
-
-    <!-- LOGIN VIEW -->
-    <div class="auth-view active" id="authLoginView">
-
-      <div class="auth-mini-flow">
-        <div class="auth-mini-node active">IDENTITY</div>
-        <div class="auth-mini-node">VERIFY</div>
-        <div class="auth-mini-node">SESSION</div>
-      </div>
-
-      <div class="auth-field">
-
-        <label for="loginEmail">
-          البريد الإلكتروني
-        </label>
-
-        <div class="auth-input-wrap">
-
-          <span class="auth-input-icon">@</span>
-
-          <input
-            id="loginEmail"
-            class="auth-input"
-            type="email"
-            autocomplete="email"
-            placeholder="client@example.com"
-            dir="ltr"
-          >
-
+        <div class="auth-status-line">
+          <i></i>
+          SECURE CLIENT AUTHENTICATION
         </div>
 
       </div>
 
-      <div class="auth-field">
+      <div class="auth-body">
 
-        <label for="loginPassword">
-          كلمة المرور
-        </label>
+        <div class="auth-view active" id="authLoginView">
 
-        <div class="auth-input-wrap">
+          <div class="auth-mini-flow">
+            <div class="auth-mini-node active">IDENTITY</div>
+            <div class="auth-mini-node">VERIFY</div>
+            <div class="auth-mini-node">SESSION</div>
+          </div>
 
-          <span class="auth-input-icon">●</span>
+          <div class="auth-field">
 
-          <input
-            id="loginPassword"
-            class="auth-input"
-            type="password"
-            autocomplete="current-password"
-            placeholder="••••••••"
-            dir="ltr"
-          >
+            <label for="loginEmail">
+              البريد الإلكتروني
+            </label>
+
+            <div class="auth-input-wrap">
+
+              <span class="auth-input-icon">@</span>
+
+              <input
+                id="loginEmail"
+                class="auth-input"
+                type="email"
+                autocomplete="email"
+                placeholder="client@example.com"
+                dir="ltr"
+              >
+
+            </div>
+
+          </div>
+
+          <div class="auth-field">
+
+            <label for="loginPassword">
+              كلمة المرور
+            </label>
+
+            <div class="auth-input-wrap">
+
+              <span class="auth-input-icon">●</span>
+
+              <input
+                id="loginPassword"
+                class="auth-input"
+                type="password"
+                autocomplete="current-password"
+                placeholder="••••••••"
+                dir="ltr"
+              >
+
+              <button
+                type="button"
+                class="auth-password-toggle"
+                onclick="togglePassword('loginPassword', this)"
+              >
+                ◉
+              </button>
+
+            </div>
+
+          </div>
+
+          <div class="auth-message" id="loginMessage">
+            <span class="auth-message-icon">!</span>
+            <span class="auth-message-text"></span>
+          </div>
 
           <button
             type="button"
-            class="auth-password-toggle"
-            onclick="togglePassword('loginPassword', this)"
+            class="auth-submit"
+            id="loginSubmit"
+            onclick="startCustomerAuth()"
           >
-            ◉
+            <span class="auth-submit-text">
+              متابعة الدخول
+            </span>
+          </button>
+
+          <div class="auth-links">
+
+            <button
+              type="button"
+              class="auth-link"
+              onclick="showForgotPassword()"
+            >
+              نسيت كلمة المرور؟
+            </button>
+
+            <button
+              type="button"
+              class="auth-link highlight"
+              onclick="showRegisterDirect()"
+            >
+              إنشاء حساب
+            </button>
+
+          </div>
+
+          <div class="auth-security">
+            <span>●</span>
+            ROUTIX SECURITY LAYER • SESSION PROTECTED
+          </div>
+
+        </div>
+
+        <div class="auth-view" id="authRegisterOtpView">
+
+          <button
+            type="button"
+            class="auth-back"
+            onclick="showLoginView()"
+          >
+            → العودة
+          </button>
+
+          <div class="auth-flow-title">
+
+            <h3>
+              تحقق من بريدك
+            </h3>
+
+            <p>
+              تم إرسال رمز تحقق إلى البريد الإلكتروني.
+              أدخل الرمز لإكمال إنشاء حسابك.
+            </p>
+
+          </div>
+
+          <div class="otp-email">
+            <span>EMAIL:</span>
+            <strong id="registerOtpEmail"></strong>
+          </div>
+
+          <div class="otp-box">
+
+            <input class="otp-digit" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
+            <input class="otp-digit" maxlength="1" inputmode="numeric">
+            <input class="otp-digit" maxlength="1" inputmode="numeric">
+            <input class="otp-digit" maxlength="1" inputmode="numeric">
+            <input class="otp-digit" maxlength="1" inputmode="numeric">
+            <input class="otp-digit" maxlength="1" inputmode="numeric">
+
+          </div>
+
+          <div class="auth-message" id="registerOtpMessage">
+            <span class="auth-message-icon">!</span>
+            <span class="auth-message-text"></span>
+          </div>
+
+          <button
+            type="button"
+            class="auth-submit"
+            id="registerOtpSubmit"
+            onclick="verifyRegistrationOtp()"
+          >
+            <span class="auth-submit-text">
+              التحقق وإنشاء الحساب
+            </span>
+          </button>
+
+          <div class="auth-security">
+            <span>●</span>
+            OTP VERIFICATION • ROUTIX IDENTITY LAYER
+          </div>
+
+        </div>
+
+        <div class="auth-view" id="authRegisterPasswordView">
+
+          <button
+            type="button"
+            class="auth-back"
+            onclick="showLoginView()"
+          >
+            → العودة
+          </button>
+
+          <div class="auth-flow-title">
+
+            <h3>
+              إنشاء حساب العميل
+            </h3>
+
+            <p>
+              أكمل كلمة المرور الخاصة بالحساب الجديد.
+            </p>
+
+          </div>
+
+          <div class="auth-field">
+
+            <label for="registerEmail">
+              البريد الإلكتروني
+            </label>
+
+            <div class="auth-input-wrap">
+
+              <span class="auth-input-icon">@</span>
+
+              <input
+                id="registerEmail"
+                class="auth-input"
+                type="email"
+                autocomplete="email"
+                placeholder="client@example.com"
+                dir="ltr"
+              >
+
+            </div>
+
+          </div>
+
+          <div class="auth-field">
+
+            <label for="registerPassword">
+              كلمة المرور
+            </label>
+
+            <div class="auth-input-wrap">
+
+              <span class="auth-input-icon">●</span>
+
+              <input
+                id="registerPassword"
+                class="auth-input"
+                type="password"
+                autocomplete="new-password"
+                placeholder="••••••••"
+                dir="ltr"
+              >
+
+              <button
+                type="button"
+                class="auth-password-toggle"
+                onclick="togglePassword('registerPassword', this)"
+              >
+                ◉
+              </button>
+
+            </div>
+
+          </div>
+
+          <div class="auth-message" id="registerMessage">
+            <span class="auth-message-icon">!</span>
+            <span class="auth-message-text"></span>
+          </div>
+
+          <button
+            type="button"
+            class="auth-submit"
+            id="registerSubmit"
+            onclick="registerCustomer()"
+          >
+            <span class="auth-submit-text">
+              إرسال رمز التحقق
+            </span>
+          </button>
+
+        </div>
+
+        <div class="auth-view" id="authForgotView">
+
+          <button
+            type="button"
+            class="auth-back"
+            onclick="showLoginView()"
+          >
+            → العودة
+          </button>
+
+          <div class="auth-flow-title">
+
+            <h3>
+              استعادة الوصول
+            </h3>
+
+            <p>
+              أدخل البريد المرتبط بالحساب، وسيتم إرسال
+              رمز OTP لإعادة تعيين كلمة المرور.
+            </p>
+
+          </div>
+
+          <div class="auth-field">
+
+            <label for="forgotEmail">
+              البريد الإلكتروني
+            </label>
+
+            <div class="auth-input-wrap">
+
+              <span class="auth-input-icon">@</span>
+
+              <input
+                id="forgotEmail"
+                class="auth-input"
+                type="email"
+                autocomplete="email"
+                placeholder="client@example.com"
+                dir="ltr"
+              >
+
+            </div>
+
+          </div>
+
+          <div class="auth-message" id="forgotMessage">
+            <span class="auth-message-icon">!</span>
+            <span class="auth-message-text"></span>
+          </div>
+
+          <button
+            type="button"
+            class="auth-submit"
+            id="forgotSubmit"
+            onclick="sendForgotPasswordOtp()"
+          >
+            <span class="auth-submit-text">
+              إرسال رمز الاستعادة
+            </span>
+          </button>
+
+        </div>
+
+        <div class="auth-view" id="authResetView">
+
+          <button
+            type="button"
+            class="auth-back"
+            onclick="showForgotPassword()"
+          >
+            → العودة
+          </button>
+
+          <div class="auth-flow-title">
+
+            <h3>
+              تغيير كلمة المرور
+            </h3>
+
+            <p>
+              أدخل رمز OTP ثم كلمة المرور الجديدة.
+            </p>
+
+          </div>
+
+          <div class="otp-email">
+            <span>EMAIL:</span>
+            <strong id="resetOtpEmail"></strong>
+          </div>
+
+          <div class="otp-box">
+
+            <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
+            <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric">
+            <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric">
+            <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric">
+            <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric">
+            <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric">
+
+          </div>
+
+          <div class="auth-field">
+
+            <label for="newPassword">
+              كلمة المرور الجديدة
+            </label>
+
+            <div class="auth-input-wrap">
+
+              <span class="auth-input-icon">●</span>
+
+              <input
+                id="newPassword"
+                class="auth-input"
+                type="password"
+                autocomplete="new-password"
+                placeholder="••••••••"
+                dir="ltr"
+              >
+
+              <button
+                type="button"
+                class="auth-password-toggle"
+                onclick="togglePassword('newPassword', this)"
+              >
+                ◉
+              </button>
+
+            </div>
+
+          </div>
+
+          <div class="auth-message" id="resetMessage">
+            <span class="auth-message-icon">!</span>
+            <span class="auth-message-text"></span>
+          </div>
+
+          <button
+            type="button"
+            class="auth-submit"
+            id="resetSubmit"
+            onclick="resetCustomerPassword()"
+          >
+            <span class="auth-submit-text">
+              تغيير كلمة المرور والدخول
+            </span>
+          </button>
+
+        </div>
+
+        <div class="auth-view" id="authDirectRegisterView">
+
+          <button
+            type="button"
+            class="auth-back"
+            onclick="showLoginView()"
+          >
+            → العودة لتسجيل الدخول
+          </button>
+
+          <div class="auth-flow-title">
+
+            <h3>
+              إنشاء حساب جديد
+            </h3>
+
+            <p>
+              أدخل البريد وكلمة المرور، وبعدها سيتم
+              إرسال OTP للتحقق من البريد.
+            </p>
+
+          </div>
+
+          <div class="auth-field">
+
+            <label for="directRegisterEmail">
+              البريد الإلكتروني
+            </label>
+
+            <div class="auth-input-wrap">
+
+              <span class="auth-input-icon">@</span>
+
+              <input
+                id="directRegisterEmail"
+                class="auth-input"
+                type="email"
+                autocomplete="email"
+                placeholder="client@example.com"
+                dir="ltr"
+              >
+
+            </div>
+
+          </div>
+
+          <div class="auth-field">
+
+            <label for="directRegisterPassword">
+              كلمة المرور
+            </label>
+
+            <div class="auth-input-wrap">
+
+              <span class="auth-input-icon">●</span>
+
+              <input
+                id="directRegisterPassword"
+                class="auth-input"
+                type="password"
+                autocomplete="new-password"
+                placeholder="••••••••"
+                dir="ltr"
+              >
+
+              <button
+                type="button"
+                class="auth-password-toggle"
+                onclick="togglePassword('directRegisterPassword', this)"
+              >
+                ◉
+              </button>
+
+            </div>
+
+          </div>
+
+          <div class="auth-message" id="directRegisterMessage">
+            <span class="auth-message-icon">!</span>
+            <span class="auth-message-text"></span>
+          </div>
+
+          <button
+            type="button"
+            class="auth-submit"
+            id="directRegisterSubmit"
+            onclick="directRegisterCustomer()"
+          >
+            <span class="auth-submit-text">
+              إنشاء الحساب وإرسال OTP
+            </span>
           </button>
 
         </div>
 
       </div>
-
-      <div class="auth-message" id="loginMessage">
-        <span class="auth-message-icon">!</span>
-        <span class="auth-message-text"></span>
-      </div>
-
-      <button
-        type="button"
-        class="auth-submit"
-        id="loginSubmit"
-        onclick="startCustomerAuth()"
-      >
-        <span class="auth-submit-text">
-          متابعة الدخول
-        </span>
-      </button>
-
-      <div class="auth-links">
-
-        <button
-          type="button"
-          class="auth-link"
-          onclick="showForgotPassword()"
-        >
-          نسيت كلمة المرور؟
-        </button>
-
-        <button
-          type="button"
-          class="auth-link highlight"
-          onclick="showRegisterDirect()"
-        >
-          إنشاء حساب
-        </button>
-
-      </div>
-
-      <div class="auth-security">
-        <span>●</span>
-        ROUTIX SECURITY LAYER • SESSION PROTECTED
-      </div>
-
-    </div>
-
-
-    <!-- REGISTER OTP VIEW -->
-    <div class="auth-view" id="authRegisterOtpView">
-
-      <button
-        type="button"
-        class="auth-back"
-        onclick="showLoginView()"
-      >
-        → العودة
-      </button>
-
-      <div class="auth-flow-title">
-
-        <h3>
-          تحقق من بريدك
-        </h3>
-
-        <p>
-          تم إرسال رمز تحقق إلى البريد الإلكتروني.
-          أدخل الرمز لإكمال إنشاء حسابك.
-        </p>
-
-      </div>
-
-      <div class="otp-email">
-        <span>EMAIL:</span>
-        <strong id="registerOtpEmail"></strong>
-      </div>
-
-      <div class="otp-box">
-
-        <input class="otp-digit" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
-        <input class="otp-digit" maxlength="1" inputmode="numeric">
-        <input class="otp-digit" maxlength="1" inputmode="numeric">
-        <input class="otp-digit" maxlength="1" inputmode="numeric">
-        <input class="otp-digit" maxlength="1" inputmode="numeric">
-        <input class="otp-digit" maxlength="1" inputmode="numeric">
-
-      </div>
-
-      <div class="auth-message" id="registerOtpMessage">
-        <span class="auth-message-icon">!</span>
-        <span class="auth-message-text"></span>
-      </div>
-
-      <button
-        type="button"
-        class="auth-submit"
-        id="registerOtpSubmit"
-        onclick="verifyRegistrationOtp()"
-      >
-        <span class="auth-submit-text">
-          التحقق وإنشاء الحساب
-        </span>
-      </button>
-
-      <div class="auth-security">
-        <span>●</span>
-        OTP VERIFICATION • ROUTIX IDENTITY LAYER
-      </div>
-
-    </div>
-
-
-    <!-- REGISTER PASSWORD VIEW -->
-    <div class="auth-view" id="authRegisterPasswordView">
-
-      <button
-        type="button"
-        class="auth-back"
-        onclick="showLoginView()"
-      >
-        → العودة
-      </button>
-
-      <div class="auth-flow-title">
-
-        <h3>
-          إنشاء حساب العميل
-        </h3>
-
-        <p>
-          أكمل كلمة المرور الخاصة بالحساب الجديد.
-        </p>
-
-      </div>
-
-      <div class="auth-field">
-
-        <label for="registerEmail">
-          البريد الإلكتروني
-        </label>
-
-        <div class="auth-input-wrap">
-
-          <span class="auth-input-icon">@</span>
-
-          <input
-            id="registerEmail"
-            class="auth-input"
-            type="email"
-            autocomplete="email"
-            placeholder="client@example.com"
-            dir="ltr"
-          >
-
-        </div>
-
-      </div>
-
-      <div class="auth-field">
-
-        <label for="registerPassword">
-          كلمة المرور
-        </label>
-
-        <div class="auth-input-wrap">
-
-          <span class="auth-input-icon">●</span>
-
-          <input
-            id="registerPassword"
-            class="auth-input"
-            type="password"
-            autocomplete="new-password"
-            placeholder="••••••••"
-            dir="ltr"
-          >
-
-          <button
-            type="button"
-            class="auth-password-toggle"
-            onclick="togglePassword('registerPassword', this)"
-          >
-            ◉
-          </button>
-
-        </div>
-
-      </div>
-
-      <div class="auth-message" id="registerMessage">
-        <span class="auth-message-icon">!</span>
-        <span class="auth-message-text"></span>
-      </div>
-
-      <button
-        type="button"
-        class="auth-submit"
-        id="registerSubmit"
-        onclick="registerCustomer()"
-      >
-        <span class="auth-submit-text">
-          إرسال رمز التحقق
-        </span>
-      </button>
-
-    </div>
-
-
-    <!-- FORGOT PASSWORD EMAIL VIEW -->
-    <div class="auth-view" id="authForgotView">
-
-      <button
-        type="button"
-        class="auth-back"
-        onclick="showLoginView()"
-      >
-        → العودة
-      </button>
-
-      <div class="auth-flow-title">
-
-        <h3>
-          استعادة الوصول
-        </h3>
-
-        <p>
-          أدخل البريد المرتبط بالحساب، وسيتم إرسال
-          رمز OTP لإعادة تعيين كلمة المرور.
-        </p>
-
-      </div>
-
-      <div class="auth-field">
-
-        <label for="forgotEmail">
-          البريد الإلكتروني
-        </label>
-
-        <div class="auth-input-wrap">
-
-          <span class="auth-input-icon">@</span>
-
-          <input
-            id="forgotEmail"
-            class="auth-input"
-            type="email"
-            autocomplete="email"
-            placeholder="client@example.com"
-            dir="ltr"
-          >
-
-        </div>
-
-      </div>
-
-      <div class="auth-message" id="forgotMessage">
-        <span class="auth-message-icon">!</span>
-        <span class="auth-message-text"></span>
-      </div>
-
-      <button
-        type="button"
-        class="auth-submit"
-        id="forgotSubmit"
-        onclick="sendForgotPasswordOtp()"
-      >
-        <span class="auth-submit-text">
-          إرسال رمز الاستعادة
-        </span>
-      </button>
-
-    </div>
-
-
-    <!-- FORGOT PASSWORD OTP + NEW PASSWORD VIEW -->
-    <div class="auth-view" id="authResetView">
-
-      <button
-        type="button"
-        class="auth-back"
-        onclick="showForgotPassword()"
-      >
-        → العودة
-      </button>
-
-      <div class="auth-flow-title">
-
-        <h3>
-          تغيير كلمة المرور
-        </h3>
-
-        <p>
-          أدخل رمز OTP ثم كلمة المرور الجديدة.
-        </p>
-
-      </div>
-
-      <div class="otp-email">
-        <span>EMAIL:</span>
-        <strong id="resetOtpEmail"></strong>
-      </div>
-
-      <div class="otp-box">
-
-        <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
-        <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric">
-        <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric">
-        <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric">
-        <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric">
-        <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric">
-
-      </div>
-
-      <div class="auth-field">
-
-        <label for="newPassword">
-          كلمة المرور الجديدة
-        </label>
-
-        <div class="auth-input-wrap">
-
-          <span class="auth-input-icon">●</span>
-
-          <input
-            id="newPassword"
-            class="auth-input"
-            type="password"
-            autocomplete="new-password"
-            placeholder="••••••••"
-            dir="ltr"
-          >
-
-          <button
-            type="button"
-            class="auth-password-toggle"
-            onclick="togglePassword('newPassword', this)"
-          >
-            ◉
-          </button>
-
-        </div>
-
-      </div>
-
-      <div class="auth-message" id="resetMessage">
-        <span class="auth-message-icon">!</span>
-        <span class="auth-message-text"></span>
-      </div>
-
-      <button
-        type="button"
-        class="auth-submit"
-        id="resetSubmit"
-        onclick="resetCustomerPassword()"
-      >
-        <span class="auth-submit-text">
-          تغيير كلمة المرور والدخول
-        </span>
-      </button>
-
-    </div>
-
-
-    <!-- REGISTER DIRECT VIEW -->
-    <div class="auth-view" id="authDirectRegisterView">
-
-      <button
-        type="button"
-        class="auth-back"
-        onclick="showLoginView()"
-      >
-        → العودة لتسجيل الدخول
-      </button>
-
-      <div class="auth-flow-title">
-
-        <h3>
-          إنشاء حساب جديد
-        </h3>
-
-        <p>
-          أدخل البريد وكلمة المرور، وبعدها سيتم
-          إرسال OTP للتحقق من البريد.
-        </p>
-
-      </div>
-
-      <div class="auth-field">
-
-        <label for="directRegisterEmail">
-          البريد الإلكتروني
-        </label>
-
-        <div class="auth-input-wrap">
-
-          <span class="auth-input-icon">@</span>
-
-          <input
-            id="directRegisterEmail"
-            class="auth-input"
-            type="email"
-            autocomplete="email"
-            placeholder="client@example.com"
-            dir="ltr"
-          >
-
-        </div>
-
-      </div>
-
-      <div class="auth-field">
-
-        <label for="directRegisterPassword">
-          كلمة المرور
-        </label>
-
-        <div class="auth-input-wrap">
-
-          <span class="auth-input-icon">●</span>
-
-          <input
-            id="directRegisterPassword"
-            class="auth-input"
-            type="password"
-            autocomplete="new-password"
-            placeholder="••••••••"
-            dir="ltr"
-          >
-
-          <button
-            type="button"
-            class="auth-password-toggle"
-            onclick="togglePassword('directRegisterPassword', this)"
-          >
-            ◉
-          </button>
-
-        </div>
-
-      </div>
-
-      <div class="auth-message" id="directRegisterMessage">
-        <span class="auth-message-icon">!</span>
-        <span class="auth-message-text"></span>
-      </div>
-
-      <button
-        type="button"
-        class="auth-submit"
-        id="directRegisterSubmit"
-        onclick="directRegisterCustomer()"
-      >
-        <span class="auth-submit-text">
-          إنشاء الحساب وإرسال OTP
-        </span>
-      </button>
 
     </div>
 
   </div>
 
-</div>
-
-  </div>  <script>
+  <script>
 
     /* =========================================================
        ORIGINAL FUNCTIONS
@@ -3075,15 +3081,13 @@ TARGET_URL الداخلي
     let authEmail = "";
     let authPassword = "";
 
-    /*
-      جميع طلبات API تمر من نفس الأصل.
-      هذا مناسب عندما تكون صفحة HTML والـAPI على نفس الدومين.
-    */
     const AUTH_API = "";
 
 
     function normalizeEmail(email) {
-      return String(email || "").trim().toLowerCase();
+      return String(email || "")
+        .trim()
+        .toLowerCase();
     }
 
 
@@ -3097,34 +3101,77 @@ TARGET_URL الداخلي
     }
 
 
+    /*
+      ==========================================================
+      API REQUEST
+      ==========================================================
+
+      مهم:
+      نرسل credentials: include حتى يتم حفظ Session/Cookie
+      الذي ينشئه السيرفر بعد تسجيل الدخول.
+    */
+
     async function apiRequest(path, options = {}) {
 
-      const response = await fetch(getApiUrl(path), {
+      const requestOptions = {
         ...options,
         credentials: "include",
         headers: {
-          "Content-Type": "application/json",
+          ...(options.body !== undefined
+            ? { "Content-Type": "application/json" }
+            : {}),
           ...(options.headers || {})
         }
-      });
+      };
+
+      const response = await fetch(
+        getApiUrl(path),
+        requestOptions
+      );
 
       let data = {};
 
-      try {
-        data = await response.json();
-      } catch (_) {
-        data = {};
+      const contentType =
+        response.headers.get("content-type") || "";
+
+      if (contentType.includes("application/json")) {
+
+        try {
+          data = await response.json();
+        } catch (_) {
+          data = {};
+        }
+
+      } else {
+
+        try {
+          const text = await response.text();
+
+          if (text) {
+            try {
+              data = JSON.parse(text);
+            } catch (_) {
+              data = {
+                message: text
+              };
+            }
+          }
+
+        } catch (_) {
+          data = {};
+        }
       }
 
       if (!response.ok) {
 
         const message =
-          data?.message ||
-          data?.error ||
-          data?.msg ||
-          "تعذر تنفيذ العملية.";
+          extractMessage(
+            data,
+            `تعذر تنفيذ العملية. HTTP ${response.status}`
+          );
 
         const error = new Error(message);
+
         error.status = response.status;
         error.data = data;
 
@@ -3136,25 +3183,445 @@ TARGET_URL الداخلي
 
 
     function extractMessage(data, fallback) {
+
+      if (!data) {
+        return fallback;
+      }
+
+      if (typeof data === "string") {
+        return data || fallback;
+      }
+
       return (
         data?.message ||
         data?.error ||
         data?.msg ||
         data?.detail ||
+        data?.data?.message ||
+        data?.data?.error ||
         fallback
       );
     }
 
 
+    /*
+      ==========================================================
+      FIX مهم جدًا:
+      تفسير نتيجة /api/check-email
+      ==========================================================
+
+      السيرفر ممكن يرجع:
+
+      { exists: true }
+
+      أو:
+
+      { exists: "true" }
+
+      أو:
+
+      { exists: 1 }
+
+      أو:
+
+      { found: true }
+
+      أو:
+
+      { userExists: true }
+
+      أو:
+
+      { accountExists: true }
+
+      أو:
+
+      { data: { exists: true } }
+
+      أو:
+
+      { data: { found: true } }
+
+      أو حتى:
+
+      { account: {...} }
+
+      أو:
+
+      { user: {...} }
+
+      لذلك لا نعتمد فقط على === true.
+    */
+
+    function parseBooleanValue(value) {
+
+      if (value === true) {
+        return true;
+      }
+
+      if (value === false) {
+        return false;
+      }
+
+      if (typeof value === "number") {
+
+        if (value === 1) {
+          return true;
+        }
+
+        if (value === 0) {
+          return false;
+        }
+      }
+
+      if (typeof value === "string") {
+
+        const normalized =
+          value
+            .trim()
+            .toLowerCase();
+
+        if (
+          normalized === "true" ||
+          normalized === "1" ||
+          normalized === "yes" ||
+          normalized === "found" ||
+          normalized === "exists" ||
+          normalized === "existing" ||
+          normalized === "registered" ||
+          normalized === "available"
+        ) {
+          return true;
+        }
+
+        if (
+          normalized === "false" ||
+          normalized === "0" ||
+          normalized === "no" ||
+          normalized === "not_found" ||
+          normalized === "not-found" ||
+          normalized === "missing" ||
+          normalized === "new" ||
+          normalized === "unregistered"
+        ) {
+          return false;
+        }
+      }
+
+      return null;
+    }
+
+
+    function getNestedValue(object, path) {
+
+      return path.reduce((current, key) => {
+
+        if (
+          current &&
+          Object.prototype.hasOwnProperty.call(current, key)
+        ) {
+          return current[key];
+        }
+
+        return undefined;
+
+      }, object);
+    }
+
+
+    function detectAccountExists(result) {
+
+      if (!result) {
+        return null;
+      }
+
+      /*
+        لو الرد عبارة عن Boolean مباشر.
+      */
+
+      const directBoolean =
+        parseBooleanValue(result);
+
+      if (directBoolean !== null) {
+        return directBoolean;
+      }
+
+
+      /*
+        الحقول الشائعة.
+      */
+
+      const existenceKeys = [
+        "exists",
+        "found",
+        "userExists",
+        "accountExists",
+        "emailExists",
+        "isExisting",
+        "registered",
+        "isRegistered",
+        "hasAccount",
+        "accountFound",
+        "userFound"
+      ];
+
+
+      /*
+        نفحص المستوى الأساسي أولًا.
+      */
+
+      for (const key of existenceKeys) {
+
+        if (
+          Object.prototype.hasOwnProperty.call(
+            result,
+            key
+          )
+        ) {
+
+          const parsed =
+            parseBooleanValue(result[key]);
+
+          if (parsed !== null) {
+            return parsed;
+          }
+        }
+      }
+
+
+      /*
+        نفحص data.
+      */
+
+      if (
+        result.data &&
+        typeof result.data === "object"
+      ) {
+
+        for (const key of existenceKeys) {
+
+          if (
+            Object.prototype.hasOwnProperty.call(
+              result.data,
+              key
+            )
+          ) {
+
+            const parsed =
+              parseBooleanValue(
+                result.data[key]
+              );
+
+            if (parsed !== null) {
+              return parsed;
+            }
+          }
+        }
+      }
+
+
+      /*
+        نفحص account / user.
+
+        إذا رجع السيرفر account أو user ككائن
+        فهذا يعني أن الحساب موجود.
+      */
+
+      if (
+        result.account &&
+        typeof result.account === "object"
+      ) {
+        return true;
+      }
+
+      if (
+        result.user &&
+        typeof result.user === "object"
+      ) {
+        return true;
+      }
+
+      if (
+        result.data?.account &&
+        typeof result.data.account === "object"
+      ) {
+        return true;
+      }
+
+      if (
+        result.data?.user &&
+        typeof result.data.user === "object"
+      ) {
+        return true;
+      }
+
+
+      /*
+        نفحص status.
+      */
+
+      const statusValues = [
+        result.status,
+        result.accountStatus,
+        result.data?.status,
+        result.data?.accountStatus
+      ];
+
+      for (const value of statusValues) {
+
+        if (value === undefined || value === null) {
+          continue;
+        }
+
+        const status =
+          String(value)
+            .trim()
+            .toLowerCase();
+
+        if (
+          status === "exists" ||
+          status === "found" ||
+          status === "registered" ||
+          status === "existing" ||
+          status === "active"
+        ) {
+          return true;
+        }
+
+        if (
+          status === "not_found" ||
+          status === "not-found" ||
+          status === "missing" ||
+          status === "new" ||
+          status === "unregistered"
+        ) {
+          return false;
+        }
+      }
+
+
+      /*
+        بعض الـAPIs ترجع:
+        count: 1
+        أو:
+        count: 0
+      */
+
+      const counts = [
+        result.count,
+        result.data?.count,
+        result.total,
+        result.data?.total
+      ];
+
+      for (const count of counts) {
+
+        if (typeof count === "number") {
+
+          if (count > 0) {
+            return true;
+          }
+
+          if (count === 0) {
+            return false;
+          }
+        }
+
+        if (
+          typeof count === "string" &&
+          /^\d+$/.test(count.trim())
+        ) {
+
+          const numericCount =
+            Number(count.trim());
+
+          if (numericCount > 0) {
+            return true;
+          }
+
+          if (numericCount === 0) {
+            return false;
+          }
+        }
+      }
+
+
+      /*
+        لم نستطع تحديد الحالة.
+      */
+
+      return null;
+    }
+
+
+    /*
+      ==========================================================
+      CHECK EMAIL
+      ==========================================================
+
+      نجرب POST أولًا.
+
+      إذا كان endpoint عندك مضبوط GET ويرجع 405/404،
+      نجرب GET تلقائيًا بدون تغيير بقية النظام.
+    */
+
+    async function checkCustomerEmail(email) {
+
+      try {
+
+        return await apiRequest(
+          "/api/check-email",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              email
+            })
+          }
+        );
+
+      } catch (error) {
+
+        /*
+          بعض السيرفرات تستخدم GET بدل POST.
+          لذلك نحاول GET فقط إذا كانت المشكلة
+          من طريقة الطلب.
+        */
+
+        if (
+          error.status === 404 ||
+          error.status === 405
+        ) {
+
+          const query =
+            encodeURIComponent(email);
+
+          return await apiRequest(
+            `/api/check-email?email=${query}`,
+            {
+              method: "GET"
+            }
+          );
+        }
+
+        throw error;
+      }
+    }
+
+
     function showAuthMessage(id, message, type = "error") {
 
-      const box = document.getElementById(id);
+      const box =
+        document.getElementById(id);
 
       if (!box) return;
 
-      box.className = "auth-message show " + type;
+      box.className =
+        "auth-message show " + type;
 
-      const text = box.querySelector(".auth-message-text");
+      const text =
+        box.querySelector(
+          ".auth-message-text"
+        );
 
       if (text) {
         text.textContent = message;
@@ -3164,13 +3631,17 @@ TARGET_URL الداخلي
 
     function hideAuthMessage(id) {
 
-      const box = document.getElementById(id);
+      const box =
+        document.getElementById(id);
 
       if (!box) return;
 
       box.className = "auth-message";
 
-      const text = box.querySelector(".auth-message-text");
+      const text =
+        box.querySelector(
+          ".auth-message-text"
+        );
 
       if (text) {
         text.textContent = "";
@@ -3180,11 +3651,16 @@ TARGET_URL الداخلي
 
     function setButtonLoading(id, loading) {
 
-      const button = document.getElementById(id);
+      const button =
+        document.getElementById(id);
 
       if (!button) return;
 
-      button.classList.toggle("loading", loading);
+      button.classList.toggle(
+        "loading",
+        loading
+      );
+
       button.disabled = loading;
     }
 
@@ -3197,8 +3673,14 @@ TARGET_URL الداخلي
       showLoginView();
 
       setTimeout(() => {
-        const email = document.getElementById("loginEmail");
-        if (email) email.focus();
+
+        const email =
+          document.getElementById("loginEmail");
+
+        if (email) {
+          email.focus();
+        }
+
       }, 250);
     }
 
@@ -3212,19 +3694,24 @@ TARGET_URL الداخلي
 
     function showView(id) {
 
-      document.querySelectorAll(".auth-view").forEach(view => {
-        view.classList.remove("active");
-      });
+      document
+        .querySelectorAll(".auth-view")
+        .forEach(view => {
+          view.classList.remove("active");
+        });
 
-      const target = document.getElementById(id);
+      const target =
+        document.getElementById(id);
 
       if (target) {
         target.classList.add("active");
       }
 
-      document.querySelectorAll(".auth-message").forEach(message => {
-        message.className = "auth-message";
-      });
+      document
+        .querySelectorAll(".auth-message")
+        .forEach(message => {
+          message.className = "auth-message";
+        });
     }
 
 
@@ -3232,9 +3719,10 @@ TARGET_URL الداخلي
 
       showView("authLoginView");
 
-      const loginEmail = document.getElementById("loginEmail");
+      const loginEmail =
+        document.getElementById("loginEmail");
 
-      if (authEmail) {
+      if (loginEmail && authEmail) {
         loginEmail.value = authEmail;
       }
     }
@@ -3244,14 +3732,22 @@ TARGET_URL الداخلي
 
       showView("authForgotView");
 
-      const forgotEmail = document.getElementById("forgotEmail");
+      const forgotEmail =
+        document.getElementById("forgotEmail");
 
-      if (forgotEmail && authEmail) {
+      if (
+        forgotEmail &&
+        authEmail
+      ) {
         forgotEmail.value = authEmail;
       }
 
       setTimeout(() => {
-        if (forgotEmail) forgotEmail.focus();
+
+        if (forgotEmail) {
+          forgotEmail.focus();
+        }
+
       }, 100);
     }
 
@@ -3260,28 +3756,45 @@ TARGET_URL الداخلي
 
       showView("authDirectRegisterView");
 
-      const email = document.getElementById("directRegisterEmail");
+      const email =
+        document.getElementById(
+          "directRegisterEmail"
+        );
 
-      if (email && authEmail) {
+      if (
+        email &&
+        authEmail
+      ) {
         email.value = authEmail;
       }
 
       setTimeout(() => {
-        if (email) email.focus();
+
+        if (email) {
+          email.focus();
+        }
+
       }, 100);
     }
 
 
-    function togglePassword(inputId, button) {
+    function togglePassword(
+      inputId,
+      button
+    ) {
 
-      const input = document.getElementById(inputId);
+      const input =
+        document.getElementById(inputId);
 
       if (!input) return;
 
       if (input.type === "password") {
+
         input.type = "text";
         button.textContent = "◌";
+
       } else {
+
         input.type = "password";
         button.textContent = "◉";
       }
@@ -3289,30 +3802,38 @@ TARGET_URL الداخلي
 
 
     /*
-      التدفق الأساسي:
+      ==========================================================
+      LOGIN FLOW
+      ==========================================================
 
       Email + Password
              ↓
       /api/check-email
              ↓
-      موجود؟ ───── لا ───→ /api/register
-        │                       ↓
-        │                     OTP
-        │                       ↓
-        │                 /api/verify-otp
-        │
-        نعم
-        ↓
+      موجود؟
+        ↓ نعم
       /api/login
+             ↓
+      Session
     */
 
     async function startCustomerAuth() {
 
-      const emailInput = document.getElementById("loginEmail");
-      const passwordInput = document.getElementById("loginPassword");
+      const emailInput =
+        document.getElementById("loginEmail");
 
-      const email = normalizeEmail(emailInput.value);
-      const password = String(passwordInput.value || "");
+      const passwordInput =
+        document.getElementById("loginPassword");
+
+      const email =
+        normalizeEmail(
+          emailInput.value
+        );
+
+      const password =
+        String(
+          passwordInput.value || ""
+        );
 
       hideAuthMessage("loginMessage");
 
@@ -3343,143 +3864,135 @@ TARGET_URL الداخلي
       authEmail = email;
       authPassword = password;
 
-      setButtonLoading("loginSubmit", true);
+      setButtonLoading(
+        "loginSubmit",
+        true
+      );
 
       try {
 
         /*
-          /api/check-email
-          نرسل البريد فقط للبحث عن الحساب.
+          هنا الإصلاح الأساسي:
+          استخدام checkCustomerEmail + detectAccountExists
+          بدل الاعتماد على result.exists === true فقط.
         */
 
-        const result = await apiRequest(
-          "/api/check-email",
-          {
-            method: "POST",
-            body: JSON.stringify({
-              email
-            })
-          }
-        );
+        const result =
+          await checkCustomerEmail(email);
+
+        const accountExists =
+          detectAccountExists(result);
+
 
         /*
-          دعم أكثر من شكل محتمل لرد السيرفر:
-          exists
-          exists: true/false
-          found
-          userExists
+          الحساب موجود فعليًا.
         */
 
-        const exists =
-          result?.exists === true ||
-          result?.found === true ||
-          result?.userExists === true ||
-          result?.accountExists === true;
+        if (accountExists === true) {
 
-        const explicitlyMissing =
-          result?.exists === false ||
-          result?.found === false ||
-          result?.userExists === false ||
-          result?.accountExists === false;
+          await loginExistingCustomer(
+            email,
+            password
+          );
 
-        if (exists) {
-
-          /*
-            الحساب موجود
-            → /api/login
-          */
-
-          await loginExistingCustomer(email, password);
-
-        } else if (explicitlyMissing) {
-
-          /*
-            الحساب غير موجود
-            → /api/register
-          */
-
-          await beginRegistration(email, password);
-
-        } else {
-
-          /*
-            في حال كان رد الـAPI لا يستخدم أسماء الحقول المعتادة،
-            نحاول تفسير بعض الصيغ الإضافية.
-          */
-
-          const status =
-            String(
-              result?.status ||
-              result?.accountStatus ||
-              ""
-            ).toLowerCase();
-
-          if (
-            status === "exists" ||
-            status === "found" ||
-            status === "registered"
-          ) {
-
-            await loginExistingCustomer(email, password);
-
-          } else if (
-            status === "not_found" ||
-            status === "missing" ||
-            status === "new"
-          ) {
-
-            await beginRegistration(email, password);
-
-          } else {
-
-            throw new Error(
-              extractMessage(
-                result,
-                "تعذر تحديد حالة الحساب من الخادم."
-              )
-            );
-          }
+          return;
         }
+
+
+        /*
+          الحساب غير موجود فعليًا.
+        */
+
+        if (accountExists === false) {
+
+          await beginRegistration(
+            email,
+            password
+          );
+
+          return;
+        }
+
+
+        /*
+          إذا لم نفهم الرد،
+          لا نرسل المستخدم مباشرة للتسجيل
+          حتى لا يحصل تعارض مع حساب موجود.
+        */
+
+        console.error(
+          "ROUTIX /api/check-email unexpected response:",
+          result
+        );
+
+        throw new Error(
+          "تعذر تحديد حالة الحساب من الخادم. تحقق من استجابة /api/check-email."
+        );
 
       } catch (error) {
 
+        console.error(
+          "ROUTIX CUSTOMER AUTH ERROR:",
+          error
+        );
+
         showAuthMessage(
           "loginMessage",
-          error.message || "حدث خطأ أثناء الاتصال بالخادم.",
+          error.message ||
+          "حدث خطأ أثناء الاتصال بالخادم.",
           "error"
         );
 
       } finally {
 
-        setButtonLoading("loginSubmit", false);
+        setButtonLoading(
+          "loginSubmit",
+          false
+        );
       }
     }
 
 
-    async function loginExistingCustomer(email, password) {
+    async function loginExistingCustomer(
+      email,
+      password
+    ) {
 
       try {
 
-        const result = await apiRequest(
-          "/api/login",
-          {
-            method: "POST",
-            body: JSON.stringify({
-              email,
-              password
-            })
-          }
-        );
+        /*
+          الحساب موجود:
+          الآن فقط نتحقق من كلمة المرور.
+        */
+
+        const result =
+          await apiRequest(
+            "/api/login",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                email,
+                password
+              })
+            }
+          );
+
 
         /*
-          نجاح تسجيل الدخول:
-          السيرفر ينشئ Session.
+          لا نفترض أن السيرفر يجب أن يرجع
+          success:true بالضرورة.
+
+          إذا كان HTTP status = 2xx
+          ولم يرجع success:false صراحة،
+          نعتبر العملية ناجحة.
         */
 
         const success =
           result?.success !== false &&
           result?.authenticated !== false &&
-          result?.loggedIn !== false;
+          result?.loggedIn !== false &&
+          result?.valid !== false;
+
 
         if (!success) {
 
@@ -3495,17 +4008,22 @@ TARGET_URL الداخلي
           return;
         }
 
+
         updateCustomerSession(
           result?.email ||
           result?.user?.email ||
+          result?.data?.email ||
+          result?.data?.user?.email ||
           email
         );
 
+
         showAuthMessage(
           "loginMessage",
-          "تم تسجيل الدخول بنجاح. تم إنشاء Session للحساب.",
+          "تم تسجيل الدخول بنجاح.",
           "success"
         );
+
 
         setTimeout(() => {
           closeAuth();
@@ -3513,48 +4031,50 @@ TARGET_URL الداخلي
 
       } catch (error) {
 
-        /*
-          إذا كانت كلمة المرور خاطئة يظهر للمستخدم
-          خيار استعادة كلمة المرور.
-        */
-
         showAuthMessage(
           "loginMessage",
-          (error.message || "كلمة المرور غير صحيحة.") +
-          " يمكنك استخدام «نسيت كلمة المرور؟».",
+          error.message ||
+          "البريد أو كلمة المرور غير صحيحة. يمكنك استخدام «نسيت كلمة المرور؟».",
           "error"
         );
       }
     }
 
 
-    async function beginRegistration(email, password) {
+    async function beginRegistration(
+      email,
+      password
+    ) {
 
       authEmail = email;
       authPassword = password;
 
       try {
 
-        const result = await apiRequest(
-          "/api/register",
-          {
-            method: "POST",
-            body: JSON.stringify({
-              email,
-              password
-            })
-          }
+        const result =
+          await apiRequest(
+            "/api/register",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                email,
+                password
+              })
+            }
+          );
+
+
+        document.getElementById(
+          "registerOtpEmail"
+        ).textContent = email;
+
+        clearOtpInputs(
+          "authRegisterOtpView"
         );
 
-        /*
-          السيرفر يرسل OTP.
-        */
-
-        document.getElementById("registerOtpEmail").textContent = email;
-
-        clearOtpInputs("authRegisterOtpView");
-
-        showView("authRegisterOtpView");
+        showView(
+          "authRegisterOtpView"
+        );
 
         showAuthMessage(
           "registerOtpMessage",
@@ -3565,7 +4085,9 @@ TARGET_URL الداخلي
           "success"
         );
 
-        focusFirstOtp("authRegisterOtpView");
+        focusFirstOtp(
+          "authRegisterOtpView"
+        );
 
       } catch (error) {
 
@@ -3581,9 +4103,14 @@ TARGET_URL الداخلي
 
     async function verifyRegistrationOtp() {
 
-      const otp = getOtp("authRegisterOtpView");
+      const otp =
+        getOtp(
+          "authRegisterOtpView"
+        );
 
-      hideAuthMessage("registerOtpMessage");
+      hideAuthMessage(
+        "registerOtpMessage"
+      );
 
       if (!/^\d{6}$/.test(otp)) {
 
@@ -3596,36 +4123,32 @@ TARGET_URL الداخلي
         return;
       }
 
-      setButtonLoading("registerOtpSubmit", true);
+      setButtonLoading(
+        "registerOtpSubmit",
+        true
+      );
 
       try {
 
-        /*
-          /api/verify-otp
-          التحقق من:
-          email + otp
+        const result =
+          await apiRequest(
+            "/api/verify-otp",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                email: authEmail,
+                otp,
+                password: authPassword
+              })
+            }
+          );
 
-          وكلمة المرور الأصلية محفوظة في authPassword
-          ويتم إرسالها كذلك لتسهيل إنشاء الحساب
-          إذا كان السيرفر يتطلبها.
-        */
-
-        const result = await apiRequest(
-          "/api/verify-otp",
-          {
-            method: "POST",
-            body: JSON.stringify({
-              email: authEmail,
-              otp,
-              password: authPassword
-            })
-          }
-        );
 
         const success =
           result?.success !== false &&
           result?.verified !== false &&
           result?.valid !== false;
+
 
         if (!success) {
 
@@ -3637,11 +4160,6 @@ TARGET_URL الداخلي
           );
         }
 
-        /*
-          بعض السيرفرات تنشئ Session مباشرة بعد verify-otp.
-          إذا أعاد السيرفر authenticated/session نعتبر المستخدم
-          مسجلًا مباشرة.
-        */
 
         if (
           result?.authenticated === true ||
@@ -3653,6 +4171,7 @@ TARGET_URL الداخلي
           updateCustomerSession(
             result?.email ||
             result?.user?.email ||
+            result?.data?.email ||
             authEmail
           );
 
@@ -3669,21 +4188,19 @@ TARGET_URL الداخلي
           return;
         }
 
-        /*
-          إذا لم يتم إنشاء Session في verify-otp،
-          نعيد /api/login لتسجيل الدخول وإنشاء Session.
-        */
 
-        const loginResult = await apiRequest(
-          "/api/login",
-          {
-            method: "POST",
-            body: JSON.stringify({
-              email: authEmail,
-              password: authPassword
-            })
-          }
-        );
+        const loginResult =
+          await apiRequest(
+            "/api/login",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                email: authEmail,
+                password: authPassword
+              })
+            }
+          );
+
 
         if (
           loginResult?.success === false ||
@@ -3699,17 +4216,21 @@ TARGET_URL الداخلي
           );
         }
 
+
         updateCustomerSession(
           loginResult?.email ||
           loginResult?.user?.email ||
+          loginResult?.data?.email ||
           authEmail
         );
+
 
         showAuthMessage(
           "registerOtpMessage",
           "تم إنشاء الحساب وتسجيل الدخول بنجاح.",
           "success"
         );
+
 
         setTimeout(() => {
           closeAuth();
@@ -3737,18 +4258,28 @@ TARGET_URL الداخلي
     async function directRegisterCustomer() {
 
       const emailInput =
-        document.getElementById("directRegisterEmail");
+        document.getElementById(
+          "directRegisterEmail"
+        );
 
       const passwordInput =
-        document.getElementById("directRegisterPassword");
+        document.getElementById(
+          "directRegisterPassword"
+        );
 
       const email =
-        normalizeEmail(emailInput.value);
+        normalizeEmail(
+          emailInput.value
+        );
 
       const password =
-        String(passwordInput.value || "");
+        String(
+          passwordInput.value || ""
+        );
 
-      hideAuthMessage("directRegisterMessage");
+      hideAuthMessage(
+        "directRegisterMessage"
+      );
 
       if (!isValidEmail(email)) {
 
@@ -3782,27 +4313,19 @@ TARGET_URL الداخلي
 
       try {
 
-        /*
-          قبل التسجيل المباشر نتحقق من وجود الحساب.
-        */
-
-        const check = await apiRequest(
-          "/api/check-email",
-          {
-            method: "POST",
-            body: JSON.stringify({
-              email
-            })
-          }
-        );
+        const check =
+          await checkCustomerEmail(email);
 
         const exists =
-          check?.exists === true ||
-          check?.found === true ||
-          check?.userExists === true ||
-          check?.accountExists === true;
+          detectAccountExists(check);
 
-        if (exists) {
+
+        /*
+          إذا كان الحساب موجودًا:
+          لا نحاول التسجيل.
+        */
+
+        if (exists === true) {
 
           showAuthMessage(
             "directRegisterMessage",
@@ -3813,9 +4336,30 @@ TARGET_URL الداخلي
           return;
         }
 
-        await beginRegistration(
-          email,
-          password
+
+        /*
+          إذا كان غير موجود:
+          نبدأ التسجيل.
+        */
+
+        if (exists === false) {
+
+          await beginRegistration(
+            email,
+            password
+          );
+
+          return;
+        }
+
+
+        console.error(
+          "ROUTIX unexpected /api/check-email response:",
+          check
+        );
+
+        throw new Error(
+          "تعذر تحديد حالة الحساب من الخادم."
         );
 
       } catch (error) {
@@ -3837,27 +4381,21 @@ TARGET_URL الداخلي
     }
 
 
-    /*
-      نسيت كلمة المرور:
-
-      /api/login
-      {
-        email,
-        forgotPassword: true
-      }
-
-      → OTP
-    */
-
     async function sendForgotPasswordOtp() {
 
       const input =
-        document.getElementById("forgotEmail");
+        document.getElementById(
+          "forgotEmail"
+        );
 
       const email =
-        normalizeEmail(input.value);
+        normalizeEmail(
+          input.value
+        );
 
-      hideAuthMessage("forgotMessage");
+      hideAuthMessage(
+        "forgotMessage"
+      );
 
       if (!isValidEmail(email)) {
 
@@ -3879,28 +4417,34 @@ TARGET_URL الداخلي
 
       try {
 
-        const result = await apiRequest(
-          "/api/login",
-          {
-            method: "POST",
-            body: JSON.stringify({
-              email,
-              forgotPassword: true
-            })
-          }
-        );
+        const result =
+          await apiRequest(
+            "/api/login",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                email,
+                forgotPassword: true
+              })
+            }
+          );
+
 
         document.getElementById(
           "resetOtpEmail"
         ).textContent = email;
 
-        clearOtpInputs("authResetView");
+        clearOtpInputs(
+          "authResetView"
+        );
 
         document.getElementById(
           "newPassword"
         ).value = "";
 
-        showView("authResetView");
+        showView(
+          "authResetView"
+        );
 
         showAuthMessage(
           "resetMessage",
@@ -3911,7 +4455,9 @@ TARGET_URL الداخلي
           "success"
         );
 
-        focusFirstOtp("authResetView");
+        focusFirstOtp(
+          "authResetView"
+        );
 
       } catch (error) {
 
@@ -3932,34 +4478,23 @@ TARGET_URL الداخلي
     }
 
 
-    /*
-      تغيير كلمة المرور:
-
-      /api/login
-      {
-        email,
-        forgotPassword: true,
-        otp,
-        newPassword
-      }
-
-      السيرفر مسؤول عن:
-      email + OTP + newPassword
-      ثم تغيير كلمة المرور
-      ثم إنشاء Session.
-    */
-
     async function resetCustomerPassword() {
 
       const otp =
-        getOtp("authResetView");
+        getOtp(
+          "authResetView"
+        );
 
       const newPassword =
         String(
-          document.getElementById("newPassword").value || ""
+          document.getElementById(
+            "newPassword"
+          ).value || ""
         );
 
-      hideAuthMessage("resetMessage");
+      hideAuthMessage(
+        "resetMessage"
+      );
 
       if (!/^\d{6}$/.test(otp)) {
 
@@ -3990,23 +4525,26 @@ TARGET_URL الداخلي
 
       try {
 
-        const result = await apiRequest(
-          "/api/login",
-          {
-            method: "POST",
-            body: JSON.stringify({
-              email: authEmail,
-              forgotPassword: true,
-              otp,
-              newPassword
-            })
-          }
-        );
+        const result =
+          await apiRequest(
+            "/api/login",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                email: authEmail,
+                forgotPassword: true,
+                otp,
+                newPassword
+              })
+            }
+          );
+
 
         const success =
           result?.success !== false &&
           result?.authenticated !== false &&
           result?.loggedIn !== false;
+
 
         if (!success) {
 
@@ -4018,25 +4556,21 @@ TARGET_URL الداخلي
           );
         }
 
-        /*
-          السيرفر حسب التدفق المطلوب:
-          تغيير كلمة المرور
-          حفظها
-          إنشاء Session
-          تسجيل الدخول
-        */
 
         updateCustomerSession(
           result?.email ||
           result?.user?.email ||
+          result?.data?.email ||
           authEmail
         );
+
 
         showAuthMessage(
           "resetMessage",
           "تم تغيير كلمة المرور وتسجيل الدخول بنجاح.",
           "success"
         );
+
 
         setTimeout(() => {
           closeAuth();
@@ -4091,24 +4625,11 @@ TARGET_URL الداخلي
           email || "CLIENT";
       }
 
-      /*
-        لا نخزن كلمة المرور أو OTP في localStorage.
-        Session الحقيقي يبقى تحت إدارة السيرفر.
-      */
       authPassword = "";
     }
 
 
     async function logoutCustomer() {
-
-      /*
-        إذا كان السيرفر لديه endpoint خاص بتسجيل الخروج
-        يمكن استخدامه هنا.
-        لا نفترض endpoint غير مذكور في طلبك.
-
-        لذلك يتم فقط مسح حالة الواجهة.
-        Session الفعلي يظل تحت إدارة السيرفر.
-      */
 
       const session =
         document.getElementById(
@@ -4120,12 +4641,39 @@ TARGET_URL الداخلي
           "customerLoginButton"
         );
 
+
+      /*
+        نحاول استخدام logout الموجود في السيرفر
+        فقط إذا كان endpoint موجودًا.
+
+        لا نكسر الواجهة إذا لم يكن endpoint موجودًا.
+      */
+
+      try {
+
+        await apiRequest(
+          "/api/logout",
+          {
+            method: "POST",
+            body: JSON.stringify({})
+          }
+        );
+
+      } catch (_) {
+        /*
+          لا نفشل logout في الواجهة
+          إذا لم يكن /api/logout موجودًا.
+        */
+      }
+
+
       if (session) {
         session.classList.remove("active");
       }
 
       if (loginButton) {
-        loginButton.style.display = "inline-flex";
+        loginButton.style.display =
+          "inline-flex";
       }
 
       authEmail = "";
@@ -4141,7 +4689,9 @@ TARGET_URL الداخلي
       if (!view) return "";
 
       return Array.from(
-        view.querySelectorAll(".otp-digit")
+        view.querySelectorAll(
+          ".otp-digit"
+        )
       )
         .map(input => input.value)
         .join("");
@@ -4155,7 +4705,8 @@ TARGET_URL الداخلي
 
       if (!view) return;
 
-      view.querySelectorAll(".otp-digit")
+      view
+        .querySelectorAll(".otp-digit")
         .forEach(input => {
           input.value = "";
         });
@@ -4170,174 +4721,214 @@ TARGET_URL الداخلي
       if (!view) return;
 
       const first =
-        view.querySelector(".otp-digit");
+        view.querySelector(
+          ".otp-digit"
+        );
 
       if (first) {
-        setTimeout(() => first.focus(), 100);
+
+        setTimeout(() => {
+          first.focus();
+        }, 100);
       }
     }
 
 
     /*
-      OTP UX:
-      الانتقال تلقائيًا بين الخانات
-      والرجوع للخلف عند Backspace
-      ودعم لصق الرمز كاملًا.
+      ==========================================================
+      OTP UX
+      ==========================================================
     */
 
-    document.querySelectorAll(".otp-digit")
-      .forEach((input, index, inputs) => {
+    document
+      .querySelectorAll(".otp-digit")
+      .forEach(
+        (input, index, inputs) => {
 
-        input.addEventListener("input", event => {
+          input.addEventListener(
+            "input",
+            event => {
 
-          let value =
-            event.target.value
-              .replace(/\D/g, "");
+              let value =
+                event.target.value
+                  .replace(/\D/g, "");
 
-          event.target.value =
-            value.slice(-1);
+              event.target.value =
+                value.slice(-1);
 
-          if (
-            event.target.value &&
-            inputs[index + 1]
-          ) {
-            inputs[index + 1].focus();
-          }
-        });
-
-        input.addEventListener("keydown", event => {
-
-          if (
-            event.key === "Backspace" &&
-            !input.value &&
-            inputs[index - 1]
-          ) {
-            inputs[index - 1].focus();
-          }
-
-          if (event.key === "ArrowLeft" &&
-              inputs[index - 1]) {
-            inputs[index - 1].focus();
-          }
-
-          if (event.key === "ArrowRight" &&
-              inputs[index + 1]) {
-            inputs[index + 1].focus();
-          }
-        });
-
-        input.addEventListener("paste", event => {
-
-          event.preventDefault();
-
-          const pasted =
-            (
-              event.clipboardData ||
-              window.clipboardData
-            )
-              .getData("text")
-              .replace(/\D/g, "")
-              .slice(0, 6);
-
-          if (!pasted) return;
-
-          const parent =
-            input.closest(".otp-box");
-
-          if (!parent) return;
-
-          const boxes =
-            Array.from(
-              parent.querySelectorAll(".otp-digit")
-            );
-
-          pasted
-            .split("")
-            .forEach((digit, i) => {
-              if (boxes[i]) {
-                boxes[i].value = digit;
+              if (
+                event.target.value &&
+                inputs[index + 1]
+              ) {
+                inputs[index + 1].focus();
               }
-            });
-
-          const next =
-            boxes[Math.min(
-              pasted.length,
-              boxes.length
-            ) - 1];
-
-          if (next) {
-            next.focus();
-          }
-        });
-      });
+            }
+          );
 
 
-    /*
-      إغلاق النافذة عند الضغط خارج البطاقة.
-    */
+          input.addEventListener(
+            "keydown",
+            event => {
 
-    authOverlay.addEventListener("click", event => {
+              if (
+                event.key === "Backspace" &&
+                !input.value &&
+                inputs[index - 1]
+              ) {
+                inputs[index - 1].focus();
+              }
 
-      if (event.target === authOverlay) {
-        closeAuth();
-      }
-    });
+              if (
+                event.key === "ArrowLeft" &&
+                inputs[index - 1]
+              ) {
+                inputs[index - 1].focus();
+              }
+
+              if (
+                event.key === "ArrowRight" &&
+                inputs[index + 1]
+              ) {
+                inputs[index + 1].focus();
+              }
+            }
+          );
 
 
-    /*
-      Escape:
-      إغلاق القائمة
-      وإغلاق نافذة تسجيل الدخول.
-    */
+          input.addEventListener(
+            "paste",
+            event => {
 
-    document.addEventListener("keydown", event => {
+              event.preventDefault();
 
-      if (event.key === "Escape") {
+              const pasted =
+                (
+                  event.clipboardData ||
+                  window.clipboardData
+                )
+                  .getData("text")
+                  .replace(/\D/g, "")
+                  .slice(0, 6);
 
-        document.getElementById(
-          "nav"
-        ).classList.remove("mobile-open");
+              if (!pasted) return;
 
-        if (authOverlay.classList.contains("open")) {
+              const parent =
+                input.closest(
+                  ".otp-box"
+                );
+
+              if (!parent) return;
+
+              const boxes =
+                Array.from(
+                  parent.querySelectorAll(
+                    ".otp-digit"
+                  )
+                );
+
+              pasted
+                .split("")
+                .forEach(
+                  (digit, i) => {
+
+                    if (boxes[i]) {
+                      boxes[i].value =
+                        digit;
+                    }
+
+                  }
+                );
+
+              const next =
+                boxes[
+                  Math.min(
+                    pasted.length,
+                    boxes.length
+                  ) - 1
+                ];
+
+              if (next) {
+                next.focus();
+              }
+            }
+          );
+        }
+      );
+
+
+    authOverlay.addEventListener(
+      "click",
+      event => {
+
+        if (
+          event.target ===
+          authOverlay
+        ) {
           closeAuth();
         }
+
       }
-    });
+    );
 
 
-    /*
-      Enter في حقول تسجيل الدخول.
-    */
+    document.addEventListener(
+      "keydown",
+      event => {
 
-    document.getElementById("loginPassword")
-      .addEventListener("keydown", event => {
+        if (event.key === "Escape") {
 
-        if (event.key === "Enter") {
-          startCustomerAuth();
+          document
+            .getElementById("nav")
+            .classList.remove(
+              "mobile-open"
+            );
+
+          if (
+            authOverlay.classList.contains(
+              "open"
+            )
+          ) {
+            closeAuth();
+          }
         }
-      });
+
+      }
+    );
 
 
-    document.getElementById("loginEmail")
-      .addEventListener("keydown", event => {
+    document
+      .getElementById("loginPassword")
+      .addEventListener(
+        "keydown",
+        event => {
 
-        if (event.key === "Enter") {
-          document.getElementById(
-            "loginPassword"
-          ).focus();
+          if (event.key === "Enter") {
+            startCustomerAuth();
+          }
+
         }
-      });
+      );
 
 
-    /*
-      التحقق من Session عند فتح الصفحة.
-      
-      لا يوجد endpoint session محدد في طلبك،
-      لذلك لا يتم اختراع endpoint جديد.
-      
-      إذا كان السيرفر يعيد Session تلقائيًا من Cookie،
-      يمكن ربط endpoint التحقق هنا لاحقًا.
-    */
+    document
+      .getElementById("loginEmail")
+      .addEventListener(
+        "keydown",
+        event => {
 
-  </script></body>
+          if (event.key === "Enter") {
+
+            document
+              .getElementById(
+                "loginPassword"
+              )
+              .focus();
+          }
+
+        }
+      );
+
+  </script>
+
+</body>
 </html>
