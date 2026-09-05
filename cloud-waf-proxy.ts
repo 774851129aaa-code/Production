@@ -9317,12 +9317,11 @@ server.on(
 let isStarted = false;
 
 async function start(): Promise<void> {
-  if (isStarted) return; // منع التكرار إذا تم استدعاء الدالة مرتين
+  if (isStarted) return;
   isStarted = true;
 
   try {
     await connectDatabase();
-
     db = await loadDb();
 
     await mongoose.connect(
@@ -9333,7 +9332,6 @@ async function start(): Promise<void> {
     );
 
     console.log('[MongoDB] Authentication database connected');
-
     await OTPModel.createIndexes();
 
     console.log('==========================================');
@@ -9365,13 +9363,18 @@ async function start(): Promise<void> {
       console.log(`[SITE] ${site.domains.join(', ')} -> ${site.target_url}`);
     }
 
-    server.listen(
-      config.PORT,
-      '0.0.0.0',
-      () => {
-        console.log(`Server listening on port ${config.PORT}`);
-      },
-    );
+    // تحقق ذكي يمنع الانهيار إذا كان السيرفر يعمل مسبقاً
+    if (server && !(server as any).listening) {
+      server.listen(
+        config.PORT,
+        '0.0.0.0',
+        () => {
+          console.log(`Server listening on port ${config.PORT}`);
+        },
+      );
+    } else {
+      console.log('[Routix WAF] Server is already active, skipping listen call.');
+    }
   } catch (error) {
     console.error('FATAL STARTUP ERROR:', error);
 
@@ -9387,7 +9390,7 @@ async function start(): Promise<void> {
   }
 }
 
-// تشغيل السيرفر تلقائياً
+// تشغيل السيرفر مرة واحدة فقط وبأمان
 if (process.env.NODE_ENV !== 'test') {
   start();
 }
