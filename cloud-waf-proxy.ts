@@ -9321,156 +9321,59 @@ async function start(): Promise<void> {
   isStarted = true;
 
   try {
-    
-async function start(): Promise<void> {
-  try {
     await connectDatabase();
 
-    db =
-      await loadDb();
+    db = await loadDb();
 
     await mongoose.connect(
       config.MONGO_URI,
       {
-        serverSelectionTimeoutMS:
-          10000,
+        serverSelectionTimeoutMS: 10000,
       },
     );
 
-    console.log(
-      '[MongoDB] Authentication database connected',
-    );
+    console.log('[MongoDB] Authentication database connected');
 
     await OTPModel.createIndexes();
 
-    console.log(
-      '==========================================',
-    );
+    console.log('==========================================');
+    console.log(' Routix Multi-Site Cloud WAF');
+    console.log(' Dynamic Reverse Proxy Enabled');
+    console.log(' Live Admin Dashboard Enabled');
+    console.log(' Multi-Domain Protection Enabled');
+    console.log(' L7 Protection Enabled');
+    console.log(' Global Anti-Bot Challenge Enabled');
+    console.log(` Challenge Wait: ${config.CHALLENGE_WAIT_SECONDS}s`);
+    console.log(` Server: http://0.0.0.0:${config.PORT}`);
+    console.log(` Sites: ${db.sites.length}`);
+    console.log(' Database: MongoDB / routix');
+    console.log(` Index: ${INDEX_FILE}`);
+    console.log(` Server Hosts: ${[...SERVER_HOSTS].join(', ') || 'none'}`);
+    console.log(' Admin: /admin');
+    console.log(' Auth: /api/*');
+    console.log(' Site API: /__waf/api/*');
+    console.log(` Rate default: ${config.RATE_LIMIT_MAX}/${config.RATE_LIMIT_WINDOW}s`);
+    console.log(` Burst default: ${config.BURST_MAX}/${config.BURST_WINDOW_MS}ms`);
+    console.log(` Max concurrent/IP: ${config.MAX_CONCURRENT_PER_IP}`);
+    console.log(` Max global concurrent: ${config.MAX_GLOBAL_CONCURRENT}`);
+    console.log(' Visitor Counter: MongoDB');
+    console.log(' Authentication: MongoDB + Argon2 + JWT');
+    console.log(` Brevo Email: ${config.BREVO_API_KEY ? 'configured' : 'not configured'}`);
+    console.log('==========================================');
 
-    console.log(
-      ' Routix Multi-Site Cloud WAF',
-    );
-
-    console.log(
-      ' Dynamic Reverse Proxy Enabled',
-    );
-
-    console.log(
-      ' Live Admin Dashboard Enabled',
-    );
-
-    console.log(
-      ' Multi-Domain Protection Enabled',
-    );
-
-    console.log(
-      ' L7 Protection Enabled',
-    );
-
-    console.log(
-      ' Global Anti-Bot Challenge Enabled',
-    );
-
-    console.log(
-      ` Challenge Wait: ${config.CHALLENGE_WAIT_SECONDS}s`,
-    );
-
-    console.log(
-      ` Server: http://0.0.0.0:${config.PORT}`,
-    );
-
-    console.log(
-      ` Sites: ${db.sites.length}`,
-    );
-
-    console.log(
-      ' Database: MongoDB / routix',
-    );
-
-    console.log(
-      ` Index: ${INDEX_FILE}`,
-    );
-
-    console.log(
-      ` Server Hosts: ${
-        [...SERVER_HOSTS].join(
-          ', ',
-        ) || 'none'
-      }`,
-    );
-
-    console.log(
-      ' Admin: /admin',
-    );
-
-    console.log(
-      ' Auth: /api/*',
-    );
-
-    console.log(
-      ' Site API: /__waf/api/*',
-    );
-
-    console.log(
-      ` Rate default: ${config.RATE_LIMIT_MAX}/${config.RATE_LIMIT_WINDOW}s`,
-    );
-
-    console.log(
-      ` Burst default: ${config.BURST_MAX}/${config.BURST_WINDOW_MS}ms`,
-    );
-
-    console.log(
-      ` Max concurrent/IP: ${config.MAX_CONCURRENT_PER_IP}`,
-    );
-
-    console.log(
-      ` Max global concurrent: ${config.MAX_GLOBAL_CONCURRENT}`,
-    );
-
-    console.log(
-      ' Visitor Counter: MongoDB',
-    );
-
-    console.log(
-      ' Authentication: MongoDB + Argon2 + JWT',
-    );
-
-    console.log(
-      ` Brevo Email: ${
-        config.BREVO_API_KEY
-          ? 'configured'
-          : 'not configured'
-      }`,
-    );
-
-    console.log(
-      '==========================================',
-    );
-
-    for (
-      const site of db.sites
-    ) {
-      console.log(
-        `[SITE] ${site.domains.join(
-          ', ',
-        )} -> ${site.target_url}`,
-      );
+    for (const site of db.sites) {
+      console.log(`[SITE] ${site.domains.join(', ')} -> ${site.target_url}`);
     }
 
     server.listen(
       config.PORT,
       '0.0.0.0',
       () => {
-        console.log(
-          `Server listening on port ${config.PORT}`,
-        );
+        console.log(`Server listening on port ${config.PORT}`);
       },
     );
   } catch (error) {
-    console.error(
-      'FATAL STARTUP ERROR:',
-      error,
-    );
+    console.error('FATAL STARTUP ERROR:', error);
 
     try {
       await mongoose.disconnect();
@@ -9482,6 +9385,11 @@ async function start(): Promise<void> {
 
     process.exit(1);
   }
+}
+
+// تشغيل السيرفر تلقائياً
+if (process.env.NODE_ENV !== 'test') {
+  start();
 }
 
 /* ============================================================
