@@ -9102,7 +9102,28 @@ const proxy = createProxyMiddleware({
   },
 });
 
-app.use('/', proxy);
+// بدلاً من app.use('/', proxy); المباشر
+app.use((req, res, next) => {
+  const wafReq = req as WafRequest;
+  const targetUrl = wafReq.wafSite?.target_url;
+
+  // 1. استثناء مسارات النظام الداخلية من التوجيه للبروكسي
+  if (
+    req.path.startsWith('/admin') || 
+    req.path.startsWith('/api') || 
+    req.path.startsWith('/__waf')
+  ) {
+    return next();
+  }
+
+  // 2. إذا لم يكن هناك target_url صالح، قم بتجاوز البروكسي لمنع السقوط
+  if (!targetUrl || !targetUrl.startsWith('http')) {
+    return next();
+  }
+
+  // 3. التمرير للبروكسي للطلبات الصحيحة فقط
+  proxy(req, res, next);
+});
 
 /* ============================================================
    GLOBAL ERROR HANDLER
