@@ -10187,5 +10187,4 @@ if (typeof global !== 'undefined' && !globalInitialized(global)) {
       });
   }
 }
-                   
 
