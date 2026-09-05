@@ -10143,7 +10143,7 @@ const proxyMiddleware = createProxyMiddleware({
   },
 });
 
-    /* ============================================================
+/* ============================================================
    FINAL SERVER CONFIGURATION & EXPORTS
 ============================================================ */
 
@@ -10159,7 +10159,7 @@ if (typeof server !== 'undefined' && server) {
   server.requestTimeout = config.REQUEST_TIMEOUT_MS;
 }
 
-export async function initializeWaf() {
+async function initializeWaf() {
   await connectDatabase();
   db = await loadDb();
   return server;
@@ -10187,3 +10187,4 @@ if (typeof global !== 'undefined' && !globalInitialized(global)) {
       });
   }
 }
+
