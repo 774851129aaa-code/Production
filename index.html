@@ -1,79 +1,9 @@
-اشتيك تعدل بالكود فقط تسجيل الدخول وتخليه مثل حق الشركات قد ضبطتها انا بسيرفر وسويتها ع كذا ​1. مسارات API المتاحة للعملاء (Authentication Endpoints)
-​تعتمد جميع المسارات الخاصة بالهوية على البادئة /api/ وهي محمية بـ Auth Rate Limiter يتيح 30 طلباً كحد أقصى كل 15 دقيقة.
-​أ. التحقق من وجود البريد الإلكتروني
-​المسار: POST /api/check-email
-​الفكرة: يفحص قاعدة البيانات لمعرفة ما إذا كان البريد مُسجلاً مسبقاً قبل البدء بإنشاء حساب أو طلب كلمة مرور.
-​المدخلات: email
-​المخرجات:
-​registered: true إذا كان الحساب موجوداً.
-​registered: false إذا كان البريد جديداً.
-​ب. تسجيل حساب جديد (Register)
-​المسار: POST /api/register
-​الفكرة: عند إدخال بريد إلكتروني وكلمة مرور جديدين، لا يتم فتح الحساب فوراً، بل يتم توليد رمز تحقق مؤقت (OTP) وإرساله عبر البريد.
-​المدخلات: email, password
-​شروط كلمة المرور: أن تكون بين 8 إلى 128 حرفاً.
-​آلية العمل:
-​تشفير كلمة المرور المُدخلة باستخدام Argon2id.
-​توليد رمز OTP عشوائي مكون من 6 أرقام.
-​إرسال رسالة بريدية عبر خدمة Brevo تحتوي على الرمز.
-​حفظ الرمز وهاش كلمة المرور المؤقت في مجموعة OTPVerification في MongoDB.
-​ج. تأكيد رمز التحقق (Verify OTP)
-​المسار: POST /api/verify-otp
-​الفكرة: مطابقة الرمز الذي أدخله المستخدم في الشاشة لتأكيد ملكية البريد الإلكتروني وإنشاء الحساب النهائي.
-​المدخلات: email, otp (يقبل النظام المسميات: otp, code, verificationCode, verification_code).
-​شروط وملاحظات:
-​صلاحية رمز الـ OTP هي 5 دقائق فقط (ينتهي تلقائياً عبر Mongo TTL).
-​في حال نجاح التحقق، يتم حذف سجّل OTP وتوليد حساب جديد في مجموعة User.
-​يتم إنشاء جلسة عمل (Session) للمستخدم وتسجيل دخوله فوراً.
-​د. تسجيل الدخول واستعادة كلمة المرور (Login & Forgot Password)
-​المسار: POST /api/login
-​الفكرة: يعمل هذا المسار بآليتين بناءً على وجود معامل forgotPassword:
-​1. تسجيل الدخول العادي:
-​المدخلات: email, password
-​آلية العمل:
-​البحث عن البريد في قاعدة البيانات.
-​مطابقة كلمة المرور باستخدام argon2.verify().
-​عند نجاح المطابقة: تحديث تاريخ آخر تسجيل دخول lastLoginAt وإنشاء جلسة جديدة.
-​عند فشل المطابقة: إرجاع استجابة تفيد بأن كلمة المرور خاطئة وتنبيه الواجهة لإتاحة خيار "نسيت كلمة المرور".
-​2. استعادة كلمة المرور (عند إرسال forgotPassword: true):
-​المرحلة الأولى (بدون OTP): يتم التأكد من وجود الحساب، ثم إرسال رمز OTP مكوّن من 6 أرقام عبر Brevo إلى البريد وتخزينه مؤقتاً.
-​المرحلة الثانية (عند إرسال OTP + newPassword):
-​التحقق من صحة الرمز ومن عدم انقضاء مهلة الـ 5 دقائق.
-​تشفير كلمة المرور الجديدة newPassword باستخدام Argon2id.
-​تحديث كلمة مرور المستخدم الرسمية في قاعدة البيانات، حذف سجل OTP، وتسجيل دخول المستخدم مباشرة.
-​هـ. التحقق من الجلسة وجلب البيانات (Session & Profile)
-​المسارات:
-​GET /api/profile
-​GET /api/me
-​آلية العمل: تتأكد هذه المسارات من وجود الكوكي الخاص بالجلسة وفك تشفير الـ JWT لتزويد الواجهة ببيانات العميل الحالية (مثل البريد، معرف الحساب id وحالة التفعيل emailVerified).
-​و. تسجيل الخروج (Logout)
-​المسار: POST /api/logout
-​آلية العمل: مسح كوكي الجلسة routix_session من المتصفح وإرجاع استجابة تؤكد نجاح الخروج.
-​ز. فحص جاهزية الخدمة (Health Check)
-​المسار: GET /api/health
-​آلية العمل: يرجع حالة النظام online للتأكد من أن سيرفر الهوية يعمل دون مشاكل.
-​2. التقنيات والسياسات الأمنية المتبعة في النظام
-المفهوم التقنية / الآلية المستخدمة في الكود
-تشفير كلمات المرور تقنية Argon2id (أحدث وأقوى معايير التشفير لمقاومة هجمات الـ GPU).
-إدارة الجلسات (Sessions) استخدام رموز JWT المخزنة في Cookies آمنة.
-خصائص الكوكي الآمن HttpOnly (لمنع وصول JavaScript للكوكي)، Secure (لضمان التشفير عبر HTTPS)، SameSite=None (لتفادي مشاكل النطاقات المتعددة)، وبمدة صلاحية 7 أيام.
-حماية من هجمات الغمر (Brute-Force) تحديد معدل الطلبات بـ 30 طلب كل 15 دقيقة على جميع مسارات /api/.
-رموز التحقق (OTP) رموز عشوائية من 6 أرقام وتنتهي صلاحيتها خلال 5 دقائق (300 ثانية).
-المقارنة الآمنة للملفات استخدام crypto.timingSafeEqual لمنع هجمات التوقيت (Timing Attacks) أثناء مقارنة الرموز.
-معالجة النصوص وإدخالات المستخدم تنظيف وتوحيد البريد الإلكتروني (lowercase & trim)، والتحقق من صحة المدخلات باستخدام مكتبة Zod.
-
-
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-
-<head>
+<!DOCTYPE html><html lang="ar" dir="rtl"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#02060b">
   <meta name="description" content="Routix — Web Application Firewall & Traffic Protection">
-  <title>Routix — Cloud WAF</title>
-
-  <style>
+  <title>Routix — Cloud WAF</title>  <style>
     :root {
       --bg: #02050a;
       --bg2: #06101a;
@@ -113,10 +43,7 @@
       font-family: Tahoma, Arial, sans-serif;
     }
 
-    body.locked {
-      overflow: hidden;
-    }
-
+    body.locked,
     body.modal-open {
       overflow: hidden;
     }
@@ -134,10 +61,6 @@
     button {
       cursor: pointer;
     }
-
-    /* =========================================================
-       CYBER BACKGROUND
-    ========================================================== */
 
     .cyber-bg {
       position: fixed;
@@ -261,10 +184,6 @@
       }
     }
 
-    /* =========================================================
-       INTRO SCREEN
-    ========================================================== */
-
     .intro {
       position: fixed;
       inset: 0;
@@ -323,8 +242,7 @@
         rgba(54,230,255,.45),
         transparent
       );
-      box-shadow:
-        0 0 25px rgba(54,230,255,.3);
+      box-shadow: 0 0 25px rgba(54,230,255,.3);
     }
 
     .intro-grid {
@@ -367,33 +285,45 @@
       animation: pulse 1.7s infinite;
     }
 
+    .intro-logo,
+    .login-logo,
+    .brand-logo {
+      position: relative;
+      transform: rotate(45deg);
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 25px rgba(54,230,255,.13);
+    }
+
     .intro-logo {
       width: 76px;
       height: 76px;
       margin: 32px auto 26px;
-      position: relative;
-      transform: rotate(45deg);
-      border: 1px solid var(--cyan);
-      box-shadow:
-        0 0 35px rgba(54,230,255,.16),
-        inset 0 0 25px rgba(54,230,255,.05);
       animation: logoIn 1s ease both;
     }
 
-    .intro-logo::before {
+    .intro-logo::before,
+    .login-logo::before,
+    .brand-logo::before {
       content: "";
       position: absolute;
-      inset: 13px;
       border: 1px solid rgba(54,230,255,.65);
     }
 
-    .intro-logo::after {
+    .intro-logo::before {
+      inset: 13px;
+    }
+
+    .intro-logo::after,
+    .login-logo::after,
+    .brand-logo::after {
       content: "";
       position: absolute;
-      inset: 24px;
       background: rgba(54,230,255,.13);
       border: 1px solid var(--cyan);
-      box-shadow: 0 0 22px rgba(54,230,255,.2);
+    }
+
+    .intro-logo::after {
+      inset: 24px;
     }
 
     .intro h1 {
@@ -405,7 +335,8 @@
       animation: fadeUp .8s .15s ease both;
     }
 
-    .intro h1 span {
+    .intro h1 span,
+    .dashboard-copy h1 span {
       color: var(--cyan);
     }
 
@@ -425,7 +356,6 @@
       padding: 0 26px;
       border: 0;
       border-radius: 13px;
-      cursor: pointer;
       color: #021018;
       font-weight: 900;
       font-size: 14px;
@@ -439,9 +369,6 @@
 
     .enter-btn:hover {
       transform: translateY(-3px);
-      box-shadow:
-        0 20px 60px rgba(57,124,255,.3),
-        0 0 45px rgba(54,230,255,.12);
     }
 
     .intro-corner {
@@ -484,10 +411,6 @@
       }
     }
 
-    /* =========================================================
-       HEADER
-    ========================================================== */
-
     header {
       position: fixed;
       top: 0;
@@ -513,27 +436,17 @@
     }
 
     .brand-logo {
-      position: relative;
       width: 34px;
       height: 34px;
-      transform: rotate(45deg);
-      border: 1px solid var(--cyan);
       box-shadow: 0 0 22px rgba(54,230,255,.16);
     }
 
     .brand-logo::before {
-      content: "";
-      position: absolute;
       inset: 7px;
-      border: 1px solid rgba(54,230,255,.65);
     }
 
     .brand-logo::after {
-      content: "";
-      position: absolute;
       inset: 12px;
-      background: rgba(54,230,255,.13);
-      border: 1px solid var(--cyan);
     }
 
     .brand-name {
@@ -559,9 +472,11 @@
       background: rgba(54,230,255,.065);
     }
 
-    /* =========================================================
-       LOGIN HEADER BUTTON
-    ========================================================== */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
     .header-login {
       display: inline-flex;
@@ -599,19 +514,10 @@
       border: 1px solid var(--border);
       background: transparent;
       color: white;
-      cursor: pointer;
       font-size: 18px;
     }
 
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* =========================================================
-       LOGIN MODAL
-    ========================================================== */
+    /* LOGIN */
 
     .login-overlay {
       position: fixed;
@@ -670,38 +576,20 @@
       background: rgba(255,255,255,.025);
       color: var(--muted);
       font-size: 17px;
-      transition: .2s;
-    }
-
-    .login-close:hover {
-      color: white;
-      border-color: var(--border-hover);
-      background: rgba(255,255,255,.05);
     }
 
     .login-logo {
       width: 48px;
       height: 48px;
       margin: 2px auto 20px;
-      position: relative;
-      transform: rotate(45deg);
-      border: 1px solid var(--cyan);
-      box-shadow: 0 0 25px rgba(54,230,255,.13);
     }
 
     .login-logo::before {
-      content: "";
-      position: absolute;
       inset: 9px;
-      border: 1px solid rgba(54,230,255,.6);
     }
 
     .login-logo::after {
-      content: "";
-      position: absolute;
       inset: 16px;
-      background: rgba(54,230,255,.12);
-      border: 1px solid var(--cyan);
     }
 
     .login-heading {
@@ -763,6 +651,13 @@
       color: #506477;
     }
 
+    .password-hint {
+      margin-top: 7px;
+      color: var(--muted2);
+      font-size: 9px;
+      line-height: 1.6;
+    }
+
     .auth-btn {
       width: 100%;
       height: 47px;
@@ -779,7 +674,6 @@
 
     .auth-btn:hover {
       transform: translateY(-1px);
-      box-shadow: 0 16px 40px rgba(57,124,255,.25);
     }
 
     .auth-btn:disabled {
@@ -863,9 +757,7 @@
       line-height: 1.7;
     }
 
-    /* =========================================================
-       MAIN
-    ========================================================== */
+    /* MAIN */
 
     main {
       opacity: 1;
@@ -904,10 +796,6 @@
       line-height: 1.9;
     }
 
-    /* =========================================================
-       DASHBOARD HERO
-    ========================================================== */
-
     .dashboard {
       min-height: 100vh;
       padding-top: 145px;
@@ -922,11 +810,6 @@
       line-height: 1.05;
       letter-spacing: -3px;
       margin-bottom: 22px;
-    }
-
-    .dashboard-copy h1 span {
-      color: var(--cyan);
-      text-shadow: 0 0 35px rgba(54,230,255,.2);
     }
 
     .dashboard-copy > p {
@@ -972,14 +855,6 @@
       background: linear-gradient(135deg, var(--cyan), var(--blue));
       box-shadow: 0 15px 40px rgba(57,124,255,.18);
     }
-
-    .btn-primary:hover {
-      background: linear-gradient(135deg, #5ceaff, #528dff);
-    }
-
-    /* =========================================================
-       SECURITY RADAR
-    ========================================================== */
 
     .radar-card {
       position: relative;
@@ -1069,10 +944,6 @@
       }
     }
 
-    /* =========================================================
-       STATS
-    ========================================================== */
-
     .stats {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -1080,11 +951,18 @@
       margin-top: 20px;
     }
 
+    .stat,
+    .feature,
+    .step,
+    .setting,
+    .flow-node {
+      border: 1px solid var(--border);
+      background: rgba(7,15,25,.7);
+    }
+
     .stat {
       padding: 18px;
-      border: 1px solid var(--border);
       border-radius: 14px;
-      background: rgba(8,16,26,.65);
     }
 
     .stat-label {
@@ -1107,10 +985,6 @@
       color: var(--cyan);
     }
 
-    /* =========================================================
-       FEATURES
-    ========================================================== */
-
     .features {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -1121,29 +995,15 @@
       position: relative;
       padding: 23px;
       overflow: hidden;
-      border: 1px solid var(--border);
       border-radius: 17px;
       background:
         linear-gradient(145deg, rgba(10,22,35,.9), rgba(4,9,16,.8));
       transition: .25s;
     }
 
-    .feature::after {
-      content: "";
-      position: absolute;
-      width: 100px;
-      height: 100px;
-      right: -55px;
-      bottom: -55px;
-      border-radius: 50%;
-      background: rgba(54,230,255,.07);
-      filter: blur(25px);
-    }
-
     .feature:hover {
       transform: translateY(-5px);
       border-color: var(--border-hover);
-      box-shadow: 0 15px 45px rgba(0,0,0,.22);
     }
 
     .feature-icon {
@@ -1181,10 +1041,6 @@
       direction: ltr;
     }
 
-    /* =========================================================
-       API / INTEGRATION
-    ========================================================== */
-
     .integration {
       display: grid;
       grid-template-columns: .85fr 1.15fr;
@@ -1200,9 +1056,7 @@
       display: flex;
       gap: 13px;
       padding: 18px;
-      border: 1px solid var(--border);
       border-radius: 13px;
-      background: rgba(7,15,25,.7);
     }
 
     .step-number {
@@ -1245,7 +1099,6 @@
       direction: ltr;
       text-align: left;
       font: 12px/1.85 Consolas, monospace;
-      box-shadow: inset 0 0 40px rgba(54,230,255,.018);
     }
 
     .code-title {
@@ -1277,10 +1130,6 @@
       line-height: 1.7;
     }
 
-    /* =========================================================
-       L7 / REQUEST FLOW
-    ========================================================== */
-
     .flow {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -1296,9 +1145,7 @@
       justify-content: center;
       text-align: center;
       padding: 14px;
-      border: 1px solid var(--border);
       border-radius: 14px;
-      background: rgba(7,15,25,.7);
     }
 
     .flow-node b {
@@ -1319,10 +1166,6 @@
       font: 20px Consolas, monospace;
     }
 
-    /* =========================================================
-       SETTINGS
-    ========================================================== */
-
     .settings-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -1331,9 +1174,7 @@
 
     .setting {
       padding: 20px;
-      border: 1px solid var(--border);
       border-radius: 14px;
-      background: rgba(7,15,25,.65);
     }
 
     .setting h3 {
@@ -1355,10 +1196,6 @@
       text-align: left;
       font: 10px Consolas, monospace;
     }
-
-    /* =========================================================
-       ABOUT
-    ========================================================== */
 
     .about {
       display: grid;
@@ -1382,7 +1219,6 @@
       font: 11px/2.1 Consolas, monospace;
       direction: ltr;
       text-align: left;
-      box-shadow: inset 0 0 50px rgba(54,230,255,.018);
     }
 
     .terminal .green {
@@ -1397,10 +1233,6 @@
       color: white;
     }
 
-    /* =========================================================
-       FOOTER
-    ========================================================== */
-
     footer {
       padding: 30px 6%;
       border-top: 1px solid rgba(255,255,255,.05);
@@ -1413,12 +1245,7 @@
       color: var(--cyan);
     }
 
-    /* =========================================================
-       RESPONSIVE
-    ========================================================== */
-
     @media (max-width: 1050px) {
-
       nav a {
         padding: 8px;
       }
@@ -1445,7 +1272,6 @@
     }
 
     @media (max-width: 760px) {
-
       header {
         padding: 0 5%;
       }
@@ -1526,7 +1352,6 @@
     }
 
     @media (max-width: 500px) {
-
       .brand-name {
         font-size: 18px;
       }
@@ -1574,7 +1399,6 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-
       *,
       *::before,
       *::after {
@@ -1583,754 +1407,668 @@
         scroll-behavior: auto !important;
       }
     }
-  </style>
-</head>
-
-<body class="locked">
-
-  <div class="cyber-bg"></div>
+  </style></head><body class="locked">  <div class="cyber-bg"></div>
   <div class="orb one"></div>
   <div class="orb two"></div>
   <div class="particles" id="particles"></div>
-  <div class="scanlines"></div>
+  <div class="scanlines"></div>  <!-- INTRO -->  <section class="intro" id="intro"><div class="intro-tech">
+  <div class="intro-grid"></div>
+</div>
 
-  <section class="intro" id="intro">
+<div class="intro-content">
 
-    <div class="intro-tech">
-      <div class="intro-grid"></div>
-    </div>
+  <div class="intro-status">
+    <span class="live-dot"></span>
+    ROUTIX WAF SYSTEM • PROTECTION LAYER READY
+  </div>
 
-    <div class="intro-content">
+  <div class="intro-logo"></div>
 
-      <div class="intro-status">
-        <span class="live-dot"></span>
-        ROUTIX WAF SYSTEM • PROTECTION LAYER READY
-      </div>
+  <h1>
+    Routix<span>.</span>
+  </h1>
 
-      <div class="intro-logo"></div>
+  <p>
+    Web Application Firewall مصمم لمراقبة وحماية
+    تطبيقات الويب من الترافيك المشبوه، الهجمات
+    على مستوى L7، تجاوز المعدلات، والمصادر عالية الخطورة.
+  </p>
 
-      <h1>
-        Routix<span>.</span>
-      </h1>
+  <button class="enter-btn" type="button" onclick="enterPlatform()">
+    دخول إلى المنصة
+    <span>←</span>
+  </button>
 
-      <p>
-        Web Application Firewall مصمم لمراقبة وحماية
-        تطبيقات الويب من الترافيك المشبوه، الهجمات
-        على مستوى L7، تجاوز المعدلات، والمصادر عالية الخطورة.
-      </p>
+</div>
 
-      <button class="enter-btn" onclick="enterPlatform()">
-        دخول إلى المنصة
-        <span>←</span>
-      </button>
+<div class="intro-corner">
+  ROUTIX / SECURITY INFRASTRUCTURE / 2026
+</div>
 
-    </div>
+  </section>  <!-- HEADER -->  <header><a href="#home" class="brand">
+  <span class="brand-logo"></span>
+  <span class="brand-name">Routix</span>
+</a>
 
-    <div class="intro-corner">
-      ROUTIX / SECURITY INFRASTRUCTURE / 2026
-    </div>
+<nav id="nav">
+  <a href="#home">الرئيسية</a>
+  <a href="#features">المميزات</a>
+  <a href="#api">API</a>
+  <a href="#integration">طريقة الربط</a>
+  <a href="#settings">الإعدادات</a>
+  <a href="#about">من نحن</a>
+</nav>
 
-  </section>
+<div class="header-actions">
 
-  <header>
+  <button
+    type="button"
+    class="header-login"
+    id="headerLoginBtn"
+    onclick="handleHeaderAuth()">
+    <span>⇥</span>
+    تسجيل الدخول
+  </button>
 
-    <a href="#home" class="brand">
-      <span class="brand-logo"></span>
-      <span class="brand-name">Routix</span>
-    </a>
+  <button
+    type="button"
+    class="mobile-menu"
+    onclick="toggleMenu()">
+    ☰
+  </button>
 
-    <nav id="nav">
+</div>
 
-      <a href="#home">الرئيسية</a>
-      <a href="#features">المميزات</a>
-      <a href="#api">API</a>
-      <a href="#integration">طريقة الربط</a>
-      <a href="#settings">الإعدادات</a>
-      <a href="#about">من نحن</a>
-
-    </nav>
-
-    <div class="header-actions">
-
-      <button
-        type="button"
-        class="header-login"
-        id="headerLoginBtn"
-        onclick="openLogin()">
-        <span>⇥</span>
-        تسجيل الدخول
-      </button>
-
-      <button
-        type="button"
-        class="mobile-menu"
-        onclick="toggleMenu()">
-        ☰
-      </button>
-
-    </div>
-
-  </header>
-
-  <div
+  </header>  <!-- AUTH MODAL -->  <div
     class="login-overlay"
     id="loginOverlay"
-    aria-hidden="true">
+    aria-hidden="true"><div
+  class="login-box"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="loginTitle">
 
-    <div
-      class="login-box"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="loginTitle">
+  <button
+    type="button"
+    class="login-close"
+    onclick="closeLogin()"
+    aria-label="إغلاق">
+    ×
+  </button>
+
+  <div class="login-logo"></div>
+
+  <div class="login-heading">
+
+    <h2 id="loginTitle">
+      تسجيل الدخول
+    </h2>
+
+    <p id="loginSubtitle">
+      أدخل بريدك الإلكتروني وكلمة المرور للمتابعة
+    </p>
+
+  </div>
+
+  <div id="authMessage" class="auth-message"></div>
+
+  <!-- STEP 1 -->
+  <div class="auth-step active" id="stepEmail">
+
+    <div class="field">
+
+      <label for="email">
+        البريد الإلكتروني
+      </label>
+
+      <input
+        id="email"
+        type="email"
+        autocomplete="email"
+        placeholder="name@example.com"
+        dir="ltr">
+
+    </div>
+
+    <div class="field">
+
+      <label for="initialPassword">
+        كلمة المرور
+      </label>
+
+      <input
+        id="initialPassword"
+        type="password"
+        autocomplete="current-password"
+        placeholder="••••••••"
+        minlength="8"
+        maxlength="128"
+        dir="ltr">
+
+      <div class="password-hint">
+        كلمة المرور يجب أن تكون بين 8 و128 حرفاً.
+      </div>
+
+    </div>
+
+    <button
+      type="button"
+      class="auth-btn"
+      id="checkEmailBtn"
+      onclick="checkEmail()">
+      متابعة
+    </button>
+
+    <div class="auth-note">
+      سيتم التحقق من البريد أولاً، ثم تسجيل الدخول
+      أو بدء إنشاء الحساب وإرسال رمز OTP.
+    </div>
+
+  </div>
+
+  <!-- STEP LOGIN -->
+  <div class="auth-step" id="stepLogin">
+
+    <div class="field">
+
+      <label for="loginEmail">
+        البريد الإلكتروني
+      </label>
+
+      <input
+        id="loginEmail"
+        type="email"
+        readonly
+        dir="ltr">
+
+    </div>
+
+    <div class="field">
+
+      <label for="loginPassword">
+        كلمة المرور
+      </label>
+
+      <input
+        id="loginPassword"
+        type="password"
+        autocomplete="current-password"
+        placeholder="••••••••"
+        maxlength="128"
+        dir="ltr">
+
+    </div>
+
+    <button
+      type="button"
+      class="auth-btn"
+      id="loginBtn"
+      onclick="loginUser()">
+      تسجيل الدخول
+    </button>
+
+    <button
+      type="button"
+      class="forgot-btn"
+      onclick="showForgotPassword()">
+      نسيت كلمة المرور؟
+    </button>
+
+    <button
+      type="button"
+      class="auth-secondary"
+      onclick="backToEmail()">
+      ← تغيير البريد الإلكتروني
+    </button>
+
+  </div>
+
+  <!-- STEP REGISTER OTP -->
+  <div class="auth-step" id="stepRegisterOtp">
+
+    <div class="field">
+
+      <label for="registerOtp">
+        رمز التحقق OTP
+      </label>
+
+      <input
+        id="registerOtp"
+        class="otp-input"
+        type="text"
+        inputmode="numeric"
+        maxlength="6"
+        autocomplete="one-time-code"
+        placeholder="000000"
+        dir="ltr">
+
+    </div>
+
+    <button
+      type="button"
+      class="auth-btn"
+      id="verifyRegisterBtn"
+      onclick="verifyRegistration()">
+      تأكيد وإنشاء الحساب
+    </button>
+
+    <button
+      type="button"
+      class="auth-secondary"
+      onclick="backToEmail()">
+      ← رجوع
+    </button>
+
+    <div class="auth-note">
+      رمز التحقق صالح لمدة 5 دقائق فقط.
+    </div>
+
+  </div>
+
+  <!-- STEP FORGOT -->
+  <div class="auth-step" id="stepForgot">
+
+    <div class="field">
+
+      <label for="forgotEmail">
+        البريد الإلكتروني
+      </label>
+
+      <input
+        id="forgotEmail"
+        type="email"
+        readonly
+        dir="ltr">
+
+    </div>
+
+    <button
+      type="button"
+      class="auth-btn"
+      id="sendForgotOtpBtn"
+      onclick="sendForgotOtp()">
+      إرسال OTP
+    </button>
+
+    <button
+      type="button"
+      class="auth-secondary"
+      onclick="backToLogin()">
+      ← رجوع لتسجيل الدخول
+    </button>
+
+  </div>
+
+  <!-- STEP RESET -->
+  <div class="auth-step" id="stepReset">
+
+    <div class="field">
+
+      <label for="resetOtp">
+        رمز التحقق OTP
+      </label>
+
+      <input
+        id="resetOtp"
+        class="otp-input"
+        type="text"
+        inputmode="numeric"
+        maxlength="6"
+        autocomplete="one-time-code"
+        placeholder="000000"
+        dir="ltr">
+
+    </div>
+
+    <div class="field">
+
+      <label for="newPassword">
+        كلمة المرور الجديدة
+      </label>
+
+      <input
+        id="newPassword"
+        type="password"
+        autocomplete="new-password"
+        placeholder="••••••••"
+        minlength="8"
+        maxlength="128"
+        dir="ltr">
+
+      <div class="password-hint">
+        كلمة المرور يجب أن تكون بين 8 و128 حرفاً.
+      </div>
+
+    </div>
+
+    <button
+      type="button"
+      class="auth-btn"
+      id="resetPasswordBtn"
+      onclick="resetPassword()">
+      تغيير كلمة المرور
+    </button>
+
+    <button
+      type="button"
+      class="auth-secondary"
+      onclick="backToLogin()">
+      ← رجوع
+    </button>
+
+  </div>
+
+</div>
+
+  </div>  <!-- MAIN -->  <main id="home"><section class="section dashboard">
+
+  <div class="dashboard-copy">
+
+    <span class="eyebrow">
+      ROUTIX / CLOUD WAF
+    </span>
+
+    <h1>
+      حماية موقعك تبدأ<br>
+      من أول <span>Request.</span>
+    </h1>
+
+    <p>
+      Routix يعمل كطبقة حماية أمام تطبيقك،
+      يراقب الترافيك وطلبات HTTP، يحد من
+      المعدلات المرتفعة، يكتشف أنماط الهجمات
+      ويمنحك رؤية مباشرة لما يحدث على مستوى
+      البنية التحتية والتطبيق.
+    </p>
+
+    <div class="dashboard-actions">
 
       <button
         type="button"
-        class="login-close"
-        onclick="closeLogin()"
-        aria-label="إغلاق">
-        ×
+        class="btn btn-primary"
+        onclick="handleHeaderAuth()">
+        تسجيل الدخول ←
       </button>
 
-      <div class="login-logo"></div>
+      <a href="#features" class="btn">
+        استكشف المميزات
+      </a>
 
-      <div class="login-heading">
+    </div>
 
-        <h2 id="loginTitle">
-          تسجيل الدخول
-        </h2>
+    <div class="stats">
 
-        <p id="loginSubtitle">
-          أدخل بريدك الإلكتروني للمتابعة
-        </p>
-
+      <div class="stat">
+        <div class="stat-label">WAF STATUS</div>
+        <div class="stat-value green">ACTIVE</div>
       </div>
 
-      <div
-        id="authMessage"
-        class="auth-message">
+      <div class="stat">
+        <div class="stat-label">LAYER</div>
+        <div class="stat-value cyan">L7</div>
       </div>
 
-      <div
-        class="auth-step active"
-        id="stepEmail">
-
-        <div class="field">
-
-          <label for="email">
-            البريد الإلكتروني
-          </label>
-
-          <input
-            id="email"
-            type="email"
-            autocomplete="email"
-            placeholder="name@example.com"
-            dir="ltr">
-
-        </div>
-
-        <button
-          type="button"
-          class="auth-btn"
-          id="checkEmailBtn"
-          onclick="checkEmail()">
-          متابعة
-        </button>
-
-        <div class="auth-note">
-          سيتم التحقق من الحساب ثم توجيهك إلى
-          تسجيل الدخول أو إنشاء الحساب.
-        </div>
-
+      <div class="stat">
+        <div class="stat-label">RATE CONTROL</div>
+        <div class="stat-value">ON</div>
       </div>
 
-      <div
-        class="auth-step"
-        id="stepLogin">
-
-        <div class="field">
-
-          <label for="loginEmail">
-            البريد الإلكتروني
-          </label>
-
-          <input
-            id="loginEmail"
-            type="email"
-            readonly
-            dir="ltr">
-
-        </div>
-
-        <div class="field">
-
-          <label for="loginPassword">
-            كلمة المرور
-          </label>
-
-          <input
-            id="loginPassword"
-            type="password"
-            autocomplete="current-password"
-            placeholder="••••••••"
-            dir="ltr">
-
-        </div>
-
-        <button
-          type="button"
-          class="auth-btn"
-          id="loginBtn"
-          onclick="loginUser()">
-          تسجيل الدخول
-        </button>
-
-        <button
-          type="button"
-          class="forgot-btn"
-          onclick="showForgotPassword()">
-          نسيت كلمة المرور؟
-        </button>
-
-        <button
-          type="button"
-          class="auth-secondary"
-          onclick="backToEmail()">
-          ← تغيير البريد الإلكتروني
-        </button>
-
-      </div>
-
-      <div
-        class="auth-step"
-        id="stepRegisterOtp">
-
-        <div class="field">
-
-          <label for="registerOtp">
-            رمز التحقق OTP
-          </label>
-
-          <input
-            id="registerOtp"
-            class="otp-input"
-            type="text"
-            inputmode="numeric"
-            maxlength="6"
-            autocomplete="one-time-code"
-            placeholder="000000"
-            dir="ltr">
-
-        </div>
-
-        <div class="field">
-
-          <label for="registerPassword">
-            كلمة المرور الجديدة
-          </label>
-
-          <input
-            id="registerPassword"
-            type="password"
-            autocomplete="new-password"
-            placeholder="••••••••"
-            dir="ltr">
-
-        </div>
-
-        <button
-          type="button"
-          class="auth-btn"
-          id="verifyRegisterBtn"
-          onclick="verifyRegistration()">
-          إنشاء الحساب
-        </button>
-
-        <button
-          type="button"
-          class="auth-secondary"
-          onclick="backToEmail()">
-          ← رجوع
-        </button>
-
-      </div>
-
-      <div
-        class="auth-step"
-        id="stepForgot">
-
-        <div class="field">
-
-          <label for="forgotEmail">
-            البريد الإلكتروني
-          </label>
-
-          <input
-            id="forgotEmail"
-            type="email"
-            readonly
-            dir="ltr">
-
-        </div>
-
-        <button
-          type="button"
-          class="auth-btn"
-          id="sendForgotOtpBtn"
-          onclick="sendForgotOtp()">
-          إرسال OTP
-        </button>
-
-        <button
-          type="button"
-          class="auth-secondary"
-          onclick="backToLogin()">
-          ← رجوع لتسجيل الدخول
-        </button>
-
-      </div>
-
-      <div
-        class="auth-step"
-        id="stepReset">
-
-        <div class="field">
-
-          <label for="resetOtp">
-            رمز التحقق OTP
-          </label>
-
-          <input
-            id="resetOtp"
-            class="otp-input"
-            type="text"
-            inputmode="numeric"
-            maxlength="6"
-            autocomplete="one-time-code"
-            placeholder="000000"
-            dir="ltr">
-
-        </div>
-
-        <div class="field">
-
-          <label for="newPassword">
-            كلمة المرور الجديدة
-          </label>
-
-          <input
-            id="newPassword"
-            type="password"
-            autocomplete="new-password"
-            placeholder="••••••••"
-            dir="ltr">
-
-        </div>
-
-        <button
-          type="button"
-          class="auth-btn"
-          id="resetPasswordBtn"
-          onclick="resetPassword()">
-          تغيير كلمة المرور
-        </button>
-
-        <button
-          type="button"
-          class="auth-secondary"
-          onclick="backToLogin()">
-          ← رجوع
-        </button>
-
+      <div class="stat">
+        <div class="stat-label">LIVE EVENTS</div>
+        <div class="stat-value green">READY</div>
       </div>
 
     </div>
 
   </div>
 
-  <main id="home">
+  <div class="radar-card">
 
-    <section class="section dashboard">
+    <div class="radar">
+      <div class="radar-ring"></div>
+      <div class="radar-sweep"></div>
+    </div>
 
-      <div class="dashboard-copy">
+    <div class="radar-label">
+      <span>TRAFFIC_MONITOR</span>
+      <strong>● PROTECTED</strong>
+    </div>
 
-        <span class="eyebrow">
-          ROUTIX / CLOUD WAF
-        </span>
+  </div>
 
-        <h1>
-          حماية موقعك تبدأ<br>
-          من أول <span>Request.</span>
-        </h1>
+</section>
 
-        <p>
-          Routix يعمل كطبقة حماية أمام تطبيقك،
-          يراقب الترافيك وطلبات HTTP، يحد من
-          المعدلات المرتفعة، يكتشف أنماط الهجمات
-          ويمنحك رؤية مباشرة لما يحدث على مستوى
-          البنية التحتية والتطبيق.
-        </p>
+<section id="features" class="section">
 
-        <div class="dashboard-actions">
+  <div class="section-title">
 
-          <button
-            type="button"
-            class="btn btn-primary"
-            onclick="openLogin()">
-            تسجيل الدخول ←
-          </button>
+    <span class="eyebrow">
+      SECURITY ENGINE
+    </span>
 
-          <a href="#features" class="btn">
-            استكشف المميزات
-          </a>
+    <h2>
+      حماية متعددة الطبقات للترافيك
+    </h2>
 
+    <p>
+      Routix يجمع بين التحكم بالترافيك،
+      تحليل الطلبات، تقييم المخاطر وآليات
+      الحماية المختلفة داخل طبقة واحدة.
+    </p>
+
+  </div>
+
+  <div class="features">
+
+    <article class="feature">
+      <div class="feature-icon">◈</div>
+      <h3>Rate Limiting</h3>
+      <p>تحديد عدد الطلبات المسموح بها لكل IP خلال نافذة زمنية وتقليل إساءة استخدام الموارد.</p>
+      <span class="tag">TRAFFIC_CONTROL</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">⚡</div>
+      <h3>Burst Protection</h3>
+      <p>التعامل مع الارتفاعات المفاجئة والسريعة في الطلبات قبل انتقال الضغط إلى التطبيق الأصلي.</p>
+      <span class="tag">BURST_DETECTION</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">L7</div>
+      <h3>Layer 7 Protection</h3>
+      <p>فحص طلبات HTTP على مستوى التطبيق وتحليل المسارات والرؤوس والبيانات وفق قواعد الحماية.</p>
+      <span class="tag">HTTP_INSPECTION</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">SQL</div>
+      <h3>SQLi Detection</h3>
+      <p>كشف أنماط شائعة مرتبطة بمحاولات SQL Injection داخل الطلبات.</p>
+      <span class="tag">ATTACK_DETECTION</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">X</div>
+      <h3>XSS Detection</h3>
+      <p>فحص الأنماط المعروفة المرتبطة بمحاولات Cross-Site Scripting.</p>
+      <span class="tag">WEB_SECURITY</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">R</div>
+      <h3>Risk Scoring</h3>
+      <p>بناء درجة خطورة للمصادر والطلبات للمساعدة في اتخاذ قرار الحظر أو التقييد أو المراقبة.</p>
+      <span class="tag">RISK_ENGINE</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">H</div>
+      <h3>Honeypot</h3>
+      <p>مسارات طُعم يمكن استخدامها لرصد المصادر التي تتفاعل مع نقاط لا يفترض أن يستخدمها المستخدم الطبيعي.</p>
+      <span class="tag">THREAT_INTELLIGENCE</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">⊘</div>
+      <h3>Blacklist</h3>
+      <p>التعامل مع المصادر التي تتجاوز سياسات الحماية وإبقاؤها ضمن قائمة الحظر حسب منطق النظام.</p>
+      <span class="tag">IP_CONTROL</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">↯</div>
+      <h3>Concurrency Control</h3>
+      <p>التحكم في عدد الاتصالات المتزامنة لكل IP وعلى مستوى الخدمة لتقليل الضغط غير الطبيعي.</p>
+      <span class="tag">CONNECTION_LIMIT</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">◌</div>
+      <h3>Live Alerts</h3>
+      <p>مراقبة الأحداث والتنبيهات بشكل مباشر من خلال قناة الأحداث الخاصة بالـWAF.</p>
+      <span class="tag">REAL_TIME</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">▣</div>
+      <h3>Security Headers</h3>
+      <p>تحسين طبقة HTTP الأمنية باستخدام إعدادات Security Headers المناسبة للسيرفر.</p>
+      <span class="tag">HTTP_SECURITY</span>
+    </article>
+
+    <article class="feature">
+      <div class="feature-icon">↗</div>
+      <h3>Reverse Proxy</h3>
+      <p>تمرير الطلبات الطبيعية إلى التطبيق الأصلي مع إبقاء التطبيق خلف طبقة Routix.</p>
+      <span class="tag">PROXY_LAYER</span>
+    </article>
+
+  </div>
+
+</section>
+
+<section id="api" class="section">
+
+  <div class="section-title">
+
+    <span class="eyebrow">
+      REQUEST PIPELINE
+    </span>
+
+    <h2>
+      كيف يمر الطلب داخل Routix؟
+    </h2>
+
+    <p>
+      الفكرة الأساسية هي أن Routix يصبح نقطة
+      الدخول العامة، بينما يبقى التطبيق الأصلي خلفه.
+    </p>
+
+  </div>
+
+  <div class="flow">
+
+    <div class="flow-node">
+      <b>CLIENT</b>
+      <span>المستخدم يرسل HTTP Request</span>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-node">
+      <b>ROUTIX</b>
+      <span>استقبال وفحص الطلب</span>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-node">
+      <b>WAF ENGINE</b>
+      <span>Rate / L7 / Risk / Rules</span>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-node">
+      <b>DECISION</b>
+      <span>Allow / Block / Limit</span>
+    </div>
+
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-node">
+      <b>TARGET</b>
+      <span>تمرير الطلب الطبيعي للتطبيق</span>
+    </div>
+
+  </div>
+
+</section>
+
+<section id="integration" class="section">
+
+  <div class="section-title">
+
+    <span class="eyebrow">
+      API & INTEGRATION
+    </span>
+
+    <h2>
+      اربط Routix بموقع العميل
+    </h2>
+
+    <p>
+      Routix يعمل كطبقة حماية أمام تطبيق العميل،
+      بحيث تمر الطلبات عبر طبقة الحماية أولًا قبل الوصول إلى التطبيق الأصلي.
+    </p>
+
+  </div>
+
+  <div class="integration">
+
+    <div class="steps">
+
+      <div class="step">
+        <b class="step-number">01</b>
+        <div>
+          <strong>أضف موقعك إلى Routix</strong>
+          <span>أنشئ إعداد الموقع من خلال حسابك وحدد النطاق والتطبيق المرتبط به.</span>
         </div>
-
-        <div class="stats">
-
-          <div class="stat">
-            <div class="stat-label">WAF STATUS</div>
-            <div class="stat-value green">ACTIVE</div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-label">LAYER</div>
-            <div class="stat-value cyan">L7</div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-label">RATE CONTROL</div>
-            <div class="stat-value">ON</div>
-          </div>
-
-          <div class="stat">
-            <div class="stat-label">LIVE EVENTS</div>
-            <div class="stat-value green">READY</div>
-          </div>
-
-        </div>
-
       </div>
 
-      <div class="radar-card">
-
-        <div class="radar">
-
-          <div class="radar-ring"></div>
-          <div class="radar-sweep"></div>
-
+      <div class="step">
+        <b class="step-number">02</b>
+        <div>
+          <strong>التحقق من حالة الربط</strong>
+          <span>تحديد رابط موقع العميل في ملف البيئة، ثم توجيه الدومين إلى سيرفرك.</span>
         </div>
-
-        <div class="radar-label">
-          <span>TRAFFIC_MONITOR</span>
-          <strong>● PROTECTED</strong>
-        </div>
-
       </div>
 
-    </section>
-
-    <section id="features" class="section">
-
-      <div class="section-title">
-
-        <span class="eyebrow">
-          SECURITY ENGINE
-        </span>
-
-        <h2>
-          حماية متعددة الطبقات للترافيك
-        </h2>
-
-        <p>
-          Routix يجمع بين التحكم بالترافيك،
-          تحليل الطلبات، تقييم المخاطر وآليات
-          الحماية المختلفة داخل طبقة واحدة.
-        </p>
-
+      <div class="step">
+        <b class="step-number">03</b>
+        <div>
+          <strong>وجّه الدومين إلى Routix</strong>
+          <span>بعد إعداد الموقع، وجّه حركة المرور الخاصة بالدومين إلى نقطة الدخول الخاصة بـRoutix.</span>
+        </div>
       </div>
 
-      <div class="features">
-
-        <article class="feature">
-          <div class="feature-icon">◈</div>
-          <h3>Rate Limiting</h3>
-          <p>
-            تحديد عدد الطلبات المسموح بها لكل IP
-            خلال نافذة زمنية وتقليل إساءة استخدام
-            الموارد.
-          </p>
-          <span class="tag">TRAFFIC_CONTROL</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">⚡</div>
-          <h3>Burst Protection</h3>
-          <p>
-            التعامل مع الارتفاعات المفاجئة والسريعة
-            في الطلبات قبل انتقال الضغط إلى التطبيق
-            الأصلي.
-          </p>
-          <span class="tag">BURST_DETECTION</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">L7</div>
-          <h3>Layer 7 Protection</h3>
-          <p>
-            فحص طلبات HTTP على مستوى التطبيق
-            وتحليل المسارات والرؤوس والبيانات
-            وفق قواعد الحماية.
-          </p>
-          <span class="tag">HTTP_INSPECTION</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">SQL</div>
-          <h3>SQLi Detection</h3>
-          <p>
-            كشف أنماط شائعة مرتبطة بمحاولات
-            SQL Injection داخل الطلبات.
-          </p>
-          <span class="tag">ATTACK_DETECTION</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">X</div>
-          <h3>XSS Detection</h3>
-          <p>
-            فحص الأنماط المعروفة المرتبطة بمحاولات
-            Cross-Site Scripting.
-          </p>
-          <span class="tag">WEB_SECURITY</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">R</div>
-          <h3>Risk Scoring</h3>
-          <p>
-            بناء درجة خطورة للمصادر والطلبات
-            للمساعدة في اتخاذ قرار الحظر أو
-            التقييد أو المراقبة.
-          </p>
-          <span class="tag">RISK_ENGINE</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">H</div>
-          <h3>Honeypot</h3>
-          <p>
-            مسارات طُعم يمكن استخدامها لرصد
-            المصادر التي تتفاعل مع نقاط لا يفترض
-            أن يستخدمها المستخدم الطبيعي.
-          </p>
-          <span class="tag">THREAT_INTELLIGENCE</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">⊘</div>
-          <h3>Blacklist</h3>
-          <p>
-            التعامل مع المصادر التي تتجاوز سياسات
-            الحماية وإبقاؤها ضمن قائمة الحظر
-            حسب منطق النظام.
-          </p>
-          <span class="tag">IP_CONTROL</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">↯</div>
-          <h3>Concurrency Control</h3>
-          <p>
-            التحكم في عدد الاتصالات المتزامنة
-            لكل IP وعلى مستوى الخدمة لتقليل
-            الضغط غير الطبيعي.
-          </p>
-          <span class="tag">CONNECTION_LIMIT</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">◌</div>
-          <h3>Live Alerts</h3>
-          <p>
-            مراقبة الأحداث والتنبيهات بشكل مباشر
-            من خلال قناة الأحداث الخاصة بالـWAF
-            دون الحاجة لتحديث الصفحة.
-          </p>
-          <span class="tag">REAL_TIME</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">▣</div>
-          <h3>Security Headers</h3>
-          <p>
-            تحسين طبقة HTTP الأمنية باستخدام
-            إعدادات Security Headers المناسبة
-            للسيرفر.
-          </p>
-          <span class="tag">HTTP_SECURITY</span>
-        </article>
-
-        <article class="feature">
-          <div class="feature-icon">↗</div>
-          <h3>Reverse Proxy</h3>
-          <p>
-            تمرير الطلبات الطبيعية إلى التطبيق الأصلي
-            مع إبقاء التطبيق خلف طبقة Routix.
-          </p>
-          <span class="tag">PROXY_LAYER</span>
-        </article>
-
+      <div class="step">
+        <b class="step-number">04</b>
+        <div>
+          <strong>احتفظ بإعدادات السيرفر بشكل آمن</strong>
+          <span>مفاتيح النظام وبيانات الإدارة وإعدادات التطبيق الداخلي تبقى على السيرفر.</span>
+        </div>
       </div>
 
-    </section>
+    </div>
 
-    <section id="api" class="section">
+    <div class="code-card">
 
-      <div class="section-title">
-
-        <span class="eyebrow">
-          REQUEST PIPELINE
-        </span>
-
-        <h2>
-          كيف يمر الطلب داخل Routix؟
-        </h2>
-
-        <p>
-          الفكرة الأساسية هي أن Routix يصبح نقطة
-          الدخول العامة، بينما يبقى التطبيق الأصلي
-          خلفه.
-        </p>
-
+      <div class="code-title">
+        <span class="code-dot"></span>
+        ROUTIX / SITE CONFIGURATION
       </div>
-
-      <div class="flow">
-
-        <div class="flow-node">
-          <b>CLIENT</b>
-          <span>
-            المستخدم يرسل HTTP Request
-          </span>
-        </div>
-
-        <div class="flow-arrow">→</div>
-
-        <div class="flow-node">
-          <b>ROUTIX</b>
-          <span>
-            استقبال وفحص الطلب
-          </span>
-        </div>
-
-        <div class="flow-arrow">→</div>
-
-        <div class="flow-node">
-          <b>WAF ENGINE</b>
-          <span>
-            Rate / L7 / Risk / Rules
-          </span>
-        </div>
-
-        <div class="flow-arrow">→</div>
-
-        <div class="flow-node">
-          <b>DECISION</b>
-          <span>
-            Allow / Block / Limit
-          </span>
-        </div>
-
-        <div class="flow-arrow">→</div>
-
-        <div class="flow-node">
-          <b>TARGET</b>
-          <span>
-            تمرير الطلب الطبيعي للتطبيق
-          </span>
-        </div>
-
-      </div>
-
-    </section>
-
-    <section id="integration" class="section">
-
-      <div class="section-title">
-
-        <span class="eyebrow">
-          API & INTEGRATION
-        </span>
-
-        <h2>
-          اربط Routix بموقع العميل
-        </h2>
-
-        <p>
-          Routix يعمل كطبقة حماية أمام تطبيق العميل،
-          بحيث تمر الطلبات عبر طبقة الحماية أولًا قبل
-          الوصول إلى التطبيق الأصلي.
-        </p>
-
-      </div>
-
-      <div class="integration">
-
-        <div class="steps">
-
-          <div class="step">
-            <b class="step-number">01</b>
-            <div>
-              <strong>أضف موقعك إلى Routix</strong>
-              <span>
-                أنشئ إعداد الموقع من خلال حسابك
-                وحدد النطاق والتطبيق المرتبط به.
-              </span>
-            </div>
-          </div>
-
-          <div class="step">
-            <b class="step-number">02</b>
-            <div>
-              <strong>التحقق من حالة الربط</strong>
-              <span>
-                تحديد رابط موقع العميل في ملف البيئة،
-                ثم توجيه الدومين إلى سيرفرك.
-              </span>
-            </div>
-          </div>
-
-          <div class="step">
-            <b class="step-number">03</b>
-            <div>
-              <strong>وجّه الدومين إلى Routix</strong>
-              <span>
-                بعد إعداد الموقع، وجّه حركة المرور الخاصة
-                بالدومين إلى نقطة الدخول الخاصة بـRoutix.
-              </span>
-            </div>
-          </div>
-
-          <div class="step">
-            <b class="step-number">04</b>
-            <div>
-              <strong>احتفظ بإعدادات السيرفر بشكل آمن</strong>
-              <span>
-                مفاتيح النظام وبيانات الإدارة وإعدادات
-                التطبيق الداخلي تبقى على السيرفر ولا تظهر
-                في الواجهة العامة.
-              </span>
-            </div>
-          </div>
-
-        </div>
-
-        <div class="code-card">
-
-          <div class="code-title">
-            <span class="code-dot"></span>
-            ROUTIX / SITE CONFIGURATION
-          </div>
 
 <pre># Routix Site Configuration
 
@@ -2338,241 +2076,173 @@ SITE_DOMAIN=your-domain.com
 
 SITE_TOKEN=YOUR_SITE_TOKEN
 
-# يتم إنشاء القيم الحساسة
-# وإدارتها من خلال السيرفر
-
-# لا تضع:
-# WAF_API_KEY
-# ADMIN_PASSWORD
-# TARGET_URL الداخلي
-# أو أي أسرار خاصة بالسيرفر
-# داخل كود الواجهة العامة.</pre>
-
-          <div class="warning">
-            لأسباب أمنية، لا يتم عرض مفاتيح النظام أو بيانات
-            الإدارة أو إعدادات البنية الداخلية في الصفحة العامة.
-            استخدم Token الموقع الذي يتم إنشاؤه من حسابك
-            لربط موقعك بخدمة Routix.
-          </div>
-
-        </div>
-
+# القيم الحساسة تتم إدارتها على السيرفر فقط.
+# لا تضع أسرار السيرفر داخل HTML.</pre>      <div class="warning">
+        لأسباب أمنية، لا يتم عرض مفاتيح النظام أو بيانات الإدارة
+        أو إعدادات البنية الداخلية في الصفحة العامة.
       </div>
 
-    </section>
+    </div>
 
-    <section id="settings" class="section">
+  </div>
+
+</section>
+
+<section id="settings" class="section">
+
+  <div class="section-title">
+
+    <span class="eyebrow">
+      WAF CONFIGURATION
+    </span>
+
+    <h2>
+      الإعدادات التشغيلية
+    </h2>
+
+    <p>
+      يتم التحكم في السلوك التشغيلي للـWAF من خلال إعدادات البيئة الموجودة على السيرفر.
+    </p>
+
+  </div>
+
+  <div class="settings-grid">
+
+    <article class="setting">
+      <h3>Traffic Control</h3>
+      <p>التحكم في معدل الطلبات والحدود العامة وحدود الـBurst.</p>
+      <code>RATE LIMITING<br>BURST PROTECTION<br>GLOBAL TRAFFIC</code>
+    </article>
+
+    <article class="setting">
+      <h3>Risk Engine</h3>
+      <p>تقييم مستوى خطورة الطلبات والمصادر واتخاذ الإجراء المناسب.</p>
+      <code>RISK ENGINE<br>THREAT DETECTION<br>SECURITY RULES</code>
+    </article>
+
+    <article class="setting">
+      <h3>Concurrency</h3>
+      <p>التحكم في عدد الاتصالات المتزامنة لكل مصدر وعلى مستوى الخدمة.</p>
+      <code>PER-IP LIMIT<br>GLOBAL LIMIT<br>CONNECTION CONTROL</code>
+    </article>
+
+    <article class="setting">
+      <h3>Proxy</h3>
+      <p>إدارة الاتصال بين Routix والتطبيق الأصلي الموجود خلف طبقة الحماية.</p>
+      <code>REVERSE PROXY<br>UPSTREAM<br>CONNECTION ROUTING</code>
+    </article>
+
+    <article class="setting">
+      <h3>Request Limits</h3>
+      <p>التحكم في حدود ومهلات الطلبات والاتصال مع التطبيق الأصلي.</p>
+      <code>REQUEST LIMITS<br>TIMEOUT CONTROL<br>HEADER LIMITS</code>
+    </article>
+
+    <article class="setting">
+      <h3>Security</h3>
+      <p>مفاتيح النظام وبيانات الإدارة والإعدادات الحساسة تتم إدارتها داخليًا.</p>
+      <code>SERVER SIDE ONLY<br>PRIVATE CONFIGURATION<br>SECRET STORAGE</code>
+    </article>
+
+  </div>
+
+</section>
+
+<section id="about" class="section">
+
+  <div class="about">
+
+    <div class="about-copy">
+
+      <span class="eyebrow">
+        ABOUT ROUTIX
+      </span>
 
       <div class="section-title">
 
-        <span class="eyebrow">
-          WAF CONFIGURATION
-        </span>
-
         <h2>
-          الإعدادات التشغيلية
+          نبني الحماية بعقلية البنية التحتية.
         </h2>
 
         <p>
-          يتم التحكم في السلوك التشغيلي للـWAF
-          من خلال إعدادات البيئة الموجودة على السيرفر.
+          Routix مشروع تقني طوره مطورون شغوفون
+          بالأمن السيبراني، البنية التحتية وتطوير الأنظمة.
+          <br><br>
+          نؤمن أن طبقة الحماية الجيدة يجب أن تكون
+          عملية، واضحة وقابلة للمراقبة.
+          <br><br>
+          هدف Routix هو توفير طبقة WAF قابلة للدمج
+          مع المواقع والتطبيقات، مع أدوات للتحكم
+          بالترافيك ومراقبة الأحداث الأمنية.
         </p>
 
       </div>
 
-      <div class="settings-grid">
+      <button
+        type="button"
+        class="btn btn-primary"
+        onclick="handleHeaderAuth()">
+        ابدأ مع Routix ←
+      </button>
 
-        <article class="setting">
-          <h3>Traffic Control</h3>
-          <p>
-            التحكم في معدل الطلبات والحدود العامة
-            وحدود الـBurst.
-          </p>
-          <code>
-            RATE LIMITING<br>
-            BURST PROTECTION<br>
-            GLOBAL TRAFFIC
-          </code>
-        </article>
+    </div>
 
-        <article class="setting">
-          <h3>Risk Engine</h3>
-          <p>
-            تقييم مستوى خطورة الطلبات والمصادر
-            واتخاذ الإجراء المناسب وفق سياسة النظام.
-          </p>
-          <code>
-            RISK ENGINE<br>
-            THREAT DETECTION<br>
-            SECURITY RULES
-          </code>
-        </article>
+    <div class="terminal">
 
-        <article class="setting">
-          <h3>Concurrency</h3>
-          <p>
-            التحكم في عدد الاتصالات المتزامنة لكل
-            مصدر وعلى مستوى الخدمة.
-          </p>
-          <code>
-            PER-IP LIMIT<br>
-            GLOBAL LIMIT<br>
-            CONNECTION CONTROL
-          </code>
-        </article>
-
-        <article class="setting">
-          <h3>Proxy</h3>
-          <p>
-            إدارة الاتصال بين Routix والتطبيق الأصلي
-            الموجود خلف طبقة الحماية.
-          </p>
-          <code>
-            REVERSE PROXY<br>
-            UPSTREAM<br>
-            CONNECTION ROUTING
-          </code>
-        </article>
-
-        <article class="setting">
-          <h3>Request Limits</h3>
-          <p>
-            التحكم في حدود ومهلات الطلبات والاتصال
-            مع التطبيق الأصلي.
-          </p>
-          <code>
-            REQUEST LIMITS<br>
-            TIMEOUT CONTROL<br>
-            HEADER LIMITS
-          </code>
-        </article>
-
-        <article class="setting">
-          <h3>Security</h3>
-          <p>
-            مفاتيح النظام وبيانات الإدارة والإعدادات
-            الحساسة تتم إدارتها داخليًا على السيرفر.
-          </p>
-          <code>
-            SERVER SIDE ONLY<br>
-            PRIVATE CONFIGURATION<br>
-            SECRET STORAGE
-          </code>
-        </article>
-
+      <div>
+        <span class="white">$</span>
+        routix start
       </div>
 
-    </section>
+      <div class="green">✓ WAF protection enabled</div>
+      <div class="green">✓ L7 inspection enabled</div>
+      <div class="green">✓ Rate limiting enabled</div>
+      <div class="green">✓ Risk engine enabled</div>
+      <div class="green">✓ Honeypot monitoring enabled</div>
+      <div class="green">✓ Blacklist engine enabled</div>
+      <div class="green">✓ Live admin events enabled</div>
 
-    <section id="about" class="section">
-
-      <div class="about">
-
-        <div class="about-copy">
-
-          <span class="eyebrow">
-            ABOUT ROUTIX
-          </span>
-
-          <div class="section-title">
-
-            <h2>
-              نبني الحماية بعقلية
-              البنية التحتية.
-            </h2>
-
-            <p>
-              Routix مشروع تقني طوره مطورون شغوفون
-              بالأمن السيبراني، البنية التحتية وتطوير
-              الأنظمة.
-              <br><br>
-              نؤمن أن طبقة الحماية الجيدة يجب أن تكون
-              عملية، واضحة وقابلة للمراقبة، وأن تمنح
-              المطور رؤية أفضل لما يحدث على مستوى
-              الترافيك والطلبات بدل أن تكون مجرد طبقة
-              غير مرئية أمام التطبيق.
-              <br><br>
-              هدف Routix هو توفير طبقة WAF قابلة للدمج
-              مع المواقع والتطبيقات، مع أدوات للتحكم
-              بالترافيك ومراقبة الأحداث الأمنية.
-            </p>
-
-          </div>
-
-          <button
-            type="button"
-            class="btn btn-primary"
-            onclick="openLogin()">
-            ابدأ مع Routix ←
-          </button>
-
-        </div>
-
-        <div class="terminal">
-
-          <div>
-            <span class="white">$</span>
-            routix start
-          </div>
-
-          <div class="green">
-            ✓ WAF protection enabled
-          </div>
-
-          <div class="green">
-            ✓ L7 inspection enabled
-          </div>
-
-          <div class="green">
-            ✓ Rate limiting enabled
-          </div>
-
-          <div class="green">
-            ✓ Risk engine enabled
-          </div>
-
-          <div class="green">
-            ✓ Honeypot monitoring enabled
-          </div>
-
-          <div class="green">
-            ✓ Blacklist engine enabled
-          </div>
-
-          <div class="green">
-            ✓ Live admin events enabled
-          </div>
-
-          <div>
-            <span class="cyan">→</span>
-            proxying through Routix
-          </div>
-
-          <div>
-            <span class="cyan">→</span>
-            protection layer active
-          </div>
-
-        </div>
-
+      <div>
+        <span class="cyan">→</span>
+        proxying through Routix
       </div>
 
-    </section>
+      <div>
+        <span class="cyan">→</span>
+        protection layer active
+      </div>
 
-  </main>
+    </div>
 
-  <footer>
+  </div>
+
+</section>
+
+  </main>  <footer>
     © 2026 <span>Routix</span> — Cloud WAF & Application Protection
-  </footer>
+  </footer>  <script>
+    "use strict";
 
-  <script>
+    /* =========================================================
+       GLOBAL AUTH STATE
+    ========================================================== */
+
+    const loginOverlay = document.getElementById("loginOverlay");
+    const authMessage = document.getElementById("authMessage");
+
+    let authState = {
+      email: "",
+      password: "",
+      authenticated: false,
+      profile: null
+    };
+
 
     /* =========================================================
        INTRO
     ========================================================== */
 
     function enterPlatform() {
-
       const intro = document.getElementById("intro");
 
       intro.classList.add("hidden");
@@ -2589,37 +2259,25 @@ SITE_TOKEN=YOUR_SITE_TOKEN
     ========================================================== */
 
     function toggleMenu() {
-
-      const nav = document.getElementById("nav");
-
-      nav.classList.toggle("mobile-open");
+      document
+        .getElementById("nav")
+        .classList
+        .toggle("mobile-open");
     }
 
-
     document.querySelectorAll("#nav a").forEach(link => {
-
       link.addEventListener("click", () => {
-
         document
           .getElementById("nav")
           .classList
           .remove("mobile-open");
-
       });
-
     });
 
 
     /* =========================================================
-       LOGIN MODAL
+       AUTH MODAL
     ========================================================== */
-
-    const loginOverlay =
-      document.getElementById("loginOverlay");
-
-    const authMessage =
-      document.getElementById("authMessage");
-
 
     function openLogin() {
 
@@ -2630,16 +2288,21 @@ SITE_TOKEN=YOUR_SITE_TOKEN
 
       clearAuthMessage();
 
+      if (authState.authenticated) {
+        showMessage(
+          "أنت مسجل الدخول بالفعل.",
+          "success"
+        );
+        return;
+      }
+
       showStep("stepEmail");
 
+      const emailInput = document.getElementById("email");
+
       setTimeout(() => {
-
-        document
-          .getElementById("email")
-          .focus();
-
+        emailInput.focus();
       }, 100);
-
     }
 
 
@@ -2653,7 +2316,6 @@ SITE_TOKEN=YOUR_SITE_TOKEN
       clearAuthMessage();
 
       resetAuthForm();
-
     }
 
 
@@ -2671,25 +2333,22 @@ SITE_TOKEN=YOUR_SITE_TOKEN
       document
         .querySelectorAll(".auth-step")
         .forEach(step => {
-
           step.classList.remove("active");
-
         });
 
+      const step = document.getElementById(stepId);
 
-      document
-        .getElementById(stepId)
-        .classList.add("active");
-
+      if (step) {
+        step.classList.add("active");
+      }
 
       clearAuthMessage();
-
 
       const titles = {
 
         stepEmail: [
           "تسجيل الدخول",
-          "أدخل بريدك الإلكتروني للمتابعة"
+          "أدخل بريدك الإلكتروني وكلمة المرور للمتابعة"
         ],
 
         stepLogin: [
@@ -2714,7 +2373,6 @@ SITE_TOKEN=YOUR_SITE_TOKEN
 
       };
 
-
       const data = titles[stepId];
 
       if (data) {
@@ -2728,7 +2386,6 @@ SITE_TOKEN=YOUR_SITE_TOKEN
           .textContent = data[1];
 
       }
-
     }
 
 
@@ -2761,8 +2418,10 @@ SITE_TOKEN=YOUR_SITE_TOKEN
 
       if (loading) {
 
-        button.dataset.oldText =
-          button.textContent;
+        if (!button.dataset.oldText) {
+          button.dataset.oldText =
+            button.textContent;
+        }
 
         button.textContent =
           "جاري المعالجة...";
@@ -2774,31 +2433,55 @@ SITE_TOKEN=YOUR_SITE_TOKEN
           button.textContent;
 
       }
-
     }
 
 
     /* =========================================================
        API HELPER
+       جميع الطلبات تستخدم Cookie Session
     ========================================================== */
 
-    async function apiRequest(url, data) {
+    async function apiRequest(
+      url,
+      data = undefined,
+      options = {}
+    ) {
 
-      const response = await fetch(url, {
+      const config = {
 
-        method: "POST",
+        method: options.method || "POST",
 
         headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
+          "Accept": "application/json",
+          ...(data !== undefined
+            ? { "Content-Type": "application/json" }
+            : {})
         },
 
         credentials: "include",
 
-        body: JSON.stringify(data)
+        ...options
 
-      });
+      };
 
+      if (data !== undefined) {
+        config.body = JSON.stringify(data);
+      }
+
+      let response;
+
+      try {
+
+        response =
+          await fetch(url, config);
+
+      } catch (error) {
+
+        throw new Error(
+          "تعذر الاتصال بسيرفر Routix."
+        );
+
+      }
 
       let result = {};
 
@@ -2812,18 +2495,104 @@ SITE_TOKEN=YOUR_SITE_TOKEN
 
       }
 
-
       if (!response.ok) {
 
         throw new Error(
           result.message ||
-          "حدث خطأ في الاتصال بالسيرفر."
+          result.error ||
+          "حدث خطأ في السيرفر."
         );
 
       }
 
-
       return result;
+    }
+
+
+    /* =========================================================
+       RESPONSE HELPERS
+    ========================================================== */
+
+    function isSuccessful(result) {
+
+      if (!result) return false;
+
+      if (result.success === false) return false;
+      if (result.authenticated === false) return false;
+      if (result.loggedIn === false) return false;
+
+      return true;
+    }
+
+
+    function getRegisteredValue(result) {
+
+      if (!result) return null;
+
+      if (typeof result.registered === "boolean") {
+        return result.registered;
+      }
+
+      if (
+        result.data &&
+        typeof result.data.registered === "boolean"
+      ) {
+        return result.data.registered;
+      }
+
+      return null;
+    }
+
+
+    function getMessage(result, fallback) {
+
+      if (!result) return fallback;
+
+      return (
+        result.message ||
+        result.msg ||
+        result.data?.message ||
+        fallback
+      );
+    }
+
+
+    /* =========================================================
+       VALIDATION
+    ========================================================== */
+
+    function normalizeEmail(value) {
+
+      return String(value || "")
+        .trim()
+        .toLowerCase();
+
+    }
+
+
+    function isValidEmail(email) {
+
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    }
+
+
+    function isValidPassword(password) {
+
+      return (
+        typeof password === "string" &&
+        password.length >= 8 &&
+        password.length <= 128
+      );
+
+    }
+
+
+    function validateOtp(otp) {
+
+      return /^\d{6}$/.test(
+        String(otp || "").trim()
+      );
 
     }
 
@@ -2832,22 +2601,27 @@ SITE_TOKEN=YOUR_SITE_TOKEN
        CHECK EMAIL
        
        POST /api/check-email
-       
-       الحساب موجود:
-       -> /api/login
-       
-       الحساب غير موجود:
-       -> /api/register
+
+       Request:
+       {
+         email
+       }
+
+       Response:
+       {
+         registered: true/false
+       }
     ========================================================== */
 
     async function checkEmail() {
 
       const email =
-        document
-          .getElementById("email")
-          .value
-          .trim()
-          .toLowerCase();
+        normalizeEmail(
+          document.getElementById("email").value
+        );
+
+      const password =
+        document.getElementById("initialPassword").value;
 
 
       if (!email) {
@@ -2858,11 +2632,10 @@ SITE_TOKEN=YOUR_SITE_TOKEN
         );
 
         return;
-
       }
 
 
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      if (!isValidEmail(email)) {
 
         showMessage(
           "صيغة البريد الإلكتروني غير صحيحة.",
@@ -2870,11 +2643,24 @@ SITE_TOKEN=YOUR_SITE_TOKEN
         );
 
         return;
-
       }
 
 
-      setLoading("checkEmailBtn", true);
+      if (!isValidPassword(password)) {
+
+        showMessage(
+          "كلمة المرور يجب أن تكون بين 8 و128 حرفاً.",
+          "error"
+        );
+
+        return;
+      }
+
+
+      setLoading(
+        "checkEmailBtn",
+        true
+      );
 
 
       try {
@@ -2888,6 +2674,23 @@ SITE_TOKEN=YOUR_SITE_TOKEN
           );
 
 
+        const registered =
+          getRegisteredValue(result);
+
+
+        if (registered === null) {
+
+          throw new Error(
+            "استجابة السيرفر غير متوافقة مع /api/check-email."
+          );
+
+        }
+
+
+        authState.email = email;
+        authState.password = password;
+
+
         document
           .getElementById("loginEmail")
           .value = email;
@@ -2897,21 +2700,16 @@ SITE_TOKEN=YOUR_SITE_TOKEN
           .value = email;
 
 
-        /*
-          يدعم أكثر من اسم محتمل
-          لقيمة وجود الحساب.
-        */
+        if (registered === true) {
 
-        const exists =
-          result.exists === true ||
-          result.accountExists === true ||
-          result.userExists === true ||
-          result.found === true ||
-          result.data?.exists === true ||
-          result.data?.accountExists === true;
+          /*
+            الحساب موجود:
+            ننتقل لتسجيل الدخول.
+          */
 
-
-        if (exists) {
+          document
+            .getElementById("loginPassword")
+            .value = password;
 
           showStep("stepLogin");
 
@@ -2923,17 +2721,20 @@ SITE_TOKEN=YOUR_SITE_TOKEN
 
           }, 100);
 
-          return;
+        } else {
+
+          /*
+            الحساب غير موجود:
+            إنشاء حساب عبر /api/register
+            ثم انتظار OTP.
+          */
+
+          await registerUser(
+            email,
+            password
+          );
 
         }
-
-
-        /*
-          الحساب غير موجود:
-          الانتقال إلى التسجيل وإرسال OTP.
-        */
-
-        await registerUser(email);
 
       } catch (error) {
 
@@ -2945,7 +2746,10 @@ SITE_TOKEN=YOUR_SITE_TOKEN
 
       } finally {
 
-        setLoading("checkEmailBtn", false);
+        setLoading(
+          "checkEmailBtn",
+          false
+        );
 
       }
 
@@ -2956,124 +2760,109 @@ SITE_TOKEN=YOUR_SITE_TOKEN
        REGISTER
        
        POST /api/register
-       
-       email + password
-       
-       ثم OTP
+
+       Request:
+       {
+         email,
+         password
+       }
+
+       السيرفر:
+       - Argon2id
+       - OTP 6 digits
+       - Brevo
+       - MongoDB OTPVerification
+       - TTL 5 minutes
     ========================================================== */
 
-    async function registerUser(email) {
-
-      const password =
-        prompt("أنشئ كلمة مرور للحساب:");
-
-
-      if (!password) {
-
-        showMessage(
-          "تم إلغاء إنشاء الحساب.",
-          "info"
-        );
-
-        return;
-
-      }
-
-
-      if (password.length < 8) {
-
-        showMessage(
-          "كلمة المرور يجب أن تكون 8 أحرف على الأقل.",
-          "error"
-        );
-
-        return;
-
-      }
-
+    async function registerUser(
+      email,
+      password
+    ) {
 
       showMessage(
-        "جاري إنشاء طلب التسجيل وإرسال OTP...",
+        "جاري إنشاء الحساب وإرسال رمز التحقق...",
         "info"
       );
 
 
-      try {
-
-        const result =
-          await apiRequest(
-            "/api/register",
-            {
-              email,
-              password
-            }
-          );
-
-
-        if (
-          result.success === false &&
-          result.otpSent !== true
-        ) {
-
-          throw new Error(
-            result.message ||
-            "تعذر إنشاء الحساب."
-          );
-
-        }
-
-
-        showStep("stepRegisterOtp");
-
-        showMessage(
-          result.message ||
-          "تم إرسال رمز التحقق إلى بريدك الإلكتروني.",
-          "success"
+      const result =
+        await apiRequest(
+          "/api/register",
+          {
+            email,
+            password
+          }
         );
 
 
-        window.__routixRegistration = {
-          email,
-          password
-        };
+      if (!isSuccessful(result)) {
 
-
-        setTimeout(() => {
-
-          document
-            .getElementById("registerOtp")
-            .focus();
-
-        }, 100);
-
-      } catch (error) {
-
-        showMessage(
-          error.message ||
-          "تعذر إنشاء الحساب.",
-          "error"
+        throw new Error(
+          getMessage(
+            result,
+            "تعذر إنشاء الحساب."
+          )
         );
 
       }
+
+
+      authState.email = email;
+      authState.password = password;
+
+
+      showStep("stepRegisterOtp");
+
+
+      showMessage(
+        getMessage(
+          result,
+          "تم إرسال رمز التحقق إلى بريدك الإلكتروني."
+        ),
+        "success"
+      );
+
+
+      setTimeout(() => {
+
+        document
+          .getElementById("registerOtp")
+          .focus();
+
+      }, 100);
 
     }
 
 
     /* =========================================================
-       VERIFY OTP / CREATE ACCOUNT
+       VERIFY REGISTRATION OTP
        
        POST /api/verify-otp
-       
-       email + otp + password
+
+       Request:
+       {
+         email,
+         otp
+       }
+
+       السيرفر يقوم بإنشاء User
+       وتسجيل الدخول وإنشاء Session.
     ========================================================== */
 
     async function verifyRegistration() {
 
-      const registration =
-        window.__routixRegistration;
+      const email =
+        normalizeEmail(authState.email);
+
+      const otp =
+        document
+          .getElementById("registerOtp")
+          .value
+          .trim();
 
 
-      if (!registration) {
+      if (!email) {
 
         showMessage(
           "انتهت جلسة التسجيل، ابدأ من جديد.",
@@ -3083,26 +2872,17 @@ SITE_TOKEN=YOUR_SITE_TOKEN
         showStep("stepEmail");
 
         return;
-
       }
 
 
-      const otp =
-        document
-          .getElementById("registerOtp")
-          .value
-          .trim();
-
-
-      if (!otp) {
+      if (!validateOtp(otp)) {
 
         showMessage(
-          "أدخل رمز OTP.",
+          "رمز OTP يجب أن يتكون من 6 أرقام.",
           "error"
         );
 
         return;
-
       }
 
 
@@ -3118,26 +2898,40 @@ SITE_TOKEN=YOUR_SITE_TOKEN
           await apiRequest(
             "/api/verify-otp",
             {
-              email: registration.email,
-              otp: otp,
-              password: registration.password
+              email,
+              otp
             }
           );
 
 
-        if (result.success === false) {
+        if (!isSuccessful(result)) {
 
           throw new Error(
-            result.message ||
-            "رمز OTP غير صحيح."
+            getMessage(
+              result,
+              "رمز OTP غير صحيح أو انتهت صلاحيته."
+            )
           );
 
         }
 
 
+        /*
+          السيرفر أنشأ Session.
+          لا نحاول إنشاء JWT في المتصفح.
+        */
+
+        authState.authenticated = true;
+
+
+        await refreshSession();
+
+
         showMessage(
-          result.message ||
-          "تم إنشاء الحساب وتسجيل الدخول بنجاح.",
+          getMessage(
+            result,
+            "تم إنشاء الحساب وتسجيل الدخول بنجاح."
+          ),
           "success"
         );
 
@@ -3146,10 +2940,9 @@ SITE_TOKEN=YOUR_SITE_TOKEN
 
 
         setTimeout(() => {
-
           closeLogin();
-
         }, 900);
+
 
       } catch (error) {
 
@@ -3175,7 +2968,8 @@ SITE_TOKEN=YOUR_SITE_TOKEN
        LOGIN
        
        POST /api/login
-       
+
+       Request:
        {
          email,
          password
@@ -3185,12 +2979,11 @@ SITE_TOKEN=YOUR_SITE_TOKEN
     async function loginUser() {
 
       const email =
-        document
-          .getElementById("loginEmail")
-          .value
-          .trim()
-          .toLowerCase();
-
+        normalizeEmail(
+          document
+            .getElementById("loginEmail")
+            .value
+        );
 
       const password =
         document
@@ -3198,27 +2991,25 @@ SITE_TOKEN=YOUR_SITE_TOKEN
           .value;
 
 
-      if (!email) {
+      if (!email || !isValidEmail(email)) {
 
         showMessage(
-          "البريد الإلكتروني غير موجود.",
+          "البريد الإلكتروني غير صحيح.",
           "error"
         );
 
         return;
-
       }
 
 
-      if (!password) {
+      if (!isValidPassword(password)) {
 
         showMessage(
-          "أدخل كلمة المرور.",
+          "كلمة المرور يجب أن تكون بين 8 و128 حرفاً.",
           "error"
         );
 
         return;
-
       }
 
 
@@ -3230,11 +3021,6 @@ SITE_TOKEN=YOUR_SITE_TOKEN
 
       try {
 
-        /*
-          تسجيل الدخول العادي:
-          البريد + كلمة المرور فقط.
-        */
-
         const result =
           await apiRequest(
             "/api/login",
@@ -3245,28 +3031,36 @@ SITE_TOKEN=YOUR_SITE_TOKEN
           );
 
 
-        if (
-          result.success === false ||
-          result.authenticated === false ||
-          result.loggedIn === false
-        ) {
+        if (!isSuccessful(result)) {
 
           throw new Error(
-            result.message ||
-            "البريد الإلكتروني أو كلمة المرور غير صحيحة."
+            getMessage(
+              result,
+              "كلمة المرور غير صحيحة."
+            )
           );
 
         }
 
 
+        authState.email = email;
+        authState.authenticated = true;
+
+
         /*
-          السيرفر ينشئ Session.
-          fetch يستخدم credentials: include.
+          Session يتم إنشاؤها في السيرفر.
+          الـCookie HttpOnly لا يمكن للـJS قراءتها
+          وهذا هو المطلوب.
         */
 
+        await refreshSession();
+
+
         showMessage(
-          result.message ||
-          "تم تسجيل الدخول بنجاح.",
+          getMessage(
+            result,
+            "تم تسجيل الدخول بنجاح."
+          ),
           "success"
         );
 
@@ -3275,10 +3069,9 @@ SITE_TOKEN=YOUR_SITE_TOKEN
 
 
         setTimeout(() => {
-
           closeLogin();
-
         }, 900);
+
 
       } catch (error) {
 
@@ -3304,7 +3097,8 @@ SITE_TOKEN=YOUR_SITE_TOKEN
        FORGOT PASSWORD
        
        POST /api/login
-       
+
+       المرحلة الأولى:
        {
          email,
          forgotPassword: true
@@ -3314,31 +3108,11 @@ SITE_TOKEN=YOUR_SITE_TOKEN
     function showForgotPassword() {
 
       const email =
-        document
-          .getElementById("loginEmail")
-          .value
-          .trim()
-          .toLowerCase();
-
-
-      document
-        .getElementById("forgotEmail")
-        .value = email;
-
-
-      showStep("stepForgot");
-
-    }
-
-
-    async function sendForgotOtp() {
-
-      const email =
-        document
-          .getElementById("forgotEmail")
-          .value
-          .trim()
-          .toLowerCase();
+        normalizeEmail(
+          document
+            .getElementById("loginEmail")
+            .value
+        );
 
 
       if (!email) {
@@ -3349,7 +3123,40 @@ SITE_TOKEN=YOUR_SITE_TOKEN
         );
 
         return;
+      }
 
+
+      document
+        .getElementById("forgotEmail")
+        .value = email;
+
+
+      authState.email = email;
+
+
+      showStep("stepForgot");
+
+    }
+
+
+    async function sendForgotOtp() {
+
+      const email =
+        normalizeEmail(
+          document
+            .getElementById("forgotEmail")
+            .value
+        );
+
+
+      if (!email || !isValidEmail(email)) {
+
+        showMessage(
+          "البريد الإلكتروني غير صحيح.",
+          "error"
+        );
+
+        return;
       }
 
 
@@ -3371,24 +3178,29 @@ SITE_TOKEN=YOUR_SITE_TOKEN
           );
 
 
-        if (
-          result.success === false ||
-          result.otpSent === false
-        ) {
+        if (!isSuccessful(result)) {
 
           throw new Error(
-            result.message ||
-            "تعذر إرسال OTP."
+            getMessage(
+              result,
+              "تعذر إرسال OTP."
+            )
           );
 
         }
 
 
+        authState.email = email;
+
+
         showStep("stepReset");
 
+
         showMessage(
-          result.message ||
-          "تم إرسال OTP إلى بريدك الإلكتروني.",
+          getMessage(
+            result,
+            "تم إرسال رمز التحقق إلى بريدك الإلكتروني."
+          ),
           "success"
         );
 
@@ -3400,6 +3212,7 @@ SITE_TOKEN=YOUR_SITE_TOKEN
             .focus();
 
         }, 100);
+
 
       } catch (error) {
 
@@ -3425,24 +3238,31 @@ SITE_TOKEN=YOUR_SITE_TOKEN
        RESET PASSWORD
        
        POST /api/login
-       
+
+       Request:
        {
          email,
          forgotPassword: true,
          otp,
          newPassword
        }
+
+       السيرفر:
+       - يتحقق من OTP
+       - Argon2id
+       - تحديث User
+       - حذف OTP
+       - إنشاء Session
     ========================================================== */
 
     async function resetPassword() {
 
       const email =
-        document
-          .getElementById("forgotEmail")
-          .value
-          .trim()
-          .toLowerCase();
-
+        normalizeEmail(
+          document
+            .getElementById("forgotEmail")
+            .value
+        );
 
       const otp =
         document
@@ -3450,46 +3270,42 @@ SITE_TOKEN=YOUR_SITE_TOKEN
           .value
           .trim();
 
-
       const newPassword =
         document
           .getElementById("newPassword")
           .value;
 
 
-      if (!otp) {
+      if (!email || !isValidEmail(email)) {
 
         showMessage(
-          "أدخل رمز OTP.",
+          "البريد الإلكتروني غير صحيح.",
           "error"
         );
 
         return;
-
       }
 
 
-      if (!newPassword) {
+      if (!validateOtp(otp)) {
 
         showMessage(
-          "أدخل كلمة المرور الجديدة.",
+          "رمز OTP يجب أن يتكون من 6 أرقام.",
           "error"
         );
 
         return;
-
       }
 
 
-      if (newPassword.length < 8) {
+      if (!isValidPassword(newPassword)) {
 
         showMessage(
-          "كلمة المرور يجب أن تكون 8 أحرف على الأقل.",
+          "كلمة المرور الجديدة يجب أن تكون بين 8 و128 حرفاً.",
           "error"
         );
 
         return;
-
       }
 
 
@@ -3513,23 +3329,30 @@ SITE_TOKEN=YOUR_SITE_TOKEN
           );
 
 
-        if (
-          result.success === false ||
-          result.authenticated === false ||
-          result.loggedIn === false
-        ) {
+        if (!isSuccessful(result)) {
 
           throw new Error(
-            result.message ||
-            "رمز OTP غير صحيح أو انتهت صلاحيته."
+            getMessage(
+              result,
+              "رمز OTP غير صحيح أو انتهت صلاحيته."
+            )
           );
 
         }
 
 
+        authState.email = email;
+        authState.authenticated = true;
+
+
+        await refreshSession();
+
+
         showMessage(
-          result.message ||
-          "تم تغيير كلمة المرور وتسجيل الدخول بنجاح.",
+          getMessage(
+            result,
+            "تم تغيير كلمة المرور وتسجيل الدخول بنجاح."
+          ),
           "success"
         );
 
@@ -3538,10 +3361,9 @@ SITE_TOKEN=YOUR_SITE_TOKEN
 
 
         setTimeout(() => {
-
           closeLogin();
-
         }, 1000);
+
 
       } catch (error) {
 
@@ -3564,12 +3386,236 @@ SITE_TOKEN=YOUR_SITE_TOKEN
 
 
     /* =========================================================
-       NAVIGATION BETWEEN AUTH STEPS
+       SESSION / PROFILE
+       
+       GET /api/me
+       GET /api/profile
+    ========================================================== */
+
+    async function refreshSession() {
+
+      try {
+
+        let result;
+
+        try {
+
+          result =
+            await apiRequest(
+              "/api/me",
+              undefined,
+              {
+                method: "GET"
+              }
+            );
+
+        } catch {
+
+          result =
+            await apiRequest(
+              "/api/profile",
+              undefined,
+              {
+                method: "GET"
+              }
+            );
+
+        }
+
+
+        if (
+          result &&
+          result.authenticated === false
+        ) {
+
+          authState.authenticated = false;
+          authState.profile = null;
+
+          updateLoggedOutUI();
+
+          return null;
+        }
+
+
+        authState.authenticated = true;
+        authState.profile =
+          result?.user ||
+          result?.profile ||
+          result?.data ||
+          result;
+
+        updateLoggedInUI();
+
+        return authState.profile;
+
+
+      } catch {
+
+        /*
+          عدم القدرة على قراءة الملف الشخصي
+          لا يعني بالضرورة أن Cookie غير موجودة.
+        */
+
+        return null;
+
+      }
+
+    }
+
+
+    /* =========================================================
+       LOGOUT
+       
+       POST /api/logout
+       
+       السيرفر يمسح routix_session.
+    ========================================================== */
+
+    async function logoutUser() {
+
+      try {
+
+        const result =
+          await apiRequest(
+            "/api/logout",
+            {}
+          );
+
+
+        authState.authenticated = false;
+        authState.email = "";
+        authState.password = "";
+        authState.profile = null;
+
+
+        updateLoggedOutUI();
+
+
+        showMessage(
+          getMessage(
+            result,
+            "تم تسجيل الخروج بنجاح."
+          ),
+          "success"
+        );
+
+
+        setTimeout(() => {
+          closeLogin();
+        }, 700);
+
+
+      } catch (error) {
+
+        showMessage(
+          error.message ||
+          "تعذر تسجيل الخروج.",
+          "error"
+        );
+
+      }
+
+    }
+
+
+    /* =========================================================
+       HEADER AUTH BUTTON
+    ========================================================== */
+
+    function handleHeaderAuth() {
+
+      if (authState.authenticated) {
+
+        openAccountMenu();
+
+        return;
+      }
+
+      openLogin();
+
+    }
+
+
+    function openAccountMenu() {
+
+      clearAuthMessage();
+
+      showStep("stepEmail");
+
+      openLogin();
+
+      showMessage(
+        "أنت مسجل الدخول حالياً. هل تريد تسجيل الخروج؟",
+        "info"
+      );
+
+
+      /*
+        نستخدم زر تسجيل الدخول نفسه كزر خروج
+        عند وجود Session.
+      */
+
+      const button =
+        document.getElementById("headerLoginBtn");
+
+
+      button.innerHTML =
+        "<span>⇥</span> تسجيل الخروج";
+
+      button.onclick = logoutUser;
+
+    }
+
+
+    function updateLoggedInUI() {
+
+      const button =
+        document.getElementById("headerLoginBtn");
+
+      if (!button) return;
+
+      button.classList.add("logged-in");
+
+      button.innerHTML =
+        "<span>✓</span> تسجيل الخروج";
+
+      button.onclick = logoutUser;
+
+    }
+
+
+    function updateLoggedOutUI() {
+
+      const button =
+        document.getElementById("headerLoginBtn");
+
+      if (!button) return;
+
+      button.classList.remove("logged-in");
+
+      button.innerHTML =
+        "<span>⇥</span> تسجيل الدخول";
+
+      button.onclick = handleHeaderAuth;
+
+    }
+
+
+    /* =========================================================
+       NAVIGATION
     ========================================================== */
 
     function backToEmail() {
 
       clearAuthMessage();
+
+      document
+        .getElementById("email")
+        .value = authState.email || "";
+
+      document
+        .getElementById("initialPassword")
+        .value = authState.password || "";
 
       showStep("stepEmail");
 
@@ -3587,10 +3633,11 @@ SITE_TOKEN=YOUR_SITE_TOKEN
     function backToLogin() {
 
       const email =
-        document
-          .getElementById("forgotEmail")
-          .value
-          .trim();
+        normalizeEmail(
+          document
+            .getElementById("forgotEmail")
+            .value
+        );
 
 
       document
@@ -3599,6 +3646,15 @@ SITE_TOKEN=YOUR_SITE_TOKEN
 
 
       showStep("stepLogin");
+
+
+      setTimeout(() => {
+
+        document
+          .getElementById("loginPassword")
+          .focus();
+
+      }, 100);
 
     }
 
@@ -3610,52 +3666,36 @@ SITE_TOKEN=YOUR_SITE_TOKEN
     function resetAuthForm() {
 
       document
-        .querySelectorAll(
-          ".login-box input:not([readonly])"
-        )
-        .forEach(input => {
+        .getElementById("initialPassword")
+        .value = "";
 
-          input.value = "";
+      document
+        .getElementById("loginPassword")
+        .value = "";
 
-        });
+      document
+        .getElementById("registerOtp")
+        .value = "";
 
+      document
+        .getElementById("resetOtp")
+        .value = "";
+
+      document
+        .getElementById("newPassword")
+        .value = "";
 
       document
         .getElementById("loginEmail")
         .value = "";
 
-
       document
         .getElementById("forgotEmail")
         .value = "";
 
-
-      window.__routixRegistration = null;
-
+      authState.password = "";
 
       showStep("stepEmail");
-
-    }
-
-
-    /* =========================================================
-       LOGGED-IN UI
-    ========================================================== */
-
-    function updateLoggedInUI() {
-
-      const button =
-        document.getElementById("headerLoginBtn");
-
-
-      if (!button) return;
-
-
-      button.classList.add("logged-in");
-
-
-      button.innerHTML =
-        "<span>✓</span> تم تسجيل الدخول";
 
     }
 
@@ -3694,6 +3734,56 @@ SITE_TOKEN=YOUR_SITE_TOKEN
 
 
     /* =========================================================
+       ENTER KEY
+    ========================================================== */
+
+    document
+      .querySelectorAll(
+        "#email, #initialPassword, #loginPassword, #registerOtp, #resetOtp, #newPassword"
+      )
+      .forEach(input => {
+
+        input.addEventListener(
+          "keydown",
+          event => {
+
+            if (event.key !== "Enter") return;
+
+            event.preventDefault();
+
+            const step =
+              input.closest(".auth-step");
+
+            if (!step) return;
+
+
+            if (step.id === "stepEmail") {
+              checkEmail();
+            }
+
+            else if (step.id === "stepLogin") {
+              loginUser();
+            }
+
+            else if (step.id === "stepRegisterOtp") {
+              verifyRegistration();
+            }
+
+            else if (step.id === "stepForgot") {
+              sendForgotOtp();
+            }
+
+            else if (step.id === "stepReset") {
+              resetPassword();
+            }
+
+          }
+        );
+
+      });
+
+
+    /* =========================================================
        OTP INPUT
     ========================================================== */
 
@@ -3717,6 +3807,98 @@ SITE_TOKEN=YOUR_SITE_TOKEN
 
 
     /* =========================================================
+       PASSWORD INPUT LIMIT
+    ========================================================== */
+
+    document
+      .querySelectorAll(
+        "#initialPassword, #loginPassword, #newPassword"
+      )
+      .forEach(input => {
+
+        input.addEventListener(
+          "input",
+          () => {
+
+            if (input.value.length > 128) {
+              input.value =
+                input.value.slice(0, 128);
+            }
+
+          }
+        );
+
+      });
+
+
+    /* =========================================================
+       HEALTH CHECK
+       
+       GET /api/health
+    ========================================================== */
+
+    async function checkServerHealth() {
+
+      try {
+
+        const result =
+          await apiRequest(
+            "/api/health",
+            undefined,
+            {
+              method: "GET"
+            }
+          );
+
+        return (
+          result?.status === "online" ||
+          result?.online === true ||
+          result?.success === true
+        );
+
+      } catch {
+
+        return false;
+
+      }
+
+    }
+
+
+    /* =========================================================
+       SESSION RESTORE ON PAGE LOAD
+    ========================================================== */
+
+    async function restoreSession() {
+
+      try {
+
+        const profile =
+          await refreshSession();
+
+
+        if (profile) {
+
+          authState.authenticated = true;
+
+          updateLoggedInUI();
+
+        } else {
+
+          updateLoggedOutUI();
+
+        }
+
+      } catch {
+
+        updateLoggedOutUI();
+
+      }
+
+    }
+
+
+    /* =========================================================
        CYBER PARTICLES
     ========================================================== */
 
@@ -3729,31 +3911,37 @@ SITE_TOKEN=YOUR_SITE_TOKEN
       const p =
         document.createElement("span");
 
-
       p.className = "particle";
-
 
       p.style.left =
         Math.random() * 100 + "%";
 
-
       p.style.top =
         (40 + Math.random() * 60) + "%";
 
-
       p.style.animationDelay =
-        (Math.random() * 8) + "s";
-
+        Math.random() * 8 + "s";
 
       p.style.animationDuration =
-        (5 + Math.random() * 7) + "s";
-
+        5 + Math.random() * 7 + "s";
 
       particles.appendChild(p);
 
     }
 
-  </script>
 
-</body>
+    /* =========================================================
+       INITIALIZATION
+    ========================================================== */
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      () => {
+
+        restoreSession();
+
+      }
+    );
+
+  </script></body>
 </html>
