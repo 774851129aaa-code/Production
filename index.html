@@ -4188,30 +4188,63 @@ ADMIN APIs
     }
 
     /* ============================================================
-       SITES
-       GET /api/sites
+       SITES (GET & POST /api/sites)
     ============================================================ */
 
+    let currentSites = [];
+
     async function loadClientSites() {
+      try {
+        const data = await apiFetch("/api/sites", {
+          method: "GET"
+        });
 
-      const data = await apiFetch("/api/sites", {
-        method: "GET"
-      });
+        /*
+          هذه البيانات يفترض أن السيرفر يرجعها بعد التحقق
+          من Session المستخدم وowner_id.
+        */
 
-      /*
-        هذه البيانات يفترض أن السيرفر يرجعها بعد التحقق
-        من Session المستخدم وowner_id.
-      */
+        currentSites = getArray(
+          data,
+          ["sites", "data", "results"]
+        );
 
-      currentSites = getArray(
-        data,
-        ["sites", "data", "results"]
-      );
+        renderSites();
 
-      renderSites();
+        return currentSites;
+      } catch (err) {
+        console.error("Error loading sites:", err);
+        currentSites = [];
+        renderSites();
+        return [];
+      }
+    }
 
-      return currentSites;
+    async function createClientSite(domain, targetUrl = "") {
+      try {
+        const response = await apiFetch("/api/sites", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            domain: domain,
+            target_url: targetUrl
+          })
+        });
 
+        if (response && response.success) {
+          await loadClientSites();
+          return true;
+        } else {
+          alert(response?.error || "internal_error");
+          return false;
+        }
+      } catch (err) {
+        console.error("Error creating site:", err);
+        alert("internal_error");
+        return false;
+      }
     }
 
     function renderSites() {
@@ -4225,8 +4258,12 @@ ADMIN APIs
       const count =
         document.getElementById("clientSiteCount");
 
-      count.textContent =
-        `${currentSites.length} SITE${currentSites.length === 1 ? "" : "S"}`;
+      if (count) {
+        count.textContent =
+          `${currentSites.length} SITE${currentSites.length === 1 ? "" : "S"}`;
+      }
+
+      if (!dashboardList && !fullList) return;
 
       if (!currentSites.length) {
 
@@ -4237,22 +4274,23 @@ ADMIN APIs
           </div>
         `;
 
-        dashboardList.innerHTML = empty;
-        fullList.innerHTML = empty;
+        if (dashboardList) dashboardList.innerHTML = empty;
+        if (fullList) fullList.innerHTML = empty;
 
         return;
 
       }
 
-      dashboardList.innerHTML =
-        currentSites.slice(0, 5)
-          .map(site => renderSiteItem(site, false))
-          .join("");
+      const dashboardHTML = currentSites.slice(0, 5)
+        .map(site => renderSiteItem(site, false))
+        .join("");
 
-      fullList.innerHTML =
-        currentSites
-          .map(site => renderSiteItem(site, true))
-          .join("");
+      const fullHTML = currentSites
+        .map(site => renderSiteItem(site, true))
+        .join("");
+
+      if (dashboardList) dashboardList.innerHTML = dashboardHTML;
+      if (fullList) fullList.innerHTML = fullHTML;
 
     }
 
