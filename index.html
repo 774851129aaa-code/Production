@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
+<!DOCTYPE html><html lang="ar" dir="rtl"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#02060b">
@@ -56,15 +54,12 @@
       text-decoration: none;
     }
 
-    button,
-    input,
-    select,
-    textarea {
+    button {
       font-family: inherit;
     }
 
-    button {
-      cursor: pointer;
+    input {
+      font-family: inherit;
     }
 
     .cyber-bg {
@@ -473,6 +468,34 @@
       background: rgba(54,230,255,.065);
     }
 
+    /* Login button added to header */
+    .header-login {
+      min-height: 38px;
+      padding: 0 15px;
+      margin-right: 8px;
+      border: 1px solid rgba(54,230,255,.28);
+      border-radius: 10px;
+      background: rgba(54,230,255,.055);
+      color: var(--cyan);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 900;
+      transition: .22s;
+      white-space: nowrap;
+    }
+
+    .header-login:hover {
+      transform: translateY(-2px);
+      border-color: var(--cyan);
+      background: rgba(54,230,255,.10);
+      box-shadow: 0 10px 30px rgba(54,230,255,.08);
+    }
+
+    .header-login.logged {
+      color: var(--green);
+      border-color: rgba(67,230,167,.25);
+    }
+
     .mobile-menu {
       display: none;
       padding: 8px 11px;
@@ -482,80 +505,6 @@
       color: white;
       cursor: pointer;
       font-size: 18px;
-    }
-
-    /* ============================================================
-       AUTH HEADER
-    ============================================================ */
-
-    .auth-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-right: 8px;
-    }
-
-    .auth-btn {
-      min-height: 37px;
-      padding: 0 13px;
-      border-radius: 9px;
-      border: 1px solid var(--border);
-      background: rgba(54,230,255,.045);
-      color: #bdeff5;
-      font-size: 11px;
-      transition: .22s;
-      white-space: nowrap;
-    }
-
-    .auth-btn:hover {
-      border-color: var(--border-hover);
-      background: rgba(54,230,255,.08);
-      transform: translateY(-1px);
-    }
-
-    .auth-btn.primary {
-      border: 0;
-      color: #021018;
-      font-weight: 900;
-      background: linear-gradient(135deg, var(--cyan), var(--blue));
-    }
-
-    .account-menu {
-      display: none;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .account-menu.visible {
-      display: flex;
-    }
-
-    .account-user {
-      max-width: 150px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      color: #a9c0d0;
-      font-size: 10px;
-      direction: ltr;
-    }
-
-    .logout-btn {
-      min-height: 34px;
-      padding: 0 11px;
-      border: 1px solid rgba(255,82,109,.2);
-      border-radius: 8px;
-      background: rgba(255,82,109,.045);
-      color: #ff8295;
-      font-size: 10px;
-    }
-
-    .login-btn-header {
-      display: inline-flex;
-    }
-
-    .login-btn-header.hidden {
-      display: none;
     }
 
     main {
@@ -1057,179 +1006,157 @@
     }
 
     /* ============================================================
-       CUSTOMER DASHBOARD
-       تحت الـ Terminal كما طلبت
+       CUSTOMER AREA
+       يظهر أسفل الـTerminal فقط
     ============================================================ */
 
-    #client-area {
-      display: none;
+    .customer-area {
       width: min(1200px, 100%);
-      margin: auto;
-      padding: 0 6% 105px;
-      scroll-margin-top: 80px;
-    }
-
-    #client-area.visible {
-      display: block;
-    }
-
-    .client-gate {
-      margin-top: 16px;
-      padding: 18px 20px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background:
-        linear-gradient(135deg, rgba(54,230,255,.055), rgba(57,124,255,.025));
-    }
-
-    .client-gate strong {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--cyan);
-      font-size: 13px;
-    }
-
-    .client-gate span {
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.8;
-    }
-
-    .client-dashboard {
-      margin-top: 28px;
-    }
-
-    .client-topbar {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      gap: 20px;
-      margin-bottom: 24px;
-    }
-
-    .client-topbar h2 {
-      font-size: clamp(25px, 4vw, 38px);
-      margin-bottom: 7px;
-    }
-
-    .client-topbar p {
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .client-refresh {
-      min-height: 39px;
-      padding: 0 14px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      background: rgba(255,255,255,.025);
-      color: #a9dce4;
-      font-size: 10px;
-    }
-
-    .client-nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-      margin-bottom: 18px;
-      padding: 8px;
-      border: 1px solid var(--border);
-      border-radius: 13px;
-      background: rgba(5,11,18,.72);
-    }
-
-    .client-nav button {
-      min-height: 35px;
-      padding: 0 12px;
-      border: 1px solid transparent;
-      border-radius: 8px;
-      background: transparent;
-      color: #7890a2;
-      font-size: 10px;
-      transition: .2s;
-    }
-
-    .client-nav button:hover,
-    .client-nav button.active {
-      color: var(--cyan);
-      border-color: rgba(54,230,255,.14);
-      background: rgba(54,230,255,.045);
-    }
-
-    .client-panel {
-      display: none;
-    }
-
-    .client-panel.active {
-      display: block;
-      animation: fadeUp .25s ease both;
-    }
-
-    .client-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-    }
-
-    .client-card {
-      padding: 18px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: rgba(7,15,25,.72);
-      min-width: 0;
-    }
-
-    .client-card.full {
+      margin: 45px auto 0;
       grid-column: 1 / -1;
     }
 
-    .client-card h3 {
-      margin-bottom: 7px;
-      font-size: 13px;
+    .customer-lock {
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(54,230,255,.055), transparent 30%),
+        rgba(7,15,25,.65);
+      text-align: center;
     }
 
-    .client-card .small {
+    .customer-lock-icon {
+      width: 55px;
+      height: 55px;
+      margin: 0 auto 15px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      border: 1px solid rgba(54,230,255,.20);
+      background: rgba(54,230,255,.045);
+      color: var(--cyan);
+      font-size: 23px;
+    }
+
+    .customer-lock h3 {
+      font-size: 17px;
+      margin-bottom: 8px;
+    }
+
+    .customer-lock p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.8;
+      margin-bottom: 18px;
+    }
+
+    .customer-dashboard {
+      display: none;
+    }
+
+    .customer-dashboard.active {
+      display: block;
+    }
+
+    .customer-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 18px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      background: rgba(7,15,25,.72);
+    }
+
+    .customer-head h2 {
+      font-size: 22px;
+      margin-bottom: 5px;
+    }
+
+    .customer-head p {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .customer-head-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .customer-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .customer-card {
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background:
+        linear-gradient(145deg, rgba(10,22,35,.88), rgba(4,9,16,.75));
+    }
+
+    .customer-card-label {
       color: var(--muted2);
       font-size: 9px;
+      margin-bottom: 8px;
     }
 
-    .client-value {
-      margin-top: 13px;
-      font: 900 23px Consolas, monospace;
+    .customer-card-value {
+      color: var(--text);
+      font: 900 21px Consolas, monospace;
       direction: ltr;
+      text-align: right;
     }
 
-    .client-value.cyan {
-      color: var(--cyan);
-    }
-
-    .client-value.green {
+    .customer-card-value.green {
       color: var(--green);
     }
 
-    .client-value.red {
-      color: var(--red);
+    .customer-card-value.cyan {
+      color: var(--cyan);
     }
 
-    .client-value.yellow {
-      color: var(--yellow);
+    .customer-panels {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
     }
 
-    .panel-header {
+    .customer-panel {
+      min-width: 0;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(7,15,25,.68);
+    }
+
+    .customer-panel.full {
+      grid-column: 1 / -1;
+    }
+
+    .customer-panel-title {
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      gap: 15px;
-      margin-bottom: 13px;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
     }
 
-    .panel-header h3 {
-      font-size: 15px;
+    .customer-panel-title h3 {
+      font-size: 14px;
     }
 
-    .panel-header span {
+    .customer-panel-title span {
       color: var(--muted2);
-      font-size: 9px;
+      font: 9px Consolas, monospace;
+      direction: ltr;
     }
 
     .site-list {
@@ -1238,373 +1165,143 @@
     }
 
     .site-item {
-      display: grid;
-      grid-template-columns: 1.4fr .7fr .7fr auto;
-      gap: 12px;
+      display: flex;
       align-items: center;
-      padding: 15px;
-      border: 1px solid var(--border);
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid rgba(54,230,255,.09);
       border-radius: 12px;
-      background: rgba(3,9,15,.65);
+      background: rgba(2,7,13,.58);
+    }
+
+    .site-main {
+      min-width: 0;
     }
 
     .site-domain {
+      color: white;
+      font-size: 12px;
+      font-weight: 900;
       direction: ltr;
-      text-align: left;
-      font: 900 12px Consolas, monospace;
-      color: #c6f5fa;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      text-align: right;
+      overflow-wrap: anywhere;
     }
 
     .site-meta {
-      color: var(--muted);
+      color: var(--muted2);
       font-size: 9px;
-    }
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      width: fit-content;
-      padding: 5px 8px;
-      border-radius: 999px;
-      font-size: 8px;
+      margin-top: 5px;
       direction: ltr;
+      text-align: right;
     }
 
-    .status-badge.online {
-      color: var(--green);
+    .site-status {
+      flex: 0 0 auto;
+      padding: 5px 8px;
+      border-radius: 7px;
       border: 1px solid rgba(67,230,167,.18);
+      color: var(--green);
       background: rgba(67,230,167,.045);
-    }
-
-    .status-badge.offline {
-      color: var(--red);
-      border: 1px solid rgba(255,82,109,.18);
-      background: rgba(255,82,109,.045);
+      font: 9px Consolas, monospace;
     }
 
     .site-actions {
       display: flex;
       gap: 6px;
+      flex-wrap: wrap;
       justify-content: flex-end;
     }
 
     .mini-btn {
-      min-height: 31px;
-      padding: 0 9px;
+      min-height: 32px;
+      padding: 0 10px;
       border: 1px solid var(--border);
-      border-radius: 7px;
-      background: rgba(255,255,255,.02);
-      color: #9bb3c2;
-      font-size: 8px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.025);
+      color: white;
+      cursor: pointer;
+      font-size: 9px;
+      transition: .2s;
     }
 
     .mini-btn:hover {
       border-color: var(--border-hover);
-      color: white;
+      background: rgba(54,230,255,.05);
     }
 
     .mini-btn.danger {
-      color: #ff8295;
-      border-color: rgba(255,82,109,.15);
+      color: var(--red);
+      border-color: rgba(255,82,109,.16);
     }
 
     .empty-state {
-      padding: 30px 20px;
-      text-align: center;
-      color: var(--muted);
+      padding: 25px 15px;
       border: 1px dashed rgba(54,230,255,.12);
       border-radius: 12px;
-      font-size: 10px;
-    }
-
-    .client-form {
-      display: grid;
-      gap: 13px;
-      max-width: 620px;
-    }
-
-    .form-field {
-      display: grid;
-      gap: 6px;
-    }
-
-    .form-field label {
-      color: #91aabc;
-      font-size: 10px;
-    }
-
-    .form-field input,
-    .form-field select {
-      width: 100%;
-      min-height: 43px;
-      padding: 0 12px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      outline: none;
-      background: #040a11;
-      color: white;
+      text-align: center;
+      color: var(--muted2);
       font-size: 11px;
-      direction: ltr;
-      text-align: left;
     }
 
-    .form-field input:focus,
-    .form-field select:focus {
-      border-color: var(--border-hover);
-      box-shadow: 0 0 0 3px rgba(54,230,255,.035);
-    }
-
-    .form-note {
-      color: var(--muted2);
-      font-size: 9px;
-      line-height: 1.7;
-    }
-
-    .traffic-table {
-      width: 100%;
-      border-collapse: collapse;
-      direction: ltr;
-      text-align: left;
-    }
-
-    .traffic-table th,
-    .traffic-table td {
-      padding: 10px 8px;
-      border-bottom: 1px solid rgba(255,255,255,.045);
-      font-size: 9px;
-    }
-
-    .traffic-table th {
-      color: var(--muted2);
-      font-weight: 400;
-    }
-
-    .traffic-table td {
-      color: #9eb7c5;
-    }
-
-    .json-box {
-      padding: 15px;
+    .activity-list {
+      display: grid;
+      gap: 8px;
+      max-height: 270px;
       overflow: auto;
-      min-height: 130px;
-      max-height: 350px;
-      direction: ltr;
-      text-align: left;
-      border: 1px solid var(--border);
+    }
+
+    .activity-item {
+      padding: 11px;
       border-radius: 10px;
-      background: #010409;
-      color: #93d6df;
-      font: 9px/1.7 Consolas, monospace;
-      white-space: pre-wrap;
-      word-break: break-word;
+      background: rgba(2,7,13,.55);
+      border: 1px solid rgba(54,230,255,.07);
     }
 
-    .account-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
+    .activity-item strong {
+      display: block;
+      color: #cfeaf0;
+      font-size: 10px;
+      margin-bottom: 4px;
     }
 
-    .account-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 15px;
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(255,255,255,.045);
-    }
-
-    .account-row:last-child {
-      border-bottom: 0;
-    }
-
-    .account-row span:first-child {
+    .activity-item span {
       color: var(--muted2);
       font-size: 9px;
+      line-height: 1.6;
     }
 
-    .account-row span:last-child {
-      color: #bde6ed;
-      font-size: 10px;
-      direction: ltr;
-    }
-
-    /* ============================================================
-       AUTH MODAL
-    ============================================================ */
-
-    .auth-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 300;
+    .customer-message {
       display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      background: rgba(1,4,9,.82);
-      backdrop-filter: blur(15px);
+      padding: 12px 15px;
+      margin-bottom: 13px;
+      border-radius: 10px;
+      font-size: 10px;
+      line-height: 1.7;
     }
 
-    .auth-overlay.visible {
-      display: flex;
+    .customer-message.show {
+      display: block;
     }
 
-    .auth-modal {
-      position: relative;
-      width: min(480px, 100%);
-      max-height: calc(100vh - 40px);
-      overflow-y: auto;
-      padding: 27px;
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      background:
-        radial-gradient(circle at 80% 0%, rgba(57,124,255,.09), transparent 35%),
-        #050c14;
-      box-shadow: 0 30px 100px rgba(0,0,0,.55);
+    .customer-message.error {
+      color: #ff9aaa;
+      border: 1px solid rgba(255,82,109,.18);
+      background: rgba(255,82,109,.045);
     }
 
-    .auth-close {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      width: 31px;
-      height: 31px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: rgba(255,255,255,.025);
-      color: #8ba0b4;
-      font-size: 17px;
+    .customer-message.success {
+      color: #8bf0c5;
+      border: 1px solid rgba(67,230,167,.18);
+      background: rgba(67,230,167,.045);
     }
 
-    .auth-logo {
-      width: 42px;
-      height: 42px;
-      margin: 0 auto 17px;
-      transform: rotate(45deg);
-      border: 1px solid var(--cyan);
-      box-shadow: 0 0 25px rgba(54,230,255,.12);
-    }
-
-    .auth-modal h2 {
+    .loading-box {
+      padding: 18px;
       text-align: center;
-      font-size: 24px;
-      margin-bottom: 7px;
-    }
-
-    .auth-subtitle {
       color: var(--muted);
-      text-align: center;
-      font-size: 10px;
-      line-height: 1.7;
-      margin-bottom: 22px;
-    }
-
-    .auth-form {
-      display: grid;
-      gap: 12px;
-    }
-
-    .auth-form input {
-      width: 100%;
-      height: 45px;
-      padding: 0 12px;
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      outline: none;
-      background: #02070d;
-      color: white;
-      font-size: 11px;
+      font: 10px Consolas, monospace;
       direction: ltr;
-      text-align: left;
-    }
-
-    .auth-form input:focus {
-      border-color: var(--border-hover);
-    }
-
-    .auth-submit {
-      height: 45px;
-      border: 0;
-      border-radius: 9px;
-      color: #021018;
-      font-size: 11px;
-      font-weight: 900;
-      background: linear-gradient(135deg, var(--cyan), var(--blue));
-    }
-
-    .auth-link {
-      border: 0;
-      background: transparent;
-      color: var(--cyan);
-      font-size: 9px;
-      text-align: center;
-      padding: 5px;
-    }
-
-    .auth-message {
-      display: none;
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 9px;
-      line-height: 1.7;
-    }
-
-    .auth-message.visible {
-      display: block;
-    }
-
-    .auth-message.error {
-      color: #ff91a0;
-      border: 1px solid rgba(255,82,109,.15);
-      background: rgba(255,82,109,.04);
-    }
-
-    .auth-message.success {
-      color: var(--green);
-      border: 1px solid rgba(67,230,167,.15);
-      background: rgba(67,230,167,.04);
-    }
-
-    .auth-step {
-      display: none;
-    }
-
-    .auth-step.active {
-      display: block;
-    }
-
-    .auth-divider {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      margin: 7px 0;
-      color: var(--muted2);
-      font-size: 8px;
-    }
-
-    .auth-divider::before,
-    .auth-divider::after {
-      content: "";
-      flex: 1;
-      height: 1px;
-      background: rgba(255,255,255,.05);
-    }
-
-    .auth-back {
-      width: 100%;
-      min-height: 37px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: transparent;
-      color: #8ba0b4;
-      font-size: 9px;
-    }
-
-    .loading {
-      opacity: .55;
-      pointer-events: none;
     }
 
     footer {
@@ -1617,6 +1314,242 @@
 
     footer span {
       color: var(--cyan);
+    }
+
+    /* ============================================================
+       AUTH MODAL
+    ============================================================ */
+
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(1,4,8,.78);
+      backdrop-filter: blur(18px);
+    }
+
+    .auth-overlay.open {
+      display: flex;
+    }
+
+    .auth-modal {
+      width: min(440px, 100%);
+      max-height: calc(100vh - 40px);
+      overflow-y: auto;
+      position: relative;
+      border: 1px solid rgba(54,230,255,.19);
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(54,230,255,.09), transparent 38%),
+        linear-gradient(145deg, rgba(8,19,31,.98), rgba(2,7,13,.98));
+      box-shadow:
+        0 35px 100px rgba(0,0,0,.55),
+        0 0 70px rgba(54,230,255,.06);
+      padding: 28px;
+    }
+
+    .auth-close {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      width: 33px;
+      height: 33px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: rgba(255,255,255,.025);
+      color: var(--muted);
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .auth-close:hover {
+      color: white;
+      border-color: var(--border-hover);
+    }
+
+    .auth-brand {
+      width: 46px;
+      height: 46px;
+      margin: 0 auto 18px;
+      position: relative;
+      transform: rotate(45deg);
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 25px rgba(54,230,255,.13);
+    }
+
+    .auth-brand::before {
+      content: "";
+      position: absolute;
+      inset: 9px;
+      border: 1px solid rgba(54,230,255,.65);
+    }
+
+    .auth-brand::after {
+      content: "";
+      position: absolute;
+      inset: 16px;
+      background: rgba(54,230,255,.13);
+      border: 1px solid var(--cyan);
+    }
+
+    .auth-title {
+      text-align: center;
+      margin-bottom: 7px;
+      font-size: 22px;
+    }
+
+    .auth-subtitle {
+      text-align: center;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.8;
+      margin-bottom: 22px;
+    }
+
+    .auth-step {
+      display: none;
+    }
+
+    .auth-step.active {
+      display: block;
+    }
+
+    .auth-label {
+      display: block;
+      margin-bottom: 7px;
+      color: #a9bdcb;
+      font-size: 10px;
+    }
+
+    .auth-input {
+      width: 100%;
+      height: 46px;
+      padding: 0 13px;
+      margin-bottom: 13px;
+      border: 1px solid rgba(54,230,255,.13);
+      border-radius: 10px;
+      outline: none;
+      background: rgba(1,6,11,.78);
+      color: white;
+      font-size: 12px;
+      direction: ltr;
+      text-align: left;
+      transition: .2s;
+    }
+
+    .auth-input:focus {
+      border-color: rgba(54,230,255,.48);
+      box-shadow: 0 0 0 3px rgba(54,230,255,.045);
+    }
+
+    .auth-button {
+      width: 100%;
+      min-height: 48px;
+      border: 0;
+      border-radius: 11px;
+      cursor: pointer;
+      color: #021018;
+      font-weight: 900;
+      font-size: 12px;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      box-shadow: 0 14px 35px rgba(57,124,255,.15);
+      transition: .22s;
+    }
+
+    .auth-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 45px rgba(57,124,255,.23);
+    }
+
+    .auth-button:disabled {
+      opacity: .55;
+      cursor: wait;
+      transform: none;
+    }
+
+    .auth-secondary {
+      width: 100%;
+      min-height: 42px;
+      margin-top: 8px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(255,255,255,.02);
+      color: #a8bbc9;
+      cursor: pointer;
+      font-size: 10px;
+    }
+
+    .auth-secondary:hover {
+      border-color: var(--border-hover);
+      color: white;
+    }
+
+    .auth-links {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .auth-link {
+      border: 0;
+      background: transparent;
+      color: var(--cyan);
+      cursor: pointer;
+      font-size: 9px;
+      padding: 5px;
+    }
+
+    .auth-link:hover {
+      text-decoration: underline;
+    }
+
+    .auth-alert {
+      display: none;
+      margin-bottom: 13px;
+      padding: 10px 12px;
+      border-radius: 9px;
+      font-size: 10px;
+      line-height: 1.7;
+    }
+
+    .auth-alert.show {
+      display: block;
+    }
+
+    .auth-alert.error {
+      color: #ff9aaa;
+      border: 1px solid rgba(255,82,109,.18);
+      background: rgba(255,82,109,.045);
+    }
+
+    .auth-alert.success {
+      color: #8bf0c5;
+      border: 1px solid rgba(67,230,167,.18);
+      background: rgba(67,230,167,.045);
+    }
+
+    .auth-alert.info {
+      color: #9edfeb;
+      border: 1px solid rgba(54,230,255,.14);
+      background: rgba(54,230,255,.035);
+    }
+
+    .auth-email-preview {
+      padding: 11px 13px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(54,230,255,.09);
+      border-radius: 9px;
+      color: var(--cyan);
+      background: rgba(54,230,255,.025);
+      font: 10px Consolas, monospace;
+      direction: ltr;
+      text-align: left;
+      overflow-wrap: anywhere;
     }
 
     @media (max-width: 1050px) {
@@ -1650,7 +1583,7 @@
         grid-column: span 1;
       }
 
-      .client-grid {
+      .customer-grid {
         grid-template-columns: repeat(2, 1fr);
       }
     }
@@ -1687,13 +1620,9 @@
         padding: 13px;
       }
 
-      .auth-header {
+      .header-login {
         margin-right: auto;
         margin-left: 8px;
-      }
-
-      .account-user {
-        display: none;
       }
 
       .section {
@@ -1730,26 +1659,17 @@
         font-size: 14px;
       }
 
-      #client-area {
-        padding-left: 5%;
-        padding-right: 5%;
-      }
-
-      .client-topbar {
-        align-items: flex-start;
+      .customer-head {
         flex-direction: column;
+        align-items: stretch;
       }
 
-      .site-item {
+      .customer-panels {
         grid-template-columns: 1fr;
       }
 
-      .site-actions {
-        justify-content: flex-start;
-      }
-
-      .account-grid {
-        grid-template-columns: 1fr;
+      .customer-panel.full {
+        grid-column: auto;
       }
     }
 
@@ -1757,7 +1677,7 @@
       .features,
       .settings-grid,
       .stats,
-      .client-grid {
+      .customer-grid {
         grid-template-columns: 1fr;
       }
 
@@ -1787,22 +1707,17 @@
         display: none;
       }
 
-      .auth-header .auth-btn {
-        padding: 0 9px;
-        font-size: 9px;
-      }
-
       .auth-modal {
-        padding: 22px 18px;
+        padding: 23px 18px;
       }
 
-      .client-nav {
-        overflow-x: auto;
-        flex-wrap: nowrap;
+      .site-item {
+        flex-direction: column;
+        align-items: stretch;
       }
 
-      .client-nav button {
-        flex: 0 0 auto;
+      .site-actions {
+        justify-content: flex-start;
       }
     }
 
@@ -1888,40 +1803,26 @@
       <a href="#about">من نحن</a>
     </nav>
 
-    <!-- تسجيل الدخول في الـ Header -->
-    <div class="auth-header">
+    <div style="display:flex;align-items:center;gap:5px;">
 
       <button
-        id="headerLoginBtn"
-        class="auth-btn primary login-btn-header"
-        onclick="openAuth('login')">
-        تسجيل الدخول
+        class="header-login"
+        id="headerLoginButton"
+        onclick="openAuth()"
+      >
+        🔐 تسجيل دخول العملاء
       </button>
 
-      <div id="accountMenu" class="account-menu">
-
-        <span id="accountUser" class="account-user">
-          مستخدم
-        </span>
-
-        <button
-          class="logout-btn"
-          onclick="logoutUser()">
-          تسجيل الخروج
-        </button>
-
-      </div>
+      <button class="mobile-menu" onclick="toggleMenu()">
+        ☰
+      </button>
 
     </div>
-
-    <button class="mobile-menu" onclick="toggleMenu()">
-      ☰
-    </button>
 
   </header>
 
   <!-- ============================================================
-       PUBLIC WEBSITE
+       MAIN
   ============================================================ -->
 
   <main id="home">
@@ -1948,15 +1849,11 @@
         </p>
 
         <div class="dashboard-actions">
+
           <a href="#features" class="btn">
             استكشف المميزات
           </a>
 
-          <button
-            class="btn btn-primary"
-            onclick="openAuth('login')">
-            دخول العملاء
-          </button>
         </div>
 
         <div class="stats">
@@ -2366,583 +2263,291 @@ SITE_TOKEN=YOUR_SITE_TOKEN
 
         </div>
 
-        <div class="terminal">
+        <div>
 
-          <div>
-            <span class="white">$</span>
-            routix start
-          </div>
+          <div class="terminal">
 
-          <div class="green">✓ WAF protection enabled</div>
-          <div class="green">✓ L7 inspection enabled</div>
-          <div class="green">✓ Rate limiting enabled</div>
-          <div class="green">✓ Risk engine enabled</div>
-          <div class="green">✓ Honeypot monitoring enabled</div>
-          <div class="green">✓ Blacklist engine enabled</div>
-          <div class="green">✓ Live admin events enabled</div>
-
-          <div>
-            <span class="cyan">→</span>
-            proxying through Routix
-          </div>
-
-          <div>
-            <span class="cyan">→</span>
-            protection layer active
-          </div>
-
-        </div>
-
-      </div>
-
-    </section>
-
-    <!-- ============================================================
-         CLIENT AREA
-         تظهر تحت الـ Terminal فقط بعد تسجيل الدخول
-    ============================================================ -->
-
-    <section id="client-area">
-
-      <div class="client-gate">
-        <strong>🔐 منطقة العملاء محمية بتسجيل الدخول</strong>
-        <span>
-          يشترط تسجيل الدخول للوصول إلى صفحة العملاء.
-          تظهر هنا فقط بيانات الحساب والمواقع المرتبطة بالمستخدم الحالي.
-        </span>
-      </div>
-
-      <div class="client-dashboard">
-
-        <div class="client-topbar">
-
-          <div>
-            <span class="eyebrow">CUSTOMER / DASHBOARD</span>
-            <h2>لوحة العميل</h2>
-            <p id="clientWelcome">
-              بيانات حسابك ومواقعك المحمية.
-            </p>
-          </div>
-
-          <button
-            class="client-refresh"
-            onclick="refreshClientData()">
-            ↻ تحديث البيانات
-          </button>
-
-        </div>
-
-        <div class="client-nav">
-
-          <button class="active" data-panel="dashboard" onclick="switchClientPanel('dashboard', this)">
-            Dashboard
-          </button>
-
-          <button data-panel="sites" onclick="switchClientPanel('sites', this)">
-            Sites
-          </button>
-
-          <button data-panel="traffic" onclick="switchClientPanel('traffic', this)">
-            Traffic
-          </button>
-
-          <button data-panel="security" onclick="switchClientPanel('security', this)">
-            Security Events
-          </button>
-
-          <button data-panel="threat" onclick="switchClientPanel('threat', this)">
-            Threat Intelligence
-          </button>
-
-          <button data-panel="ip" onclick="switchClientPanel('ip', this)">
-            IP Management
-          </button>
-
-          <button data-panel="analytics" onclick="switchClientPanel('analytics', this)">
-            Analytics
-          </button>
-
-          <button data-panel="client-api" onclick="switchClientPanel('client-api', this)">
-            API
-          </button>
-
-          <button data-panel="account" onclick="switchClientPanel('account', this)">
-            Account
-          </button>
-
-        </div>
-
-        <!-- ======================================================
-             DASHBOARD
-        ====================================================== -->
-
-        <div id="client-panel-dashboard" class="client-panel active">
-
-          <div class="client-grid">
-
-            <div class="client-card">
-              <h3>WAF Status</h3>
-              <div class="small">PROTECTION STATUS</div>
-              <div id="clientWafStatus" class="client-value green">
-                ACTIVE
-              </div>
+            <div>
+              <span class="white">$</span>
+              routix start
             </div>
 
-            <div class="client-card">
-              <h3>Requests</h3>
-              <div class="small">TOTAL REQUESTS</div>
-              <div id="clientRequests" class="client-value cyan">
-                0
-              </div>
+            <div class="green">✓ WAF protection enabled</div>
+            <div class="green">✓ L7 inspection enabled</div>
+            <div class="green">✓ Rate limiting enabled</div>
+            <div class="green">✓ Risk engine enabled</div>
+            <div class="green">✓ Honeypot monitoring enabled</div>
+            <div class="green">✓ Blacklist engine enabled</div>
+            <div class="green">✓ Live admin events enabled</div>
+
+            <div>
+              <span class="cyan">→</span>
+              proxying through Routix
             </div>
 
-            <div class="client-card">
-              <h3>Blocked</h3>
-              <div class="small">BLOCKED REQUESTS</div>
-              <div id="clientBlocked" class="client-value red">
-                0
-              </div>
-            </div>
-
-            <div class="client-card">
-              <h3>Allowed</h3>
-              <div class="small">ALLOWED REQUESTS</div>
-              <div id="clientAllowed" class="client-value green">
-                0
-              </div>
-            </div>
-
-            <div class="client-card full">
-
-              <div class="panel-header">
-                <h3>My Sites</h3>
-                <span id="clientSiteCount">0 SITES</span>
-              </div>
-
-              <div id="dashboardSiteList" class="site-list">
-                <div class="empty-state">
-                  جاري تحميل مواقعك...
-                </div>
-              </div>
-
-            </div>
-
-            <div class="client-card full">
-
-              <div class="panel-header">
-                <h3>Live Activity</h3>
-                <span>USER SCOPED</span>
-              </div>
-
-              <div id="dashboardActivity" class="json-box">
-لا توجد بيانات بعد.
-              </div>
-
+            <div>
+              <span class="cyan">→</span>
+              protection layer active
             </div>
 
           </div>
 
-        </div>
+          <!-- ======================================================
+               CUSTOMER AREA - UNDER TERMINAL
+          ====================================================== -->
 
-        <!-- ======================================================
-             SITES
-        ====================================================== -->
+          <div class="customer-area" id="customerArea">
 
-        <div id="client-panel-sites" class="client-panel">
+            <!-- Locked state -->
+            <div class="customer-lock" id="customerLock">
 
-          <div class="client-card full">
+              <div class="customer-lock-icon">
+                🔐
+              </div>
 
-            <div class="panel-header">
-              <h3>My Sites</h3>
+              <h3>
+                صفحة العملاء محمية بتسجيل الدخول
+              </h3>
+
+              <p>
+                يشترط تسجيل الدخول للوصول إلى Dashboard
+                ومواقعك وإحصائيات WAF والأحداث الأمنية
+                الخاصة بحسابك فقط.
+              </p>
 
               <button
-                class="mini-btn"
-                onclick="switchClientPanelByName('add-site')">
-                + Add Site
-              </button>
-            </div>
-
-            <div id="fullSiteList" class="site-list">
-              <div class="empty-state">
-                جاري تحميل مواقعك...
-              </div>
-            </div>
-
-          </div>
-
-          <div
-            id="client-site-details"
-            class="client-card full"
-            style="display:none;margin-top:12px;">
-
-            <div class="panel-header">
-              <h3>Site Details</h3>
-
-              <button
-                class="mini-btn"
-                onclick="closeSiteDetails()">
-                إغلاق
-              </button>
-            </div>
-
-            <div id="siteDetailsContent" class="json-box"></div>
-
-          </div>
-
-        </div>
-
-        <!-- ======================================================
-             ADD SITE
-        ====================================================== -->
-
-        <div id="client-panel-add-site" class="client-panel">
-
-          <div class="client-card">
-
-            <div class="panel-header">
-              <h3>Add Site</h3>
-            </div>
-
-            <form class="client-form" onsubmit="createClientSite(event)">
-
-              <div class="form-field">
-                <label>DOMAIN</label>
-                <input
-                  id="newSiteDomain"
-                  type="text"
-                  placeholder="example.com"
-                  autocomplete="off"
-                  required>
-              </div>
-
-              <div class="form-field">
-                <label>TARGET URL</label>
-                <input
-                  id="newSiteTarget"
-                  type="url"
-                  placeholder="https://origin.example.com"
-                  required>
-              </div>
-
-              <div class="form-field">
-                <label>DOMAINS إضافية - اختياري</label>
-                <input
-                  id="newSiteDomains"
-                  type="text"
-                  placeholder="www.example.com, api.example.com"
-                  autocomplete="off">
-              </div>
-
-              <div class="form-note">
-                يتم إرسال إنشاء الموقع إلى
-                <b>/api/sites</b>.
-                لا يتم إرسال بيانات الإدارة أو مفاتيح النظام.
-              </div>
-
-              <button class="btn btn-primary" type="submit">
-                إنشاء الموقع
+                class="btn btn-primary"
+                onclick="openAuth()"
+              >
+                تسجيل الدخول للوصول إلى حسابي
               </button>
 
-            </form>
-
-          </div>
-
-        </div>
-
-        <!-- ======================================================
-             TRAFFIC
-        ====================================================== -->
-
-        <div id="client-panel-traffic" class="client-panel">
-
-          <div class="client-grid">
-
-            <div class="client-card">
-              <h3>Requests / min</h3>
-              <div id="trafficRPM" class="client-value cyan">0</div>
             </div>
 
-            <div class="client-card">
-              <h3>HTTP Methods</h3>
-              <div id="trafficMethods" class="client-value">0</div>
-            </div>
+            <!-- Customer dashboard -->
+            <div class="customer-dashboard" id="customerDashboard">
 
-            <div class="client-card">
-              <h3>Status Codes</h3>
-              <div id="trafficStatusCodes" class="client-value">0</div>
-            </div>
+              <div class="customer-head">
 
-            <div class="client-card">
-              <h3>Visitors</h3>
-              <div id="trafficVisitors" class="client-value green">0</div>
-            </div>
+                <div>
+                  <h2>
+                    ROUTIX / CUSTOMER DASHBOARD
+                  </h2>
 
-            <div class="client-card full">
-
-              <div class="panel-header">
-                <h3>Traffic Data</h3>
-                <span>USER SITES ONLY</span>
-              </div>
-
-              <div id="trafficData" class="json-box">
-جاري تحميل البيانات...
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- ======================================================
-             SECURITY
-        ====================================================== -->
-
-        <div id="client-panel-security" class="client-panel">
-
-          <div class="client-card full">
-
-            <div class="panel-header">
-              <h3>Security Events</h3>
-              <span>BLOCKED / CHALLENGES / ATTACK DETECTION</span>
-            </div>
-
-            <div id="securityEvents" class="json-box">
-جاري تحميل التنبيهات...
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- ======================================================
-             THREAT
-        ====================================================== -->
-
-        <div id="client-panel-threat" class="client-panel">
-
-          <div class="client-grid">
-
-            <div class="client-card">
-              <h3>Threat Score</h3>
-              <div id="threatScore" class="client-value yellow">0</div>
-            </div>
-
-            <div class="client-card">
-              <h3>Suspicious Sources</h3>
-              <div id="suspiciousSources" class="client-value red">0</div>
-            </div>
-
-            <div class="client-card">
-              <h3>Attack Types</h3>
-              <div id="attackTypes" class="client-value cyan">0</div>
-            </div>
-
-            <div class="client-card">
-              <h3>Risk Analysis</h3>
-              <div id="riskAnalysis" class="client-value green">READY</div>
-            </div>
-
-            <div class="client-card full">
-
-              <div class="panel-header">
-                <h3>Threat Intelligence</h3>
-                <span>SCOPED TO YOUR SITES</span>
-              </div>
-
-              <div id="threatData" class="json-box">
-جاري تحميل البيانات...
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- ======================================================
-             IP
-        ====================================================== -->
-
-        <div id="client-panel-ip" class="client-panel">
-
-          <div class="client-card full">
-
-            <div class="panel-header">
-              <h3>IP Management</h3>
-              <span>BLACKLIST STATUS</span>
-            </div>
-
-            <div class="empty-state">
-              واجهة الـIP Blacklist الحالية للعميل تعتمد على
-              بيانات الموقع المملوك له فقط.
-              لا يوجد في الـAPI الحالي Endpoint آمن لإضافة أو حذف
-              IP يدويًا، لذلك لن يتم اختراع Endpoint غير موجود.
-            </div>
-
-            <div
-              id="ipData"
-              class="json-box"
-              style="margin-top:12px;">
-جاري تحميل حالة IP...
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- ======================================================
-             ANALYTICS
-        ====================================================== -->
-
-        <div id="client-panel-analytics" class="client-panel">
-
-          <div class="client-card full">
-
-            <div class="panel-header">
-              <h3>Analytics</h3>
-              <span>TRAFFIC / SECURITY / REQUESTS / ATTACKS</span>
-            </div>
-
-            <div id="analyticsData" class="json-box">
-جاري تحميل Analytics...
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- ======================================================
-             API
-        ====================================================== -->
-
-        <div id="client-panel-client-api" class="client-panel">
-
-          <div class="client-card full">
-
-            <div class="panel-header">
-              <h3>Client API</h3>
-              <span>AVAILABLE CUSTOMER ENDPOINTS</span>
-            </div>
-
-            <div class="json-box">
-GET    /api/profile
-GET    /api/me
-POST   /api/logout
-
-GET    /api/sites
-POST   /api/sites
-GET    /api/sites/:id
-DELETE /api/sites/:id
-
-GET    /api/sites/:id/stats
-GET    /api/sites/:id/visitors
-GET    /api/sites/:id/alerts
-GET    /api/sites/:id/status
-
-ملاحظة:
-جميع طلبات بيانات المواقع تعتمد على Session المستخدم،
-ويجب أن يتحقق السيرفر من ملكية الموقع قبل إرجاع البيانات.
-
-لا يتم عرض:
-ADMIN PASSWORD
-SERVER SECRETS
-SYSTEM KEYS
-ADMIN APIs
-أو بيانات مستخدمين آخرين.
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- ======================================================
-             ACCOUNT
-        ====================================================== -->
-
-        <div id="client-panel-account" class="client-panel">
-
-          <div class="account-grid">
-
-            <div class="client-card">
-
-              <div class="panel-header">
-                <h3>Profile</h3>
-                <span>MY ACCOUNT</span>
-              </div>
-
-              <div id="profileData">
-                <div class="account-row">
-                  <span>Email</span>
-                  <span id="profileEmail">—</span>
+                  <p id="customerWelcome">
+                    جاري تحميل بيانات حسابك...
+                  </p>
                 </div>
 
-                <div class="account-row">
-                  <span>User ID</span>
-                  <span id="profileId">—</span>
+                <div class="customer-head-actions">
+
+                  <button
+                    class="mini-btn"
+                    onclick="loadCustomerDashboard()"
+                  >
+                    ↻ تحديث
+                  </button>
+
+                  <button
+                    class="mini-btn danger"
+                    onclick="logoutUser()"
+                  >
+                    تسجيل الخروج
+                  </button>
+
                 </div>
 
-                <div class="account-row">
-                  <span>Status</span>
-                  <span id="profileStatus">Authenticated</span>
+              </div>
+
+              <div
+                class="customer-message"
+                id="customerMessage"
+              ></div>
+
+              <div class="customer-grid">
+
+                <div class="customer-card">
+                  <div class="customer-card-label">
+                    WAF STATUS
+                  </div>
+                  <div
+                    class="customer-card-value green"
+                    id="customerWafStatus"
+                  >
+                    ACTIVE
+                  </div>
                 </div>
+
+                <div class="customer-card">
+                  <div class="customer-card-label">
+                    MY SITES
+                  </div>
+                  <div
+                    class="customer-card-value cyan"
+                    id="customerSitesCount"
+                  >
+                    0
+                  </div>
+                </div>
+
+                <div class="customer-card">
+                  <div class="customer-card-label">
+                    REQUESTS
+                  </div>
+                  <div
+                    class="customer-card-value"
+                    id="customerRequests"
+                  >
+                    0
+                  </div>
+                </div>
+
+                <div class="customer-card">
+                  <div class="customer-card-label">
+                    BLOCKED
+                  </div>
+                  <div
+                    class="customer-card-value"
+                    id="customerBlocked"
+                  >
+                    0
+                  </div>
+                </div>
+
               </div>
 
-            </div>
+              <div class="customer-panels">
 
-            <div class="client-card">
+                <!-- Sites -->
+                <div class="customer-panel full">
 
-              <div class="panel-header">
-                <h3>Security</h3>
-                <span>SESSION</span>
+                  <div class="customer-panel-title">
+
+                    <h3>
+                      My Sites
+                    </h3>
+
+                    <span>
+                      /api/sites
+                    </span>
+
+                  </div>
+
+                  <div
+                    class="site-list"
+                    id="siteList"
+                  >
+                    <div class="loading-box">
+                      LOADING YOUR SITES...
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Traffic -->
+                <div class="customer-panel">
+
+                  <div class="customer-panel-title">
+
+                    <h3>
+                      Traffic
+                    </h3>
+
+                    <span>
+                      CUSTOMER_SCOPE
+                    </span>
+
+                  </div>
+
+                  <div class="customer-grid" style="grid-template-columns:1fr 1fr;">
+
+                    <div class="customer-card">
+                      <div class="customer-card-label">
+                        ALLOWED
+                      </div>
+
+                      <div
+                        class="customer-card-value green"
+                        id="customerAllowed"
+                      >
+                        0
+                      </div>
+                    </div>
+
+                    <div class="customer-card">
+                      <div class="customer-card-label">
+                        BLOCKED
+                      </div>
+
+                      <div
+                        class="customer-card-value"
+                        id="customerTrafficBlocked"
+                      >
+                        0
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <div class="activity-list" id="trafficActivity">
+                    <div class="empty-state">
+                      اختر موقعًا لعرض بيانات الترافيك الخاصة به.
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Security -->
+                <div class="customer-panel">
+
+                  <div class="customer-panel-title">
+
+                    <h3>
+                      Security Events
+                    </h3>
+
+                    <span>
+                      /api/sites/:id/alerts
+                    </span>
+
+                  </div>
+
+                  <div
+                    class="activity-list"
+                    id="securityActivity"
+                  >
+                    <div class="empty-state">
+                      اختر موقعًا لعرض التنبيهات الأمنية الخاصة به.
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Analytics -->
+                <div class="customer-panel full">
+
+                  <div class="customer-panel-title">
+
+                    <h3>
+                      Site Analytics
+                    </h3>
+
+                    <span>
+                      OWNER VERIFIED
+                    </span>
+
+                  </div>
+
+                  <div
+                    id="siteDetails"
+                    class="empty-state"
+                  >
+                    لم يتم اختيار موقع.
+                  </div>
+
+                </div>
+
               </div>
-
-              <div class="account-row">
-                <span>Session</span>
-                <span>SERVER SIDE</span>
-              </div>
-
-              <div class="account-row">
-                <span>Password</span>
-                <span>PROTECTED</span>
-              </div>
-
-              <button
-                class="btn"
-                style="width:100%;margin-top:12px;"
-                onclick="openAuth('forgot')">
-                تغيير كلمة المرور
-              </button>
-
-            </div>
-
-            <div class="client-card">
-
-              <div class="panel-header">
-                <h3>Sessions</h3>
-                <span>SECURE SESSION</span>
-              </div>
-
-              <div class="empty-state">
-                الجلسة الحالية تتم إدارتها من السيرفر.
-                لا يتم تخزين Session Token في localStorage.
-              </div>
-
-            </div>
-
-            <div class="client-card">
-
-              <div class="panel-header">
-                <h3>Account</h3>
-                <span>ACCOUNT CONTROL</span>
-              </div>
-
-              <button
-                class="logout-btn"
-                style="width:100%;height:42px;"
-                onclick="logoutUser()">
-                تسجيل الخروج
-              </button>
 
             </div>
 
@@ -2965,326 +2570,297 @@ ADMIN APIs
   ============================================================ -->
 
   <div
-    id="authOverlay"
     class="auth-overlay"
-    aria-hidden="true">
+    id="authOverlay"
+    onclick="closeAuthOutside(event)"
+  >
 
     <div class="auth-modal">
 
       <button
         class="auth-close"
-        onclick="closeAuth()">
+        onclick="closeAuth()"
+        aria-label="Close"
+      >
         ×
       </button>
 
-      <div class="auth-logo"></div>
+      <div class="auth-brand"></div>
 
-      <!-- ========================================================
-           STEP 1: EMAIL
-      ======================================================== -->
+      <h2 class="auth-title" id="authTitle">
+        دخول العملاء
+      </h2>
 
-      <div id="authEmailStep" class="auth-step active">
+      <p class="auth-subtitle" id="authSubtitle">
+        سجّل الدخول للوصول إلى حسابك ومواقعك وإحصائيات WAF الخاصة بك.
+      </p>
 
-        <h2>تسجيل الدخول</h2>
+      <div
+        class="auth-alert"
+        id="authAlert"
+      ></div>
 
-        <p class="auth-subtitle">
-          أدخل بريدك الإلكتروني للمتابعة.
-          سيتم التحقق من الحساب من خلال السيرفر.
-        </p>
+      <!-- STEP 1: EMAIL -->
+      <div
+        class="auth-step active"
+        id="authStepEmail"
+      >
 
-        <form
-          id="emailForm"
-          class="auth-form"
-          onsubmit="checkCustomerEmail(event)">
+        <label class="auth-label">
+          البريد الإلكتروني
+        </label>
 
-          <input
-            id="authEmail"
-            type="email"
-            placeholder="email@example.com"
-            autocomplete="email"
-            required>
+        <input
+          class="auth-input"
+          id="authEmail"
+          type="email"
+          autocomplete="email"
+          placeholder="name@example.com"
+        >
 
-          <button
-            id="emailContinueBtn"
-            class="auth-submit"
-            type="submit">
-            متابعة
-          </button>
-
-          <button
-            class="auth-link"
-            type="button"
-            onclick="switchAuthMode('register')">
-            ليس لدي حساب — إنشاء حساب
-          </button>
-
-        </form>
-
-        <div
-          id="authEmailMessage"
-          class="auth-message">
-        </div>
+        <button
+          class="auth-button"
+          id="checkEmailButton"
+          onclick="checkEmail()"
+        >
+          متابعة
+        </button>
 
       </div>
 
-      <!-- ========================================================
-           LOGIN
-      ======================================================== -->
+      <!-- STEP 2: LOGIN -->
+      <div
+        class="auth-step"
+        id="authStepLogin"
+      >
 
-      <div id="authLoginStep" class="auth-step">
+        <div
+          class="auth-email-preview"
+          id="loginEmailPreview"
+        ></div>
 
-        <h2>دخول العميل</h2>
+        <label class="auth-label">
+          كلمة المرور
+        </label>
 
-        <p class="auth-subtitle">
-          الحساب موجود. أدخل كلمة المرور للدخول.
-        </p>
+        <input
+          class="auth-input"
+          id="loginPassword"
+          type="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+        >
 
-        <form
-          class="auth-form"
-          onsubmit="loginCustomer(event)">
+        <button
+          class="auth-button"
+          id="loginButton"
+          onclick="loginUser()"
+        >
+          تسجيل الدخول
+        </button>
 
-          <input
-            id="loginEmail"
-            type="email"
-            autocomplete="email"
-            required>
-
-          <input
-            id="loginPassword"
-            type="password"
-            placeholder="كلمة المرور"
-            autocomplete="current-password"
-            required>
-
-          <button
-            id="loginSubmitBtn"
-            class="auth-submit"
-            type="submit">
-            تسجيل الدخول
-          </button>
+        <div class="auth-links">
 
           <button
             class="auth-link"
-            type="button"
-            onclick="openForgotPassword()">
+            onclick="showForgotPassword()"
+          >
             نسيت كلمة المرور؟
           </button>
 
           <button
-            class="auth-back"
-            type="button"
-            onclick="switchAuthStep('email')">
-            ← رجوع
+            class="auth-link"
+            onclick="backToEmail()"
+          >
+            تغيير البريد
           </button>
 
-        </form>
-
-        <div
-          id="authLoginMessage"
-          class="auth-message">
         </div>
 
       </div>
 
-      <!-- ========================================================
-           REGISTER
-      ======================================================== -->
-
-      <div id="authRegisterStep" class="auth-step">
-
-        <h2>إنشاء حساب</h2>
-
-        <p class="auth-subtitle">
-          سيتم إرسال رمز OTP إلى بريدك الإلكتروني للتحقق من الحساب.
-        </p>
-
-        <form
-          class="auth-form"
-          onsubmit="registerCustomer(event)">
-
-          <input
-            id="registerEmail"
-            type="email"
-            autocomplete="email"
-            required>
-
-          <input
-            id="registerPassword"
-            type="password"
-            placeholder="كلمة المرور"
-            autocomplete="new-password"
-            minlength="8"
-            required>
-
-          <button
-            class="auth-submit"
-            type="submit">
-            إنشاء الحساب وإرسال OTP
-          </button>
-
-          <button
-            class="auth-back"
-            type="button"
-            onclick="switchAuthStep('email')">
-            ← رجوع
-          </button>
-
-        </form>
+      <!-- STEP 3: REGISTER -->
+      <div
+        class="auth-step"
+        id="authStepRegister"
+      >
 
         <div
-          id="authRegisterMessage"
-          class="auth-message">
-        </div>
+          class="auth-email-preview"
+          id="registerEmailPreview"
+        ></div>
+
+        <label class="auth-label">
+          كلمة المرور
+        </label>
+
+        <input
+          class="auth-input"
+          id="registerPassword"
+          type="password"
+          autocomplete="new-password"
+          placeholder="••••••••"
+        >
+
+        <label class="auth-label">
+          تأكيد كلمة المرور
+        </label>
+
+        <input
+          class="auth-input"
+          id="registerPasswordConfirm"
+          type="password"
+          autocomplete="new-password"
+          placeholder="••••••••"
+        >
+
+        <button
+          class="auth-button"
+          id="registerButton"
+          onclick="registerUser()"
+        >
+          إنشاء الحساب وإرسال OTP
+        </button>
+
+        <button
+          class="auth-secondary"
+          onclick="backToEmail()"
+        >
+          ← العودة
+        </button>
 
       </div>
 
-      <!-- ========================================================
-           VERIFY OTP
-      ======================================================== -->
-
-      <div id="authOtpStep" class="auth-step">
-
-        <h2>التحقق من OTP</h2>
-
-        <p class="auth-subtitle">
-          أدخل رمز التحقق الذي تم إرساله إلى بريدك الإلكتروني.
-        </p>
-
-        <form
-          class="auth-form"
-          onsubmit="verifyCustomerOtp(event)">
-
-          <input
-            id="otpEmail"
-            type="email"
-            readonly>
-
-          <input
-            id="otpCode"
-            type="text"
-            inputmode="numeric"
-            maxlength="6"
-            placeholder="000000"
-            autocomplete="one-time-code"
-            required>
-
-          <input
-            id="otpPassword"
-            type="password"
-            placeholder="كلمة المرور"
-            autocomplete="new-password"
-            required>
-
-          <button
-            class="auth-submit"
-            type="submit">
-            التحقق وإنشاء الحساب
-          </button>
-
-        </form>
+      <!-- STEP 4: OTP -->
+      <div
+        class="auth-step"
+        id="authStepOTP"
+      >
 
         <div
-          id="authOtpMessage"
-          class="auth-message">
-        </div>
+          class="auth-email-preview"
+          id="otpEmailPreview"
+        ></div>
+
+        <label class="auth-label">
+          رمز التحقق OTP
+        </label>
+
+        <input
+          class="auth-input"
+          id="otpCode"
+          type="text"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          maxlength="6"
+          placeholder="000000"
+        >
+
+        <button
+          class="auth-button"
+          id="otpButton"
+          onclick="verifyOTP()"
+        >
+          التحقق وإنهاء التسجيل
+        </button>
+
+        <button
+          class="auth-secondary"
+          onclick="backToEmail()"
+        >
+          ← العودة
+        </button>
 
       </div>
 
-      <!-- ========================================================
-           FORGOT PASSWORD
-      ======================================================== -->
-
-      <div id="authForgotRequestStep" class="auth-step">
-
-        <h2>نسيت كلمة المرور</h2>
-
-        <p class="auth-subtitle">
-          أدخل البريد المسجل، وسيتم طلب رمز OTP من السيرفر.
-        </p>
-
-        <form
-          class="auth-form"
-          onsubmit="requestPasswordReset(event)">
-
-          <input
-            id="forgotEmail"
-            type="email"
-            placeholder="email@example.com"
-            autocomplete="email"
-            required>
-
-          <button
-            class="auth-submit"
-            type="submit">
-            إرسال OTP
-          </button>
-
-          <button
-            class="auth-back"
-            type="button"
-            onclick="switchAuthStep('login')">
-            ← رجوع لتسجيل الدخول
-          </button>
-
-        </form>
+      <!-- STEP 5: FORGOT PASSWORD -->
+      <div
+        class="auth-step"
+        id="authStepForgot"
+      >
 
         <div
-          id="authForgotMessage"
-          class="auth-message">
-        </div>
+          class="auth-email-preview"
+          id="forgotEmailPreview"
+        ></div>
+
+        <p style="color:var(--muted);font-size:10px;line-height:1.8;margin-bottom:14px;">
+          سيتم إرسال رمز OTP إلى البريد الإلكتروني لإعادة تعيين كلمة المرور.
+        </p>
+
+        <button
+          class="auth-button"
+          id="forgotButton"
+          onclick="requestForgotPassword()"
+        >
+          إرسال رمز OTP
+        </button>
+
+        <button
+          class="auth-secondary"
+          onclick="showLoginStep()"
+        >
+          ← العودة لتسجيل الدخول
+        </button>
 
       </div>
 
-      <!-- ========================================================
-           CHANGE PASSWORD
-      ======================================================== -->
-
-      <div id="authChangePasswordStep" class="auth-step">
-
-        <h2>كلمة مرور جديدة</h2>
-
-        <p class="auth-subtitle">
-          أدخل OTP وكلمة المرور الجديدة لإكمال الاستعادة.
-        </p>
-
-        <form
-          class="auth-form"
-          onsubmit="changeCustomerPassword(event)">
-
-          <input
-            id="changeEmail"
-            type="email"
-            readonly>
-
-          <input
-            id="changeOtp"
-            type="text"
-            inputmode="numeric"
-            maxlength="6"
-            placeholder="000000"
-            autocomplete="one-time-code"
-            required>
-
-          <input
-            id="changePassword"
-            type="password"
-            placeholder="كلمة المرور الجديدة"
-            autocomplete="new-password"
-            minlength="8"
-            required>
-
-          <button
-            class="auth-submit"
-            type="submit">
-            تغيير كلمة المرور
-          </button>
-
-        </form>
+      <!-- STEP 6: CHANGE PASSWORD -->
+      <div
+        class="auth-step"
+        id="authStepChangePassword"
+      >
 
         <div
-          id="authChangeMessage"
-          class="auth-message">
-        </div>
+          class="auth-email-preview"
+          id="changeEmailPreview"
+        ></div>
+
+        <label class="auth-label">
+          رمز OTP
+        </label>
+
+        <input
+          class="auth-input"
+          id="changeOtp"
+          type="text"
+          inputmode="numeric"
+          maxlength="6"
+          autocomplete="one-time-code"
+          placeholder="000000"
+        >
+
+        <label class="auth-label">
+          كلمة المرور الجديدة
+        </label>
+
+        <input
+          class="auth-input"
+          id="newPassword"
+          type="password"
+          autocomplete="new-password"
+          placeholder="••••••••"
+        >
+
+        <label class="auth-label">
+          تأكيد كلمة المرور الجديدة
+        </label>
+
+        <input
+          class="auth-input"
+          id="newPasswordConfirm"
+          type="password"
+          autocomplete="new-password"
+          placeholder="••••••••"
+        >
+
+        <button
+          class="auth-button"
+          id="changePasswordButton"
+          onclick="changePassword()"
+        >
+          تغيير كلمة المرور وتسجيل الدخول
+        </button>
 
       </div>
 
@@ -3292,30 +2868,10 @@ ADMIN APIs
 
   </div>
 
-  <!-- ============================================================
-       JAVASCRIPT
-  ============================================================ -->
-
   <script>
 
     /* ============================================================
-       CONFIG
-    ============================================================ */
-
-    const API_BASE = "";
-
-    let currentUser = null;
-    let currentSites = [];
-    let selectedSiteId = null;
-
-    /*
-      لا يتم حفظ كلمة المرور أو Session Token في المتصفح.
-      الجلسة تدار من السيرفر ويتم إرسال Cookie معها
-      بواسطة credentials: include.
-    */
-
-    /* ============================================================
-       BASIC HELPERS
+       BASIC PLATFORM
     ============================================================ */
 
     function enterPlatform() {
@@ -3327,8 +2883,6 @@ ADMIN APIs
       setTimeout(() => {
         intro.style.display = "none";
       }, 750);
-
-      checkExistingSession();
     }
 
     function toggleMenu() {
@@ -3361,48 +2915,81 @@ ADMIN APIs
     document.addEventListener("keydown", event => {
 
       if (event.key === "Escape") {
-        document.getElementById("nav").classList.remove("mobile-open");
 
-        if (
-          document.getElementById("authOverlay").classList.contains("visible")
-        ) {
-          closeAuth();
-        }
+        document.getElementById("nav")
+          .classList.remove("mobile-open");
+
+        closeAuth();
+
       }
 
     });
 
     /* ============================================================
-       API HELPER
+       API CONFIG
     ============================================================ */
 
-    async function apiFetch(endpoint, options = {}) {
+    /*
+      إذا كانت صفحة HTML على نفس السيرفر:
+      /api/... يعمل مباشرة.
+
+      إذا كانت الصفحة على دومين مختلف، غيّر API_BASE
+      إلى عنوان السيرفر الصحيح، مع تفعيل CORS + credentials
+      في السيرفر.
+    */
+
+    const API_BASE = "";
+
+    let currentUser = null;
+    let currentEmail = "";
+    let currentSites = [];
+    let selectedSiteId = null;
+
+    /* ============================================================
+       SAFE API REQUEST
+       - Cookie session is automatically sent
+       - No admin credentials
+       - No admin APIs
+    ============================================================ */
+
+    async function apiRequest(endpoint, options = {}) {
 
       const config = {
         credentials: "include",
         ...options,
         headers: {
+          "Content-Type": "application/json",
           ...(options.headers || {})
         }
       };
 
-      if (
-        config.body &&
-        typeof config.body !== "string" &&
-        !(config.body instanceof FormData)
-      ) {
-        config.headers["Content-Type"] = "application/json";
-        config.body = JSON.stringify(config.body);
-      }
-
-      const response = await fetch(API_BASE + endpoint, config);
+      const response = await fetch(
+        API_BASE + endpoint,
+        config
+      );
 
       let data = null;
 
-      try {
-        data = await response.json();
-      } catch (_) {
-        data = null;
+      const contentType =
+        response.headers.get("content-type") || "";
+
+      if (contentType.includes("application/json")) {
+
+        try {
+          data = await response.json();
+        } catch {
+          data = null;
+        }
+
+      } else {
+
+        try {
+          const text = await response.text();
+          data = text ? { message: text } : null;
+        } catch {
+          data = null;
+        }
+
       }
 
       if (!response.ok) {
@@ -3411,203 +2998,255 @@ ADMIN APIs
           data?.message ||
           data?.error ||
           data?.detail ||
-          `Request failed (${response.status})`;
+          "تعذر تنفيذ الطلب.";
 
         const error = new Error(message);
+
         error.status = response.status;
         error.data = data;
 
         throw error;
+
       }
 
       return data;
+
     }
 
-    function getResponseMessage(data, fallback = "") {
-
-      if (!data) return fallback;
+    function extractMessage(data, fallback = "") {
 
       return (
-        data.message ||
-        data.msg ||
-        data.error ||
-        data.detail ||
+        data?.message ||
+        data?.error ||
+        data?.detail ||
         fallback
       );
 
     }
 
-    function getArray(data, keys = []) {
+    function extractUser(data) {
 
-      if (Array.isArray(data)) {
-        return data;
-      }
+      return (
+        data?.user ||
+        data?.account ||
+        data?.profile ||
+        data?.data?.user ||
+        data?.data ||
+        null
+      );
 
-      for (const key of keys) {
-
-        if (Array.isArray(data?.[key])) {
-          return data[key];
-        }
-
-      }
-
-      return [];
     }
 
-    function getObject(data) {
+    function isAuthenticatedUser(data) {
 
-      if (!data) return {};
+      const user = extractUser(data);
 
-      if (data.user && typeof data.user === "object") {
-        return data.user;
-      }
+      return !!(
+        user &&
+        (
+          user.id ||
+          user._id ||
+          user.user_id ||
+          user.email
+        )
+      );
 
-      if (data.profile && typeof data.profile === "object") {
-        return data.profile;
-      }
-
-      if (data.data && typeof data.data === "object") {
-        return data.data;
-      }
-
-      return data;
     }
 
     /* ============================================================
-       AUTH MODAL
+       AUTH UI
     ============================================================ */
 
-    function openAuth(mode = "login") {
+    function openAuth() {
 
-      const overlay = document.getElementById("authOverlay");
+      if (currentUser) {
 
-      overlay.classList.add("visible");
-      overlay.setAttribute("aria-hidden", "false");
+        document.getElementById("customerArea")
+          .scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
 
-      clearAuthMessages();
+        return;
 
-      if (mode === "register") {
-        switchAuthStep("register");
-      } else if (mode === "forgot") {
-        openForgotPassword();
-      } else {
-        switchAuthStep("email");
       }
+
+      document
+        .getElementById("authOverlay")
+        .classList.add("open");
+
+      showEmailStep();
 
     }
 
     function closeAuth() {
 
-      const overlay = document.getElementById("authOverlay");
+      document
+        .getElementById("authOverlay")
+        .classList.remove("open");
 
-      overlay.classList.remove("visible");
-      overlay.setAttribute("aria-hidden", "true");
-
-      clearAuthMessages();
+      clearAuthAlert();
 
     }
 
-    document.getElementById("authOverlay").addEventListener("click", event => {
+    function closeAuthOutside(event) {
 
       if (event.target.id === "authOverlay") {
         closeAuth();
       }
 
-    });
+    }
 
-    function switchAuthStep(step) {
+    function setAuthTitle(title, subtitle) {
 
-      const steps = {
-        email: "authEmailStep",
-        login: "authLoginStep",
-        register: "authRegisterStep",
-        otp: "authOtpStep",
-        forgot: "authForgotRequestStep",
-        change: "authChangePasswordStep"
-      };
+      document.getElementById("authTitle").textContent = title;
 
-      Object.values(steps).forEach(id => {
-        document.getElementById(id).classList.remove("active");
-      });
-
-      if (steps[step]) {
-        document.getElementById(steps[step]).classList.add("active");
-      }
-
-      clearAuthMessages();
+      document.getElementById("authSubtitle").textContent =
+        subtitle;
 
     }
 
-    function switchAuthMode(mode) {
+    function hideAllAuthSteps() {
 
-      if (mode === "register") {
-        const email = document.getElementById("authEmail").value.trim();
-
-        if (email) {
-          document.getElementById("registerEmail").value = email;
-        }
-
-        switchAuthStep("register");
-      }
+      document
+        .querySelectorAll(".auth-step")
+        .forEach(step => {
+          step.classList.remove("active");
+        });
 
     }
 
-    function openForgotPassword() {
+    function showAuthStep(id) {
 
-      const email =
-        document.getElementById("loginEmail").value.trim() ||
-        document.getElementById("authEmail").value.trim();
+      hideAllAuthSteps();
 
-      document.getElementById("forgotEmail").value = email;
-
-      switchAuthStep("forgot");
+      document
+        .getElementById(id)
+        .classList.add("active");
 
     }
 
-    function clearAuthMessages() {
+    function clearAuthAlert() {
 
-      document.querySelectorAll(".auth-message").forEach(el => {
+      const alert =
+        document.getElementById("authAlert");
 
-        el.textContent = "";
-        el.className = "auth-message";
-
-      });
-
-    }
-
-    function showAuthMessage(id, message, type = "error") {
-
-      const el = document.getElementById(id);
-
-      if (!el) return;
-
-      el.textContent = message || "";
-
-      el.className =
-        "auth-message visible " +
-        (type === "success" ? "success" : "error");
+      alert.className = "auth-alert";
+      alert.textContent = "";
 
     }
 
-    function setButtonLoading(button, loading, loadingText = "جاري المعالجة...") {
+    function showAuthAlert(
+      message,
+      type = "error"
+    ) {
 
-      if (!button) return;
+      const alert =
+        document.getElementById("authAlert");
 
-      if (loading) {
+      alert.className =
+        "auth-alert show " + type;
 
-        button.dataset.originalText = button.textContent;
-        button.textContent = loadingText;
-        button.classList.add("loading");
+      alert.textContent = message;
 
-      } else {
+    }
 
-        button.textContent =
-          button.dataset.originalText ||
-          button.textContent;
+    function showEmailStep() {
 
-        button.classList.remove("loading");
+      setAuthTitle(
+        "دخول العملاء",
+        "أدخل بريدك الإلكتروني للمتابعة إلى حسابك."
+      );
 
-      }
+      clearAuthAlert();
+
+      showAuthStep("authStepEmail");
+
+    }
+
+    function showLoginStep() {
+
+      document.getElementById("loginEmailPreview")
+        .textContent = currentEmail;
+
+      setAuthTitle(
+        "تسجيل الدخول",
+        "أدخل كلمة المرور للوصول إلى حسابك."
+      );
+
+      clearAuthAlert();
+
+      showAuthStep("authStepLogin");
+
+    }
+
+    function showRegisterStep() {
+
+      document.getElementById("registerEmailPreview")
+        .textContent = currentEmail;
+
+      setAuthTitle(
+        "إنشاء حساب",
+        "أنشئ حساب العميل ثم تحقق من بريدك باستخدام OTP."
+      );
+
+      clearAuthAlert();
+
+      showAuthStep("authStepRegister");
+
+    }
+
+    function showOTP() {
+
+      document.getElementById("otpEmailPreview")
+        .textContent = currentEmail;
+
+      setAuthTitle(
+        "التحقق من البريد",
+        "أدخل رمز OTP الذي تم إرساله إلى بريدك الإلكتروني."
+      );
+
+      clearAuthAlert();
+
+      showAuthStep("authStepOTP");
+
+    }
+
+    function showForgotPassword() {
+
+      document.getElementById("forgotEmailPreview")
+        .textContent = currentEmail;
+
+      setAuthTitle(
+        "استعادة كلمة المرور",
+        "سيتم إرسال رمز OTP إلى بريد حسابك."
+      );
+
+      clearAuthAlert();
+
+      showAuthStep("authStepForgot");
+
+    }
+
+    function showChangePassword() {
+
+      document.getElementById("changeEmailPreview")
+        .textContent = currentEmail;
+
+      setAuthTitle(
+        "تعيين كلمة مرور جديدة",
+        "أدخل OTP وكلمة المرور الجديدة لإكمال الاستعادة."
+      );
+
+      clearAuthAlert();
+
+      showAuthStep("authStepChangePassword");
+
+    }
+
+    function backToEmail() {
+
+      showEmailStep();
 
     }
 
@@ -3616,69 +3255,95 @@ ADMIN APIs
        POST /api/check-email
     ============================================================ */
 
-    async function checkCustomerEmail(event) {
+    async function checkEmail() {
 
-      event.preventDefault();
+      const input =
+        document.getElementById("authEmail");
 
       const email =
-        document.getElementById("authEmail").value.trim().toLowerCase();
+        input.value.trim().toLowerCase();
+
+      if (!isValidEmail(email)) {
+
+        showAuthAlert(
+          "أدخل بريدًا إلكترونيًا صحيحًا.",
+          "error"
+        );
+
+        return;
+
+      }
+
+      currentEmail = email;
 
       const button =
-        document.getElementById("emailContinueBtn");
+        document.getElementById("checkEmailButton");
 
-      if (!email) return;
+      button.disabled = true;
+      button.textContent = "جاري التحقق...";
 
       try {
 
-        setButtonLoading(button, true, "جاري التحقق...");
-
-        const data = await apiFetch("/api/check-email", {
-          method: "POST",
-          body: {
-            email
+        const data = await apiRequest(
+          "/api/check-email",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              email: currentEmail
+            })
           }
-        });
+        );
 
         /*
-          يدعم عدة أشكال شائعة:
+          يدعم أكثر من شكل شائع للاستجابة:
           exists
-          emailExists
           registered
+          userExists
           data.exists
         */
 
-        const exists = Boolean(
-          data?.exists ??
-          data?.emailExists ??
-          data?.registered ??
-          data?.data?.exists ??
-          data?.data?.emailExists
-        );
+        const exists =
+          data?.exists === true ||
+          data?.registered === true ||
+          data?.userExists === true ||
+          data?.data?.exists === true ||
+          data?.data?.registered === true;
 
         if (exists) {
 
-          document.getElementById("loginEmail").value = email;
-
-          switchAuthStep("login");
+          showLoginStep();
 
         } else {
 
-          document.getElementById("registerEmail").value = email;
-
-          switchAuthStep("register");
+          showRegisterStep();
 
         }
 
       } catch (error) {
 
-        showAuthMessage(
-          "authEmailMessage",
-          error.message || "تعذر التحقق من البريد الإلكتروني."
-        );
+        /*
+          إذا كان السيرفر يعيد 404 عند عدم وجود البريد،
+          نعتبره حسابًا جديدًا.
+        */
+
+        if (error.status === 404) {
+
+          showRegisterStep();
+
+        } else {
+
+          showAuthAlert(
+            error.message ||
+            "تعذر التحقق من البريد.",
+            "error"
+          );
+
+        }
 
       } finally {
 
-        setButtonLoading(button, false);
+        button.disabled = false;
+        button.textContent = "متابعة";
 
       }
 
@@ -3689,48 +3354,74 @@ ADMIN APIs
        POST /api/register
     ============================================================ */
 
-    async function registerCustomer(event) {
-
-      event.preventDefault();
-
-      const email =
-        document.getElementById("registerEmail").value.trim().toLowerCase();
+    async function registerUser() {
 
       const password =
         document.getElementById("registerPassword").value;
 
-      if (!email || !password) return;
+      const confirm =
+        document.getElementById("registerPasswordConfirm").value;
+
+      if (password.length < 6) {
+
+        showAuthAlert(
+          "كلمة المرور يجب أن تكون 6 أحرف على الأقل.",
+          "error"
+        );
+
+        return;
+
+      }
+
+      if (password !== confirm) {
+
+        showAuthAlert(
+          "كلمتا المرور غير متطابقتين.",
+          "error"
+        );
+
+        return;
+
+      }
+
+      const button =
+        document.getElementById("registerButton");
+
+      button.disabled = true;
+      button.textContent = "جاري إنشاء الحساب...";
 
       try {
 
-        const data = await apiFetch("/api/register", {
-          method: "POST",
-          body: {
-            email,
-            password
+        await apiRequest(
+          "/api/register",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              email: currentEmail,
+              password: password
+            })
           }
-        });
+        );
 
-        document.getElementById("otpEmail").value = email;
-        document.getElementById("otpPassword").value = password;
-
-        switchAuthStep("otp");
-
-        showAuthMessage(
-          "authOtpMessage",
-          getResponseMessage(
-            data,
-            "تم إرسال رمز OTP. أدخل الرمز لإكمال إنشاء الحساب."
-          ),
+        showAuthAlert(
+          "تم إرسال رمز OTP إلى بريدك الإلكتروني.",
           "success"
         );
 
+        showOTP();
+
       } catch (error) {
 
-        showAuthMessage(
-          "authRegisterMessage",
-          error.message || "تعذر بدء التسجيل."
+        showAuthAlert(
+          error.message ||
+          "تعذر إنشاء الحساب.",
+          "error"
         );
+
+      } finally {
+
+        button.disabled = false;
+        button.textContent = "إنشاء الحساب وإرسال OTP";
 
       }
 
@@ -3741,61 +3432,76 @@ ADMIN APIs
        POST /api/verify-otp
     ============================================================ */
 
-    async function verifyCustomerOtp(event) {
-
-      event.preventDefault();
-
-      const email =
-        document.getElementById("otpEmail").value.trim().toLowerCase();
+    async function verifyOTP() {
 
       const otp =
-        document.getElementById("otpCode").value.trim();
-
-      const password =
-        document.getElementById("otpPassword").value;
+        document.getElementById("otpCode")
+          .value
+          .trim();
 
       if (!/^\d{6}$/.test(otp)) {
 
-        showAuthMessage(
-          "authOtpMessage",
-          "يجب إدخال رمز OTP مكون من 6 أرقام."
+        showAuthAlert(
+          "أدخل رمز OTP المكون من 6 أرقام.",
+          "error"
         );
 
         return;
+
       }
+
+      const button =
+        document.getElementById("otpButton");
+
+      button.disabled = true;
+      button.textContent = "جاري التحقق...";
 
       try {
 
-        const data = await apiFetch("/api/verify-otp", {
-          method: "POST",
-          body: {
-            email,
-            otp,
-            password
+        const data = await apiRequest(
+          "/api/verify-otp",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              email: currentEmail,
+              otp: otp
+            })
           }
-        });
+        );
 
-        showAuthMessage(
-          "authOtpMessage",
-          getResponseMessage(
-            data,
-            "تم التحقق من الحساب وتسجيل الدخول."
-          ),
+        currentUser =
+          extractUser(data) ||
+          {
+            email: currentEmail
+          };
+
+        showAuthAlert(
+          "تم إنشاء الحساب وتسجيل الدخول بنجاح.",
           "success"
         );
 
-        await loadAuthenticatedUser();
-
         setTimeout(() => {
+
           closeAuth();
+
+          updateLoggedInUI();
+
+          loadCustomerDashboard();
+
         }, 500);
 
       } catch (error) {
 
-        showAuthMessage(
-          "authOtpMessage",
-          error.message || "رمز OTP غير صحيح أو منتهي."
+        showAuthAlert(
+          error.message ||
+          "رمز OTP غير صحيح أو منتهي.",
+          "error"
         );
+
+      } finally {
+
+        button.disabled = false;
+        button.textContent = "التحقق وإنهاء التسجيل";
 
       }
 
@@ -3806,72 +3512,81 @@ ADMIN APIs
        POST /api/login
     ============================================================ */
 
-    async function loginCustomer(event) {
-
-      event.preventDefault();
-
-      const email =
-        document.getElementById("loginEmail").value.trim().toLowerCase();
+    async function loginUser() {
 
       const password =
-        document.getElementById("loginPassword").value;
+        document.getElementById("loginPassword")
+          .value;
+
+      if (!password) {
+
+        showAuthAlert(
+          "أدخل كلمة المرور.",
+          "error"
+        );
+
+        return;
+
+      }
 
       const button =
-        document.getElementById("loginSubmitBtn");
+        document.getElementById("loginButton");
 
-      if (!email || !password) return;
+      button.disabled = true;
+      button.textContent = "جاري تسجيل الدخول...";
 
       try {
 
-        setButtonLoading(button, true, "جاري تسجيل الدخول...");
-
-        const data = await apiFetch("/api/login", {
-          method: "POST",
-          body: {
-            email,
-            password
+        const data = await apiRequest(
+          "/api/login",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              email: currentEmail,
+              password: password
+            })
           }
-        });
+        );
 
-        /*
-          السيرفر هو المسؤول عن إنشاء Session.
-          لا يتم حفظ Token يدويًا في localStorage.
-        */
+        currentUser =
+          extractUser(data) ||
+          {
+            email: currentEmail
+          };
 
-        if (
-          data?.success === false ||
-          data?.authenticated === false
-        ) {
+        updateLoggedInUI();
 
-          throw new Error(
-            getResponseMessage(
-              data,
-              "البريد الإلكتروني أو كلمة المرور غير صحيحة."
-            )
-          );
+        showAuthAlert(
+          "تم تسجيل الدخول بنجاح.",
+          "success"
+        );
 
-        }
+        setTimeout(() => {
 
-        await loadAuthenticatedUser();
+          closeAuth();
 
-        closeAuth();
+          loadCustomerDashboard();
+
+        }, 350);
 
       } catch (error) {
 
         /*
-          إذا كانت كلمة المرور غير صحيحة، تبقى الواجهة
-          داخل شاشة الدخول ولا يتم فتح Dashboard.
+          إذا كان السيرفر يميز حالة "نسيت كلمة المرور"
+          عن طريق رسالة/كود محدد، يبقى المستخدم قادرًا
+          على الضغط على "نسيت كلمة المرور؟".
         */
 
-        showAuthMessage(
-          "authLoginMessage",
+        showAuthAlert(
           error.message ||
-          "البريد الإلكتروني أو كلمة المرور غير صحيحة."
+          "البريد أو كلمة المرور غير صحيحة.",
+          "error"
         );
 
       } finally {
 
-        setButtonLoading(button, false);
+        button.disabled = false;
+        button.textContent = "تسجيل الدخول";
 
       }
 
@@ -3883,44 +3598,48 @@ ADMIN APIs
        forgotPassword: true
     ============================================================ */
 
-    async function requestPasswordReset(event) {
+    async function requestForgotPassword() {
 
-      event.preventDefault();
+      const button =
+        document.getElementById("forgotButton");
 
-      const email =
-        document.getElementById("forgotEmail").value.trim().toLowerCase();
-
-      if (!email) return;
+      button.disabled = true;
+      button.textContent = "جاري إرسال OTP...";
 
       try {
 
-        const data = await apiFetch("/api/login", {
-          method: "POST",
-          body: {
-            email,
-            forgotPassword: true
+        await apiRequest(
+          "/api/login",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              email: currentEmail,
+              forgotPassword: true
+            })
           }
-        });
+        );
 
-        document.getElementById("changeEmail").value = email;
-
-        switchAuthStep("change");
-
-        showAuthMessage(
-          "authChangeMessage",
-          getResponseMessage(
-            data,
-            "تم طلب رمز OTP. أدخل الرمز وكلمة المرور الجديدة."
-          ),
+        showAuthAlert(
+          "تم إرسال رمز OTP لإعادة تعيين كلمة المرور.",
           "success"
         );
 
+        setTimeout(() => {
+          showChangePassword();
+        }, 300);
+
       } catch (error) {
 
-        showAuthMessage(
-          "authForgotMessage",
-          error.message || "تعذر طلب استعادة كلمة المرور."
+        showAuthAlert(
+          error.message ||
+          "تعذر إرسال رمز استعادة كلمة المرور.",
+          "error"
         );
+
+      } finally {
+
+        button.disabled = false;
+        button.textContent = "إرسال رمز OTP";
 
       }
 
@@ -3931,201 +3650,203 @@ ADMIN APIs
        POST /api/change-password
     ============================================================ */
 
-    async function changeCustomerPassword(event) {
-
-      event.preventDefault();
-
-      const email =
-        document.getElementById("changeEmail").value.trim().toLowerCase();
+    async function changePassword() {
 
       const otp =
-        document.getElementById("changeOtp").value.trim();
+        document.getElementById("changeOtp")
+          .value
+          .trim();
 
       const newPassword =
-        document.getElementById("changePassword").value;
+        document.getElementById("newPassword")
+          .value;
+
+      const confirm =
+        document.getElementById("newPasswordConfirm")
+          .value;
 
       if (!/^\d{6}$/.test(otp)) {
 
-        showAuthMessage(
-          "authChangeMessage",
-          "يجب إدخال رمز OTP مكون من 6 أرقام."
+        showAuthAlert(
+          "أدخل رمز OTP المكون من 6 أرقام.",
+          "error"
         );
 
         return;
+
       }
+
+      if (newPassword.length < 6) {
+
+        showAuthAlert(
+          "كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل.",
+          "error"
+        );
+
+        return;
+
+      }
+
+      if (newPassword !== confirm) {
+
+        showAuthAlert(
+          "كلمتا المرور غير متطابقتين.",
+          "error"
+        );
+
+        return;
+
+      }
+
+      const button =
+        document.getElementById(
+          "changePasswordButton"
+        );
+
+      button.disabled = true;
+      button.textContent =
+        "جاري تغيير كلمة المرور...";
 
       try {
 
-        const data = await apiFetch("/api/change-password", {
-          method: "POST",
-          body: {
-            email,
-            otp,
-            newPassword
+        const data = await apiRequest(
+          "/api/change-password",
+          {
+            method: "POST",
+            body: JSON.stringify({
+              email: currentEmail,
+              otp: otp,
+              newPassword: newPassword
+            })
           }
-        });
+        );
 
-        showAuthMessage(
-          "authChangeMessage",
-          getResponseMessage(
-            data,
-            "تم تغيير كلمة المرور بنجاح."
-          ),
+        currentUser =
+          extractUser(data) ||
+          {
+            email: currentEmail
+          };
+
+        showAuthAlert(
+          "تم تغيير كلمة المرور وتسجيل الدخول.",
           "success"
         );
 
-        /*
-          إذا كان السيرفر ينشئ Session بعد تغيير كلمة المرور،
-          نحاول قراءة الجلسة مباشرة.
-        */
+        updateLoggedInUI();
 
-        try {
-          await loadAuthenticatedUser();
+        setTimeout(() => {
+
           closeAuth();
-        } catch (_) {
 
-          setTimeout(() => {
-            switchAuthStep("login");
+          loadCustomerDashboard();
 
-            document.getElementById("loginEmail").value = email;
-
-            showAuthMessage(
-              "authLoginMessage",
-              "تم تغيير كلمة المرور. يمكنك الآن تسجيل الدخول.",
-              "success"
-            );
-
-          }, 700);
-
-        }
+        }, 500);
 
       } catch (error) {
 
-        showAuthMessage(
-          "authChangeMessage",
+        showAuthAlert(
           error.message ||
-          "تعذر تغيير كلمة المرور. تحقق من البريد وOTP."
+          "تعذر تغيير كلمة المرور. تحقق من OTP والبيانات.",
+          "error"
         );
+
+      } finally {
+
+        button.disabled = false;
+        button.textContent =
+          "تغيير كلمة المرور وتسجيل الدخول";
 
       }
 
     }
 
     /* ============================================================
-       SESSION
+       SESSION CHECK
        GET /api/me
     ============================================================ */
 
-    async function checkExistingSession() {
+    async function checkCurrentSession() {
 
       try {
 
-        await loadAuthenticatedUser();
+        const data =
+          await apiRequest("/api/me", {
+            method: "GET"
+          });
 
-      } catch (_) {
+        const user =
+          extractUser(data);
 
-        setLoggedOutUI();
+        if (
+          user &&
+          (
+            user.id ||
+            user._id ||
+            user.user_id ||
+            user.email
+          )
+        ) {
+
+          currentUser = user;
+
+          if (user.email) {
+            currentEmail = user.email;
+          }
+
+          updateLoggedInUI();
+
+          loadCustomerDashboard();
+
+          return true;
+
+        }
+
+      } catch (error) {
+
+        /*
+          عدم وجود جلسة ليس خطأ في واجهة العميل.
+        */
 
       }
 
+      updateLoggedOutUI();
+
+      return false;
+
     }
 
-    async function loadAuthenticatedUser() {
+    /* ============================================================
+       PROFILE
+       GET /api/profile
+    ============================================================ */
 
-      /*
-        /api/me هو مصدر التحقق الأساسي من Session الحالية.
-      */
+    async function loadProfile() {
 
-      const data = await apiFetch("/api/me", {
-        method: "GET"
-      });
+      try {
 
-      const user = getObject(data);
+        const data =
+          await apiRequest("/api/profile", {
+            method: "GET"
+          });
 
-      /*
-        بعض السيرفرات قد ترجع:
-        { authenticated: false }
-        أو { user: null }
-      */
+        const user =
+          extractUser(data);
 
-      if (
-        data?.authenticated === false ||
-        data?.loggedIn === false ||
-        data?.user === null
-      ) {
+        if (user) {
 
-        throw new Error("Not authenticated");
+          currentUser = user;
+
+          if (user.email) {
+            currentEmail = user.email;
+          }
+
+        }
+
+      } catch {
+
+        /* Session check remains authoritative. */
 
       }
-
-      currentUser = user;
-
-      setLoggedInUI();
-
-      await loadClientDashboard();
-
-      return currentUser;
-
-    }
-
-    function setLoggedInUI() {
-
-      const loginBtn =
-        document.getElementById("headerLoginBtn");
-
-      const accountMenu =
-        document.getElementById("accountMenu");
-
-      const accountUser =
-        document.getElementById("accountUser");
-
-      loginBtn.classList.add("hidden");
-      accountMenu.classList.add("visible");
-
-      const email =
-        currentUser?.email ||
-        currentUser?.username ||
-        "حساب العميل";
-
-      accountUser.textContent = email;
-
-      document.getElementById("client-area")
-        .classList.add("visible");
-
-      document.getElementById("clientWelcome").textContent =
-        `مرحبًا بك. هذه البيانات مرتبطة بجلسة حسابك فقط.`;
-
-      document.getElementById("profileEmail").textContent =
-        currentUser?.email || "—";
-
-      document.getElementById("profileId").textContent =
-        currentUser?.id ||
-        currentUser?._id ||
-        currentUser?.user_id ||
-        "—";
-
-      document.getElementById("profileStatus").textContent =
-        "Authenticated";
-
-    }
-
-    function setLoggedOutUI() {
-
-      currentUser = null;
-      currentSites = [];
-      selectedSiteId = null;
-
-      document.getElementById("headerLoginBtn")
-        .classList.remove("hidden");
-
-      document.getElementById("accountMenu")
-        .classList.remove("visible");
-
-      document.getElementById("client-area")
-        .classList.remove("visible");
-
-      document.getElementById("profileEmail").textContent = "—";
-      document.getElementById("profileId").textContent = "—";
 
     }
 
@@ -4138,49 +3859,192 @@ ADMIN APIs
 
       try {
 
-        await apiFetch("/api/logout", {
-          method: "POST"
-        });
+        await apiRequest(
+          "/api/logout",
+          {
+            method: "POST",
+            body: JSON.stringify({})
+          }
+        );
 
-      } catch (_) {
+      } catch (error) {
 
         /*
-          حتى إذا فشل الطلب من جهة الشبكة،
-          لا نحتفظ ببيانات العميل في الواجهة.
+          حتى لو فشل الطلب بسبب انتهاء الجلسة،
+          ننظف حالة الواجهة محليًا.
         */
 
-      } finally {
-
-        setLoggedOutUI();
-
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth"
-        });
-
       }
+
+      currentUser = null;
+      currentEmail = "";
+      currentSites = [];
+      selectedSiteId = null;
+
+      updateLoggedOutUI();
+
+      document.getElementById("siteList").innerHTML = "";
+
+      document.getElementById(
+        "customerLock"
+      ).style.display = "block";
+
+      document.getElementById(
+        "customerDashboard"
+      ).classList.remove("active");
+
+      document.getElementById(
+        "customerArea"
+      ).scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
 
     }
 
     /* ============================================================
-       CLIENT DASHBOARD
+       LOGGED UI
     ============================================================ */
 
-    async function loadClientDashboard() {
+    function updateLoggedInUI() {
 
-      if (!currentUser) return;
+      const button =
+        document.getElementById(
+          "headerLoginButton"
+        );
+
+      button.textContent =
+        "◉ حسابي";
+
+      button.classList.add("logged");
+
+      document.getElementById(
+        "customerLock"
+      ).style.display = "none";
+
+      document.getElementById(
+        "customerDashboard"
+      ).classList.add("active");
+
+      const email =
+        currentUser?.email ||
+        currentEmail ||
+        "Customer";
+
+      document.getElementById(
+        "customerWelcome"
+      ).textContent =
+        "مرحبًا بك — " + email;
+
+    }
+
+    function updateLoggedOutUI() {
+
+      const button =
+        document.getElementById(
+          "headerLoginButton"
+        );
+
+      button.textContent =
+        "🔐 تسجيل دخول العملاء";
+
+      button.classList.remove("logged");
+
+      document.getElementById(
+        "customerLock"
+      ).style.display = "block";
+
+      document.getElementById(
+        "customerDashboard"
+      ).classList.remove("active");
+
+    }
+
+    /* ============================================================
+       CUSTOMER DASHBOARD
+       GET /api/sites
+    ============================================================ */
+
+    async function loadCustomerDashboard() {
+
+      if (!currentUser) {
+
+        updateLoggedOutUI();
+
+        return;
+
+      }
+
+      updateLoggedInUI();
+
+      showCustomerMessage(
+        "جاري تحميل بيانات حسابك...",
+        "success"
+      );
 
       try {
 
-        await loadClientSites();
+        const data =
+          await apiRequest(
+            "/api/sites",
+            {
+              method: "GET"
+            }
+          );
 
-        await loadClientAggregates();
+        /*
+          دعم عدة أشكال شائعة للاستجابة.
+        */
+
+        const sites =
+          Array.isArray(data)
+            ? data
+            : (
+                data?.sites ||
+                data?.data?.sites ||
+                data?.data ||
+                []
+              );
+
+        currentSites =
+          Array.isArray(sites)
+            ? sites
+            : [];
+
+        renderCustomerSites();
+
+        calculateCustomerOverview();
+
+        clearCustomerMessage();
 
       } catch (error) {
 
-        console.error(
-          "Client dashboard error:",
-          error
+        /*
+          401/403 = الجلسة غير صالحة أو انتهت.
+        */
+
+        if (
+          error.status === 401 ||
+          error.status === 403
+        ) {
+
+          currentUser = null;
+
+          updateLoggedOutUI();
+
+          showCustomerMessage(
+            "انتهت جلسة تسجيل الدخول. يرجى تسجيل الدخول مرة أخرى.",
+            "error"
+          );
+
+          return;
+
+        }
+
+        showCustomerMessage(
+          error.message ||
+          "تعذر تحميل مواقع حسابك.",
+          "error"
         );
 
       }
@@ -4188,146 +4052,108 @@ ADMIN APIs
     }
 
     /* ============================================================
-       SITES
-       GET /api/sites
+       RENDER SITES
     ============================================================ */
 
-    async function loadClientSites() {
+    function renderCustomerSites() {
 
-      const data = await apiFetch("/api/sites", {
-        method: "GET"
-      });
+      const container =
+        document.getElementById("siteList");
 
-      /*
-        هذه البيانات يفترض أن السيرفر يرجعها بعد التحقق
-        من Session المستخدم وowner_id.
-      */
-
-      currentSites = getArray(
-        data,
-        ["sites", "data", "results"]
-      );
-
-      renderSites();
-
-      return currentSites;
-
-    }
-
-    function renderSites() {
-
-      const dashboardList =
-        document.getElementById("dashboardSiteList");
-
-      const fullList =
-        document.getElementById("fullSiteList");
-
-      const count =
-        document.getElementById("clientSiteCount");
-
-      count.textContent =
-        `${currentSites.length} SITE${currentSites.length === 1 ? "" : "S"}`;
+      document.getElementById(
+        "customerSitesCount"
+      ).textContent =
+        currentSites.length;
 
       if (!currentSites.length) {
 
-        const empty = `
+        container.innerHTML = `
           <div class="empty-state">
             لا توجد مواقع مرتبطة بحسابك حاليًا.
-            يمكنك إضافة موقع من قسم Sites.
+            <br>
+            يمكنك إنشاء موقع من خلال API الخاص بحسابك.
           </div>
         `;
-
-        dashboardList.innerHTML = empty;
-        fullList.innerHTML = empty;
 
         return;
 
       }
 
-      dashboardList.innerHTML =
-        currentSites.slice(0, 5)
-          .map(site => renderSiteItem(site, false))
-          .join("");
+      container.innerHTML =
+        currentSites.map(site => {
 
-      fullList.innerHTML =
-        currentSites
-          .map(site => renderSiteItem(site, true))
-          .join("");
+          const id =
+            site.id ??
+            site.site_id ??
+            site._id;
 
-    }
+          const domain =
+            site.client_domain ||
+            site.domain ||
+            site.name ||
+            "Unknown Site";
 
-    function renderSiteItem(site, detailed = true) {
+          const status =
+            site.protection_status ||
+            site.status ||
+            "PROTECTED";
 
-      const id =
-        site?.id ??
-        site?._id ??
-        site?.site_id;
+          return `
+            <div class="site-item">
 
-      const domain =
-        site?.client_domain ||
-        site?.domain ||
-        site?.hostname ||
-        "unknown-domain";
+              <div class="site-main">
 
-      const protection =
-        site?.protection_status ||
-        site?.status ||
-        "ACTIVE";
+                <div class="site-domain">
+                  ${escapeHtml(String(domain))}
+                </div>
 
-      const target =
-        site?.target_url ||
-        site?.target ||
-        "—";
+                <div class="site-meta">
+                  SITE ID:
+                  ${escapeHtml(String(id ?? "—"))}
+                </div>
 
-      const online =
-        String(protection).toLowerCase() !== "offline";
+              </div>
 
-      const visitorCount =
-        site?.visitors ??
-        site?.visitor_count ??
-        site?.stats?.visitors ??
-        0;
+              <div class="site-status">
+                ${escapeHtml(String(status))}
+              </div>
 
-      return `
-        <div class="site-item">
+              <div class="site-actions">
 
-          <div>
-            <div class="site-domain">${escapeHTML(domain)}</div>
-            ${
-              detailed
-              ? `<div class="site-meta">TARGET: ${escapeHTML(target)}</div>`
-              : ""
-            }
-          </div>
+                <button
+                  class="mini-btn"
+                  onclick="selectCustomerSite('${escapeJs(String(id))}')"
+                >
+                  التفاصيل
+                </button>
 
-          <div>
-            <span class="status-badge ${online ? "online" : "offline"}">
-              ● ${online ? "PROTECTED" : "OFFLINE"}
-            </span>
-          </div>
+                <button
+                  class="mini-btn"
+                  onclick="loadSiteStats('${escapeJs(String(id))}')"
+                >
+                  Analytics
+                </button>
 
-          <div class="site-meta">
-            VISITORS: ${escapeHTML(String(visitorCount))}
-          </div>
+                <button
+                  class="mini-btn"
+                  onclick="loadSiteAlerts('${escapeJs(String(id))}')"
+                >
+                  Alerts
+                </button>
 
-          <div class="site-actions">
+                <button
+                  class="mini-btn danger"
+                  onclick="deleteCustomerSite('${escapeJs(String(id))}')"
+                >
+                  حذف
+                </button>
 
-            <button
-              class="mini-btn"
-              onclick="viewSiteDetails('${escapeAttribute(String(id))}')">
-              تفاصيل
-            </button>
+              </div>
 
-            <button
-              class="mini-btn danger"
-              onclick="deleteClientSite('${escapeAttribute(String(id))}')">
-              حذف
-            </button>
+            </div>
+          `;
 
-          </div>
-
-        </div>
-      `;
+        }).join("");
 
     }
 
@@ -4336,167 +4162,129 @@ ADMIN APIs
        GET /api/sites/:id
     ============================================================ */
 
-    async function viewSiteDetails(siteId) {
+    async function selectCustomerSite(siteId) {
 
-      if (!siteId) return;
+      if (!isOwnedSite(siteId)) {
+
+        showCustomerMessage(
+          "لا يمكن الوصول إلى هذا الموقع.",
+          "error"
+        );
+
+        return;
+
+      }
 
       selectedSiteId = siteId;
 
       try {
 
-        const data = await apiFetch(
-          `/api/sites/${encodeURIComponent(siteId)}`,
-          {
-            method: "GET"
-          }
-        );
-
-        const box =
-          document.getElementById("siteDetailsContent");
-
-        /*
-          لا نعرض api_key تلقائيًا.
-          إذا احتجت عرضه للمستخدم المالك، الأفضل أن يكون
-          Endpoint السيرفر نفسه مصممًا لإرجاعه بشكل آمن.
-        */
-
-        const safeData = sanitizeSiteData(data);
-
-        box.textContent =
-          JSON.stringify(
-            safeData,
-            null,
-            2
+        const data =
+          await apiRequest(
+            "/api/sites/" +
+            encodeURIComponent(siteId),
+            {
+              method: "GET"
+            }
           );
 
-        document.getElementById("client-site-details")
-          .style.display = "block";
+        const site =
+          data?.site ||
+          data?.data?.site ||
+          data?.data ||
+          data;
+
+        renderSiteDetails(site);
+
+        await Promise.allSettled([
+          loadSiteStats(siteId),
+          loadSiteAlerts(siteId)
+        ]);
 
       } catch (error) {
 
-        alert(
-          error.message ||
-          "تعذر جلب تفاصيل الموقع."
-        );
+        handleProtectedApiError(error);
 
       }
 
     }
 
-    function closeSiteDetails() {
+    function renderSiteDetails(site) {
 
-      document.getElementById("client-site-details")
-        .style.display = "none";
-
-      selectedSiteId = null;
-
-    }
-
-    /* ============================================================
-       DELETE SITE
-       DELETE /api/sites/:id
-    ============================================================ */
-
-    async function deleteClientSite(siteId) {
-
-      if (!siteId) return;
-
-      const confirmed =
-        confirm(
-          "هل أنت متأكد من حذف هذا الموقع؟ سيتم تنفيذ الحذف من السيرفر."
-        );
-
-      if (!confirmed) return;
-
-      try {
-
-        await apiFetch(
-          `/api/sites/${encodeURIComponent(siteId)}`,
-          {
-            method: "DELETE"
-          }
-        );
-
-        await loadClientSites();
-
-        await loadClientAggregates();
-
-      } catch (error) {
-
-        alert(
-          error.message ||
-          "تعذر حذف الموقع."
-        );
-
+      if (!site) {
+        return;
       }
-
-    }
-
-    /* ============================================================
-       CREATE SITE
-       POST /api/sites
-    ============================================================ */
-
-    async function createClientSite(event) {
-
-      event.preventDefault();
 
       const domain =
-        document.getElementById("newSiteDomain")
-          .value
-          .trim();
+        site.client_domain ||
+        site.domain ||
+        site.name ||
+        "Unknown";
 
-      const target =
-        document.getElementById("newSiteTarget")
-          .value
-          .trim();
+      const status =
+        site.protection_status ||
+        site.status ||
+        "PROTECTED";
 
-      const domainsText =
-        document.getElementById("newSiteDomains")
-          .value
-          .trim();
+      const targetStatus =
+        site.target_status ||
+        site.targetStatus ||
+        "UNKNOWN";
 
-      const domains =
-        domainsText
-          ? domainsText
-              .split(",")
-              .map(item => item.trim())
-              .filter(Boolean)
-          : undefined;
+      /*
+        لا نعرض api_key أو أي secret حتى لو أعاده السيرفر.
+      */
 
-      const body = {
-        client_domain: domain,
-        target_url: target
-      };
+      document.getElementById(
+        "siteDetails"
+      ).innerHTML = `
 
-      if (domains?.length) {
-        body.domains = domains;
-      }
+        <div style="
+          display:grid;
+          grid-template-columns:repeat(3,1fr);
+          gap:10px;
+          text-align:right;
+        ">
 
-      try {
+          <div class="customer-card">
+            <div class="customer-card-label">
+              DOMAIN
+            </div>
+            <div
+              class="customer-card-value cyan"
+              style="font-size:14px;overflow-wrap:anywhere;"
+            >
+              ${escapeHtml(String(domain))}
+            </div>
+          </div>
 
-        await apiFetch("/api/sites", {
-          method: "POST",
-          body
-        });
+          <div class="customer-card">
+            <div class="customer-card-label">
+              PROTECTION
+            </div>
+            <div
+              class="customer-card-value green"
+              style="font-size:14px;"
+            >
+              ${escapeHtml(String(status))}
+            </div>
+          </div>
 
-        document.getElementById("newSiteDomain").value = "";
-        document.getElementById("newSiteTarget").value = "";
-        document.getElementById("newSiteDomains").value = "";
+          <div class="customer-card">
+            <div class="customer-card-label">
+              TARGET STATUS
+            </div>
+            <div
+              class="customer-card-value"
+              style="font-size:14px;"
+            >
+              ${escapeHtml(String(targetStatus))}
+            </div>
+          </div>
 
-        await loadClientSites();
-        await loadClientAggregates();
+        </div>
 
-        switchClientPanelByName("sites");
-
-      } catch (error) {
-
-        alert(
-          error.message ||
-          "تعذر إنشاء الموقع."
-        );
-
-      }
+      `;
 
     }
 
@@ -4505,759 +4293,582 @@ ADMIN APIs
        GET /api/sites/:id/stats
     ============================================================ */
 
-    async function getSiteStats(siteId) {
+    async function loadSiteStats(siteId) {
 
-      return apiFetch(
-        `/api/sites/${encodeURIComponent(siteId)}/stats`,
-        {
-          method: "GET"
-        }
-      );
+      if (!isOwnedSite(siteId)) {
 
-    }
-
-    /* ============================================================
-       SITE VISITORS
-       GET /api/sites/:id/visitors
-    ============================================================ */
-
-    async function getSiteVisitors(siteId) {
-
-      return apiFetch(
-        `/api/sites/${encodeURIComponent(siteId)}/visitors`,
-        {
-          method: "GET"
-        }
-      );
-
-    }
-
-    /* ============================================================
-       SITE ALERTS
-       GET /api/sites/:id/alerts
-    ============================================================ */
-
-    async function getSiteAlerts(siteId) {
-
-      return apiFetch(
-        `/api/sites/${encodeURIComponent(siteId)}/alerts`,
-        {
-          method: "GET"
-        }
-      );
-
-    }
-
-    /* ============================================================
-       SITE STATUS
-       GET /api/sites/:id/status
-    ============================================================ */
-
-    async function getSiteStatus(siteId) {
-
-      return apiFetch(
-        `/api/sites/${encodeURIComponent(siteId)}/status`,
-        {
-          method: "GET"
-        }
-      );
-
-    }
-
-    /* ============================================================
-       AGGREGATED CLIENT DATA
-       فقط على مواقع المستخدم الحالية
-    ============================================================ */
-
-    async function loadClientAggregates() {
-
-      if (!currentSites.length) {
-
-        setText("clientRequests", "0");
-        setText("clientBlocked", "0");
-        setText("clientAllowed", "0");
-        setText("trafficRPM", "0");
-        setText("trafficVisitors", "0");
-
-        setText(
-          "trafficData",
-          "لا توجد مواقع لعرض الإحصائيات."
-        );
-
-        setText(
-          "securityEvents",
-          "لا توجد مواقع لعرض التنبيهات."
-        );
-
-        setText(
-          "analyticsData",
-          "لا توجد مواقع لعرض Analytics."
-        );
-
-        setText(
-          "threatData",
-          "لا توجد مواقع لعرض Threat Intelligence."
+        showCustomerMessage(
+          "لا يمكن الوصول إلى إحصائيات هذا الموقع.",
+          "error"
         );
 
         return;
 
       }
 
-      /*
-        يتم جلب البيانات لكل Site موجود في /api/sites.
-        السيرفر يجب أن يتحقق من ownership في كل طلب.
-      */
+      try {
 
-      const results = [];
-
-      for (const site of currentSites) {
-
-        const siteId =
-          site?.id ??
-          site?._id ??
-          site?.site_id;
-
-        if (!siteId) continue;
-
-        try {
-
-          const stats = await getSiteStats(siteId);
-
-          results.push({
-            siteId,
-            domain:
-              site?.client_domain ||
-              site?.domain ||
-              "unknown",
-            stats
-          });
-
-        } catch (error) {
-
-          console.warn(
-            "Unable to load stats for site:",
-            siteId,
-            error
+        const data =
+          await apiRequest(
+            "/api/sites/" +
+            encodeURIComponent(siteId) +
+            "/stats",
+            {
+              method: "GET"
+            }
           );
 
-        }
+        const stats =
+          data?.stats ||
+          data?.data?.stats ||
+          data?.data ||
+          data;
+
+        updateStatsUI(stats);
+
+      } catch (error) {
+
+        handleProtectedApiError(error);
 
       }
 
-      const totals =
-        calculateTotals(results);
+    }
 
-      setText(
-        "clientRequests",
-        formatNumber(totals.requests)
-      );
+    function updateStatsUI(stats) {
 
-      setText(
-        "clientBlocked",
-        formatNumber(totals.blocked)
-      );
+      if (!stats) {
+        return;
+      }
 
-      setText(
-        "clientAllowed",
-        formatNumber(totals.allowed)
-      );
+      const requests =
+        firstDefined(
+          stats.requests,
+          stats.totalRequests,
+          stats.total_requests,
+          0
+        );
 
-      setText(
-        "trafficRPM",
-        formatNumber(totals.requestsPerMinute)
-      );
+      const blocked =
+        firstDefined(
+          stats.blocked,
+          stats.blockedRequests,
+          stats.blocked_requests,
+          0
+        );
 
-      setText(
-        "trafficMethods",
-        formatNumber(totals.httpMethods)
-      );
+      const allowed =
+        firstDefined(
+          stats.allowed,
+          stats.allowedRequests,
+          stats.allowed_requests,
+          0
+        );
 
-      setText(
-        "trafficStatusCodes",
-        formatNumber(totals.statusCodes)
-      );
+      document.getElementById(
+        "customerRequests"
+      ).textContent =
+        formatNumber(requests);
 
-      setText(
-        "trafficVisitors",
-        formatNumber(totals.visitors)
-      );
+      document.getElementById(
+        "customerBlocked"
+      ).textContent =
+        formatNumber(blocked);
 
-      setText(
-        "dashboardActivity",
-        JSON.stringify(
-          results,
-          null,
-          2
-        )
-      );
+      document.getElementById(
+        "customerAllowed"
+      ).textContent =
+        formatNumber(allowed);
 
-      setText(
-        "trafficData",
-        JSON.stringify(
-          results,
-          null,
-          2
-        )
-      );
+      document.getElementById(
+        "customerTrafficBlocked"
+      ).textContent =
+        formatNumber(blocked);
 
-      setText(
-        "analyticsData",
-        JSON.stringify(
-          results,
-          null,
-          2
-        )
-      );
+      document.getElementById(
+        "trafficActivity"
+      ).innerHTML = `
 
-      await loadSecurityAndThreatData();
+        <div class="activity-item">
+          <strong>Traffic Analytics</strong>
+          <span>
+            Requests:
+            ${escapeHtml(formatNumber(requests))}
+            <br>
+            Allowed:
+            ${escapeHtml(formatNumber(allowed))}
+            <br>
+            Blocked:
+            ${escapeHtml(formatNumber(blocked))}
+          </span>
+        </div>
+
+      `;
 
     }
 
-    function calculateTotals(results) {
+    /* ============================================================
+       VISITORS
+       GET /api/sites/:id/visitors
+    ============================================================ */
+
+    async function loadSiteVisitors(siteId) {
+
+      if (!isOwnedSite(siteId)) {
+        return;
+      }
+
+      try {
+
+        const data =
+          await apiRequest(
+            "/api/sites/" +
+            encodeURIComponent(siteId) +
+            "/visitors",
+            {
+              method: "GET"
+            }
+          );
+
+        return data;
+
+      } catch (error) {
+
+        handleProtectedApiError(error);
+
+      }
+
+    }
+
+    /* ============================================================
+       ALERTS
+       GET /api/sites/:id/alerts
+    ============================================================ */
+
+    async function loadSiteAlerts(siteId) {
+
+      if (!isOwnedSite(siteId)) {
+
+        showCustomerMessage(
+          "لا يمكن الوصول إلى تنبيهات هذا الموقع.",
+          "error"
+        );
+
+        return;
+
+      }
+
+      try {
+
+        const data =
+          await apiRequest(
+            "/api/sites/" +
+            encodeURIComponent(siteId) +
+            "/alerts",
+            {
+              method: "GET"
+            }
+          );
+
+        const alerts =
+          Array.isArray(data)
+            ? data
+            : (
+                data?.alerts ||
+                data?.data?.alerts ||
+                data?.data ||
+                []
+              );
+
+        renderAlerts(
+          Array.isArray(alerts)
+            ? alerts
+            : []
+        );
+
+      } catch (error) {
+
+        handleProtectedApiError(error);
+
+      }
+
+    }
+
+    function renderAlerts(alerts) {
+
+      const container =
+        document.getElementById(
+          "securityActivity"
+        );
+
+      if (!alerts.length) {
+
+        container.innerHTML = `
+          <div class="empty-state">
+            لا توجد تنبيهات أمنية لمواقع حسابك.
+          </div>
+        `;
+
+        return;
+
+      }
+
+      container.innerHTML =
+        alerts.slice(0, 30).map(alert => {
+
+          const type =
+            alert.type ||
+            alert.event ||
+            alert.reason ||
+            "SECURITY EVENT";
+
+          const message =
+            alert.message ||
+            alert.description ||
+            alert.reason ||
+            "Security event";
+
+          const time =
+            alert.created_at ||
+            alert.createdAt ||
+            alert.timestamp ||
+            "";
+
+          return `
+            <div class="activity-item">
+
+              <strong>
+                ${escapeHtml(String(type))}
+              </strong>
+
+              <span>
+                ${escapeHtml(String(message))}
+                ${
+                  time
+                    ? "<br>" +
+                      escapeHtml(String(time))
+                    : ""
+                }
+              </span>
+
+            </div>
+          `;
+
+        }).join("");
+
+    }
+
+    /* ============================================================
+       DELETE SITE
+       DELETE /api/sites/:id
+       
+       IMPORTANT:
+       السيرفر يجب أن يتحقق من owner_id/session.
+    ============================================================ */
+
+    async function deleteCustomerSite(siteId) {
+
+      if (!isOwnedSite(siteId)) {
+
+        showCustomerMessage(
+          "لا يمكن حذف هذا الموقع.",
+          "error"
+        );
+
+        return;
+
+      }
+
+      const confirmed =
+        window.confirm(
+          "هل أنت متأكد من حذف هذا الموقع؟ سيتم حذف بياناته المرتبطة وفق صلاحيات السيرفر."
+        );
+
+      if (!confirmed) {
+        return;
+      }
+
+      try {
+
+        await apiRequest(
+          "/api/sites/" +
+          encodeURIComponent(siteId),
+          {
+            method: "DELETE"
+          }
+        );
+
+        showCustomerMessage(
+          "تم حذف الموقع بنجاح.",
+          "success"
+        );
+
+        selectedSiteId = null;
+
+        document.getElementById(
+          "siteDetails"
+        ).innerHTML = `
+          <div class="empty-state">
+            لم يتم اختيار موقع.
+          </div>
+        `;
+
+        document.getElementById(
+          "securityActivity"
+        ).innerHTML = `
+          <div class="empty-state">
+            لم يتم اختيار موقع.
+          </div>
+        `;
+
+        document.getElementById(
+          "trafficActivity"
+        ).innerHTML = `
+          <div class="empty-state">
+            لم يتم اختيار موقع.
+          </div>
+        `;
+
+        await loadCustomerDashboard();
+
+      } catch (error) {
+
+        handleProtectedApiError(error);
+
+      }
+
+    }
+
+    /* ============================================================
+       OWNERSHIP CHECK — FRONTEND SAFETY ONLY
+       
+       هذا ليس بديلًا عن فحص الملكية في السيرفر.
+    ============================================================ */
+
+    function isOwnedSite(siteId) {
+
+      if (!currentUser) {
+        return false;
+      }
+
+      return currentSites.some(site => {
+
+        const id =
+          site.id ??
+          site.site_id ??
+          site._id;
+
+        return String(id) === String(siteId);
+
+      });
+
+    }
+
+    /* ============================================================
+       CUSTOMER OVERVIEW
+    ============================================================ */
+
+    function calculateCustomerOverview() {
 
       let requests = 0;
       let blocked = 0;
       let allowed = 0;
-      let visitors = 0;
-      let requestsPerMinute = 0;
-      let httpMethods = 0;
-      let statusCodes = 0;
 
-      for (const item of results) {
-
-        const s = item.stats || {};
-
-        const data =
-          s?.data ||
-          s?.stats ||
-          s;
+      currentSites.forEach(site => {
 
         requests += Number(
-          data?.requests ??
-          data?.totalRequests ??
-          data?.total_requests ??
-          0
-        );
+          firstDefined(
+            site.requests,
+            site.totalRequests,
+            site.total_requests,
+            0
+          )
+        ) || 0;
 
         blocked += Number(
-          data?.blocked ??
-          data?.blockedRequests ??
-          data?.blocked_requests ??
-          0
-        );
+          firstDefined(
+            site.blocked,
+            site.blockedRequests,
+            site.blocked_requests,
+            0
+          )
+        ) || 0;
 
         allowed += Number(
-          data?.allowed ??
-          data?.allowedRequests ??
-          data?.allowed_requests ??
-          0
-        );
-
-        visitors += Number(
-          data?.visitors ??
-          data?.visitorCount ??
-          data?.visitor_count ??
-          0
-        );
-
-        requestsPerMinute += Number(
-          data?.requestsPerMinute ??
-          data?.requests_per_minute ??
-          data?.rpm ??
-          0
-        );
-
-        const methods =
-          data?.httpMethods ??
-          data?.methods;
-
-        if (methods && typeof methods === "object") {
-          httpMethods += Object.keys(methods).length;
-        }
-
-        const codes =
-          data?.statusCodes ??
-          data?.status_codes;
-
-        if (codes && typeof codes === "object") {
-          statusCodes += Object.keys(codes).length;
-        }
-
-      }
-
-      return {
-        requests,
-        blocked,
-        allowed,
-        visitors,
-        requestsPerMinute,
-        httpMethods,
-        statusCodes
-      };
-
-    }
-
-    /* ============================================================
-       SECURITY + THREAT DATA
-    ============================================================ */
-
-    async function loadSecurityAndThreatData() {
-
-      const allAlerts = [];
-      const allStatuses = [];
-
-      for (const site of currentSites) {
-
-        const siteId =
-          site?.id ??
-          site?._id ??
-          site?.site_id;
-
-        if (!siteId) continue;
-
-        try {
-
-          const alerts =
-            await getSiteAlerts(siteId);
-
-          allAlerts.push({
-            siteId,
-            alerts
-          });
-
-        } catch (error) {
-
-          console.warn(
-            "Alerts unavailable:",
-            siteId,
-            error
-          );
-
-        }
-
-        try {
-
-          const status =
-            await getSiteStatus(siteId);
-
-          allStatuses.push({
-            siteId,
-            status
-          });
-
-        } catch (error) {
-
-          console.warn(
-            "Status unavailable:",
-            siteId,
-            error
-          );
-
-        }
-
-      }
-
-      setText(
-        "securityEvents",
-        JSON.stringify(
-          allAlerts,
-          null,
-          2
-        )
-      );
-
-      setText(
-        "threatData",
-        JSON.stringify(
-          allStatuses,
-          null,
-          2
-        )
-      );
-
-      const threatNumbers =
-        calculateThreatNumbers(
-          allAlerts,
-          allStatuses
-        );
-
-      setText(
-        "threatScore",
-        formatNumber(threatNumbers.score)
-      );
-
-      setText(
-        "suspiciousSources",
-        formatNumber(threatNumbers.suspicious)
-      );
-
-      setText(
-        "attackTypes",
-        formatNumber(threatNumbers.attackTypes)
-      );
-
-      setText(
-        "riskAnalysis",
-        threatNumbers.score > 70
-          ? "HIGH RISK"
-          : threatNumbers.score > 30
-            ? "MONITORING"
-            : "LOW RISK"
-      );
-
-      setText(
-        "ipData",
-        JSON.stringify(
-          allStatuses,
-          null,
-          2
-        )
-      );
-
-    }
-
-    function calculateThreatNumbers(alerts, statuses) {
-
-      let suspicious = 0;
-      let attackTypes = new Set();
-      let score = 0;
-
-      for (const item of alerts) {
-
-        const value =
-          item.alerts?.data ||
-          item.alerts?.alerts ||
-          item.alerts;
-
-        const list =
-          Array.isArray(value)
-            ? value
-            : [];
-
-        suspicious += list.length;
-
-        list.forEach(alert => {
-
-          const type =
-            alert?.type ||
-            alert?.attack_type ||
-            alert?.event ||
-            alert?.reason;
-
-          if (type) {
-            attackTypes.add(String(type));
-          }
-
-        });
-
-      }
-
-      for (const item of statuses) {
-
-        const value =
-          item.status?.data ||
-          item.status;
-
-        const risk =
-          Number(
-            value?.risk ??
-            value?.riskScore ??
-            value?.risk_score ??
+          firstDefined(
+            site.allowed,
+            site.allowedRequests,
+            site.allowed_requests,
             0
-          );
+          )
+        ) || 0;
 
-        if (risk > score) {
-          score = risk;
+      });
+
+      document.getElementById(
+        "customerSitesCount"
+      ).textContent =
+        currentSites.length;
+
+      /*
+        القيم الموجودة في /api/sites قد تكون مجرد metadata.
+        إذا كانت صفرًا، يتم تحديثها لاحقًا من /stats للموقع المحدد.
+      */
+
+      if (requests) {
+
+        document.getElementById(
+          "customerRequests"
+        ).textContent =
+          formatNumber(requests);
+
+      }
+
+      if (blocked) {
+
+        document.getElementById(
+          "customerBlocked"
+        ).textContent =
+          formatNumber(blocked);
+
+      }
+
+      if (allowed) {
+
+        document.getElementById(
+          "customerAllowed"
+        ).textContent =
+          formatNumber(allowed);
+
+      }
+
+    }
+
+    /* ============================================================
+       PROTECTED API ERROR
+    ============================================================ */
+
+    function handleProtectedApiError(error) {
+
+      if (
+        error.status === 401 ||
+        error.status === 403
+      ) {
+
+        currentUser = null;
+
+        updateLoggedOutUI();
+
+        showCustomerMessage(
+          "لا تملك جلسة صالحة للوصول إلى هذه البيانات.",
+          "error"
+        );
+
+        return;
+
+      }
+
+      showCustomerMessage(
+        error.message ||
+        "تعذر تنفيذ العملية.",
+        "error"
+      );
+
+    }
+
+    /* ============================================================
+       CUSTOMER MESSAGES
+    ============================================================ */
+
+    function showCustomerMessage(
+      message,
+      type = "success"
+    ) {
+
+      const box =
+        document.getElementById(
+          "customerMessage"
+        );
+
+      box.textContent = message;
+
+      box.className =
+        "customer-message show " +
+        type;
+
+    }
+
+    function clearCustomerMessage() {
+
+      const box =
+        document.getElementById(
+          "customerMessage"
+        );
+
+      box.className =
+        "customer-message";
+
+      box.textContent = "";
+
+    }
+
+    /* ============================================================
+       HELPERS
+    ============================================================ */
+
+    function isValidEmail(email) {
+
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        email
+      );
+
+    }
+
+    function firstDefined(...values) {
+
+      for (const value of values) {
+
+        if (
+          value !== undefined &&
+          value !== null
+        ) {
+
+          return value;
+
         }
 
       }
 
-      return {
-        score,
-        suspicious,
-        attackTypes: attackTypes.size
-      };
-
-    }
-
-    /* ============================================================
-       CLIENT NAVIGATION
-    ============================================================ */
-
-    function switchClientPanel(panel, button) {
-
-      document.querySelectorAll(".client-panel")
-        .forEach(el => {
-          el.classList.remove("active");
-        });
-
-      const target =
-        document.getElementById(
-          `client-panel-${panel}`
-        );
-
-      if (target) {
-        target.classList.add("active");
-      }
-
-      document.querySelectorAll(".client-nav button")
-        .forEach(btn => {
-          btn.classList.remove("active");
-        });
-
-      if (button) {
-        button.classList.add("active");
-      }
-
-    }
-
-    function switchClientPanelByName(panel) {
-
-      if (panel === "add-site") {
-
-        document.querySelectorAll(".client-panel")
-          .forEach(el => {
-            el.classList.remove("active");
-          });
-
-        document.getElementById("client-panel-add-site")
-          .classList.add("active");
-
-        document.querySelectorAll(".client-nav button")
-          .forEach(btn => {
-            btn.classList.remove("active");
-          });
-
-        return;
-      }
-
-      const button =
-        document.querySelector(
-          `.client-nav button[data-panel="${panel}"]`
-        );
-
-      switchClientPanel(panel, button);
-
-    }
-
-    /* ============================================================
-       REFRESH
-    ============================================================ */
-
-    async function refreshClientData() {
-
-      if (!currentUser) {
-
-        openAuth("login");
-        return;
-
-      }
-
-      try {
-
-        await loadAuthenticatedUser();
-
-      } catch (_) {
-
-        setLoggedOutUI();
-
-        openAuth("login");
-
-      }
-
-    }
-
-    /* ============================================================
-       PROFILE
-       GET /api/profile
-    ============================================================ */
-
-    async function loadProfile() {
-
-      if (!currentUser) return;
-
-      try {
-
-        const data =
-          await apiFetch("/api/profile", {
-            method: "GET"
-          });
-
-        const profile =
-          getObject(data);
-
-        currentUser = {
-          ...currentUser,
-          ...profile
-        };
-
-        setLoggedInUI();
-
-      } catch (error) {
-
-        console.warn(
-          "Profile unavailable:",
-          error
-        );
-
-      }
-
-    }
-
-    /* ============================================================
-       SECURITY HELPERS
-    ============================================================ */
-
-    function escapeHTML(value) {
-
-      return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-    }
-
-    function escapeAttribute(value) {
-
-      return String(value ?? "")
-        .replace(/\\/g, "\\\\")
-        .replace(/'/g, "\\'");
-
-    }
-
-    function setText(id, value) {
-
-      const el =
-        document.getElementById(id);
-
-      if (el) {
-        el.textContent = value;
-      }
+      return undefined;
 
     }
 
     function formatNumber(value) {
 
       const number =
-        Number(value);
-
-      if (!Number.isFinite(number)) {
-        return "0";
-      }
+        Number(value) || 0;
 
       return number.toLocaleString("en-US");
 
     }
 
-    /*
-      إزالة الحقول الحساسة من تفاصيل الموقع قبل عرضها.
-      الحماية الحقيقية يجب أن تكون في السيرفر أيضًا.
-    */
+    function escapeHtml(value) {
 
-    function sanitizeSiteData(data) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 
-      if (!data || typeof data !== "object") {
-        return data;
-      }
+    }
 
-      const clone =
-        JSON.parse(
-          JSON.stringify(data)
-        );
+    function escapeJs(value) {
 
-      const sensitiveKeys = [
-        "admin_password",
-        "adminPassword",
-        "server_secret",
-        "serverSecret",
-        "system_secret",
-        "systemSecret",
-        "jwt_secret",
-        "jwtSecret",
-        "internal_secret",
-        "internalSecret"
-      ];
-
-      function removeKeys(object) {
-
-        if (!object || typeof object !== "object") {
-          return;
-        }
-
-        for (const key of sensitiveKeys) {
-
-          if (
-            Object.prototype.hasOwnProperty.call(
-              object,
-              key
-            )
-          ) {
-            delete object[key];
-          }
-
-        }
-
-        Object.keys(object).forEach(key => {
-
-          if (
-            object[key] &&
-            typeof object[key] === "object"
-          ) {
-            removeKeys(object[key]);
-          }
-
-        });
-
-      }
-
-      removeKeys(clone);
-
-      /*
-        لا نعرض Site API Key تلقائيًا في شاشة التفاصيل.
-      */
-
-      function removeApiKeys(object) {
-
-        if (!object || typeof object !== "object") {
-          return;
-        }
-
-        if (
-          Object.prototype.hasOwnProperty.call(
-            object,
-            "api_key"
-          )
-        ) {
-          object.api_key = "HIDDEN";
-        }
-
-        if (
-          Object.prototype.hasOwnProperty.call(
-            object,
-            "apiKey"
-          )
-        ) {
-          object.apiKey = "HIDDEN";
-        }
-
-        Object.keys(object).forEach(key => {
-
-          if (
-            object[key] &&
-            typeof object[key] === "object"
-          ) {
-            removeApiKeys(object[key]);
-          }
-
-        });
-
-      }
-
-      removeApiKeys(clone);
-
-      return clone;
+      return String(value)
+        .replaceAll("\\", "\\\\")
+        .replaceAll("'", "\\'")
+        .replaceAll("\n", "\\n")
+        .replaceAll("\r", "\\r");
 
     }
 
@@ -5265,20 +4876,20 @@ ADMIN APIs
        INITIAL SESSION CHECK
     ============================================================ */
 
-    /*
-      لا نفتح شاشة العميل تلقائيًا قبل التأكد من Session.
-      عند تحميل الصفحة نتحقق من /api/me.
-    */
+    document.addEventListener(
+      "DOMContentLoaded",
+      () => {
 
-    window.addEventListener("load", () => {
+        /*
+          يتم فحص جلسة السيرفر الموجودة أصلًا.
+          لا يتم تخزين كلمة المرور أو Session ID
+          في localStorage أو sessionStorage.
+        */
 
-      setTimeout(() => {
+        checkCurrentSession();
 
-        checkExistingSession();
-
-      }, 250);
-
-    });
+      }
+    );
 
   </script>
 
