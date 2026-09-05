@@ -10143,32 +10143,6 @@ const proxyMiddleware = createProxyMiddleware({
   },
 });
 
-/* ============================================================
-   FINAL SERVER CONFIGURATION & EXPORTS
-============================================================ */
-
-if (typeof server !== 'undefined' && server) {
-  server.on('clientError', (err, socket) => {
-    if (socket.writable) {
-      socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
-    }
-  });
-
-  server.keepAliveTimeout = config.KEEP_ALIVE_TIMEOUT_MS;
-  server.headersTimeout = config.HEADERS_TIMEOUT_MS;
-  server.requestTimeout = config.REQUEST_TIMEOUT_MS;
-}
-
-async function initializeWaf() {
-  await connectDatabase();
-  db = await loadDb();
-  return server;
-}
-
-function globalInitialized(g: any) {
-  return g?.__waf_listening;
-}
-
 if (typeof global !== 'undefined' && !globalInitialized(global)) {
   (global as any).__waf_listening = true;
 
@@ -10186,5 +10160,6 @@ if (typeof global !== 'undefined' && !globalInitialized(global)) {
         process.exit(1);
       });
   }
+}
 }
 
