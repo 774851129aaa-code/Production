@@ -10165,29 +10165,27 @@ export async function initializeWaf() {
   return server;
 }
 
-if (process.env.NODE_ENV !== 'test' && !globalInitialized(global)) {
-  initializeWaf()
-    .then((srv) => {
-      if (srv && !srv.listening) {
-        srv.listen(config.PORT, () => {
-          console.log(`[Routix WAF] Server running on port ${config.PORT}`);
-        });
-      }
-    })
-    .catch((error) => {
-      console.error('[Routix WAF] Failed to start server:', error);
-      process.exit(1);
-    });
-}
-
 function globalInitialized(g: any) {
-  return g.__waf_listening;
+  return g?.__waf_listening;
 }
 
-if (typeof global !== 'undefined') {
+if (typeof global !== 'undefined' && !globalInitialized(global)) {
   (global as any).__waf_listening = true;
-}
 
-void start();
+  if (process.env.NODE_ENV !== 'test') {
+    initializeWaf()
+      .then((srv) => {
+        if (srv && !srv.listening) {
+          srv.listen(config.PORT, '0.0.0.0', () => {
+            console.log(`[Routix WAF] Server running on port ${config.PORT}`);
+          });
+        }
+      })
+      .catch((error) => {
+        console.error('[Routix WAF] Failed to start server:', error);
+        process.exit(1);
+      });
+  }
+}
                    
 
