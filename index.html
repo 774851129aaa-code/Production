@@ -52,7 +52,7 @@
       overflow: hidden;
     }
 
-    body.login-open {
+    body.modal-open {
       overflow: hidden;
     }
 
@@ -61,9 +61,18 @@
       text-decoration: none;
     }
 
-    button {
+    button,
+    input {
       font-family: inherit;
     }
+
+    button {
+      cursor: pointer;
+    }
+
+    /* =========================================================
+       CYBER BACKGROUND
+    ========================================================== */
 
     .cyber-bg {
       position: fixed;
@@ -172,17 +181,24 @@
         transform: translateY(20px);
         opacity: 0;
       }
+
       20% {
         opacity: 1;
       }
+
       80% {
         opacity: .8;
       }
+
       to {
         transform: translateY(-180px);
         opacity: 0;
       }
     }
+
+    /* =========================================================
+       INTRO SCREEN
+    ========================================================== */
 
     .intro {
       position: fixed;
@@ -242,7 +258,8 @@
         rgba(54,230,255,.45),
         transparent
       );
-      box-shadow: 0 0 25px rgba(54,230,255,.3);
+      box-shadow:
+        0 0 25px rgba(54,230,255,.3);
     }
 
     .intro-grid {
@@ -376,6 +393,7 @@
         opacity: 0;
         transform: translateY(18px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -387,6 +405,7 @@
         opacity: 0;
         transform: rotate(45deg) scale(.6);
       }
+
       to {
         opacity: 1;
         transform: rotate(45deg) scale(1);
@@ -399,6 +418,10 @@
         transform: scale(.75);
       }
     }
+
+    /* =========================================================
+       HEADER
+    ========================================================== */
 
     header {
       position: fixed;
@@ -471,6 +494,39 @@
       background: rgba(54,230,255,.065);
     }
 
+    /* =========================================================
+       LOGIN HEADER BUTTON
+    ========================================================== */
+
+    .header-login {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 38px;
+      padding: 0 15px;
+      border: 1px solid rgba(54,230,255,.28);
+      border-radius: 9px;
+      background: rgba(54,230,255,.045);
+      color: var(--cyan);
+      font-size: 11px;
+      font-weight: 700;
+      transition: .2s;
+      white-space: nowrap;
+    }
+
+    .header-login:hover {
+      border-color: var(--cyan);
+      background: rgba(54,230,255,.09);
+      box-shadow: 0 0 25px rgba(54,230,255,.08);
+      transform: translateY(-1px);
+    }
+
+    .header-login.logged-in {
+      color: var(--green);
+      border-color: rgba(67,230,167,.25);
+    }
+
     .mobile-menu {
       display: none;
       padding: 8px 11px;
@@ -481,6 +537,270 @@
       cursor: pointer;
       font-size: 18px;
     }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* =========================================================
+       LOGIN MODAL
+    ========================================================== */
+
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0,0,0,.72);
+      backdrop-filter: blur(13px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: .25s ease;
+    }
+
+    .login-overlay.active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .login-box {
+      position: relative;
+      width: min(460px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 30px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at 90% 0%, rgba(57,124,255,.14), transparent 32%),
+        linear-gradient(145deg, rgba(8,19,31,.98), rgba(2,7,13,.98));
+      box-shadow:
+        0 30px 100px rgba(0,0,0,.55),
+        0 0 70px rgba(54,230,255,.06);
+      transform: translateY(15px) scale(.98);
+      transition: .25s ease;
+    }
+
+    .login-overlay.active .login-box {
+      transform: translateY(0) scale(1);
+    }
+
+    .login-close {
+      position: absolute;
+      top: 13px;
+      left: 13px;
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(255,255,255,.025);
+      color: var(--muted);
+      font-size: 17px;
+      transition: .2s;
+    }
+
+    .login-close:hover {
+      color: white;
+      border-color: var(--border-hover);
+      background: rgba(255,255,255,.05);
+    }
+
+    .login-logo {
+      width: 48px;
+      height: 48px;
+      margin: 2px auto 20px;
+      position: relative;
+      transform: rotate(45deg);
+      border: 1px solid var(--cyan);
+      box-shadow: 0 0 25px rgba(54,230,255,.13);
+    }
+
+    .login-logo::before {
+      content: "";
+      position: absolute;
+      inset: 9px;
+      border: 1px solid rgba(54,230,255,.6);
+    }
+
+    .login-logo::after {
+      content: "";
+      position: absolute;
+      inset: 16px;
+      background: rgba(54,230,255,.12);
+      border: 1px solid var(--cyan);
+    }
+
+    .login-heading {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .login-heading h2 {
+      font-size: 25px;
+      margin-bottom: 7px;
+    }
+
+    .login-heading p {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    .auth-step {
+      display: none;
+    }
+
+    .auth-step.active {
+      display: block;
+    }
+
+    .field {
+      margin-bottom: 15px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      color: #b9c9d6;
+      font-size: 11px;
+    }
+
+    .field input {
+      width: 100%;
+      height: 46px;
+      padding: 0 13px;
+      border: 1px solid rgba(54,230,255,.13);
+      border-radius: 10px;
+      outline: none;
+      background: rgba(0,0,0,.28);
+      color: white;
+      font-size: 13px;
+      direction: ltr;
+      text-align: left;
+      transition: .2s;
+    }
+
+    .field input:focus {
+      border-color: rgba(54,230,255,.55);
+      box-shadow: 0 0 0 3px rgba(54,230,255,.06);
+    }
+
+    .field input::placeholder {
+      color: #506477;
+    }
+
+    .auth-btn {
+      width: 100%;
+      height: 47px;
+      margin-top: 5px;
+      border: 0;
+      border-radius: 10px;
+      color: #021018;
+      font-size: 12px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      box-shadow: 0 13px 35px rgba(57,124,255,.17);
+      transition: .2s;
+    }
+
+    .auth-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 40px rgba(57,124,255,.25);
+    }
+
+    .auth-btn:disabled {
+      opacity: .55;
+      cursor: wait;
+      transform: none;
+    }
+
+    .auth-secondary {
+      width: 100%;
+      height: 43px;
+      margin-top: 9px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--muted);
+      background: rgba(255,255,255,.02);
+      font-size: 11px;
+      transition: .2s;
+    }
+
+    .auth-secondary:hover {
+      color: white;
+      border-color: var(--border-hover);
+    }
+
+    .forgot-btn {
+      display: block;
+      margin: 13px auto 0;
+      border: 0;
+      background: transparent;
+      color: var(--cyan);
+      font-size: 10px;
+    }
+
+    .forgot-btn:hover {
+      text-decoration: underline;
+    }
+
+    .auth-message {
+      display: none;
+      margin: 0 0 15px;
+      padding: 10px 12px;
+      border-radius: 9px;
+      font-size: 10px;
+      line-height: 1.7;
+    }
+
+    .auth-message.show {
+      display: block;
+    }
+
+    .auth-message.error {
+      color: #ff9bab;
+      border: 1px solid rgba(255,82,109,.2);
+      background: rgba(255,82,109,.06);
+    }
+
+    .auth-message.success {
+      color: #8ff1c7;
+      border: 1px solid rgba(67,230,167,.2);
+      background: rgba(67,230,167,.06);
+    }
+
+    .auth-message.info {
+      color: #8fe8f4;
+      border: 1px solid rgba(54,230,255,.2);
+      background: rgba(54,230,255,.06);
+    }
+
+    .otp-input {
+      letter-spacing: 7px;
+      font-size: 19px !important;
+      text-align: center !important;
+    }
+
+    .auth-note {
+      margin-top: 14px;
+      text-align: center;
+      color: var(--muted2);
+      font-size: 9px;
+      line-height: 1.7;
+    }
+
+    /* =========================================================
+       MAIN
+    ========================================================== */
 
     main {
       opacity: 1;
@@ -518,6 +838,10 @@
       font-size: 14px;
       line-height: 1.9;
     }
+
+    /* =========================================================
+       DASHBOARD HERO
+    ========================================================== */
 
     .dashboard {
       min-height: 100vh;
@@ -587,6 +911,10 @@
     .btn-primary:hover {
       background: linear-gradient(135deg, #5ceaff, #528dff);
     }
+
+    /* =========================================================
+       SECURITY RADAR
+    ========================================================== */
 
     .radar-card {
       position: relative;
@@ -676,6 +1004,10 @@
       }
     }
 
+    /* =========================================================
+       STATS
+    ========================================================== */
+
     .stats {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -709,6 +1041,10 @@
     .stat-value.cyan {
       color: var(--cyan);
     }
+
+    /* =========================================================
+       FEATURES
+    ========================================================== */
 
     .features {
       display: grid;
@@ -779,6 +1115,10 @@
       font: 9px Consolas, monospace;
       direction: ltr;
     }
+
+    /* =========================================================
+       API / INTEGRATION
+    ========================================================== */
 
     .integration {
       display: grid;
@@ -872,6 +1212,10 @@
       line-height: 1.7;
     }
 
+    /* =========================================================
+       L7 / REQUEST FLOW
+    ========================================================== */
+
     .flow {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
@@ -910,6 +1254,10 @@
       font: 20px Consolas, monospace;
     }
 
+    /* =========================================================
+       SETTINGS
+    ========================================================== */
+
     .settings-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -942,6 +1290,10 @@
       text-align: left;
       font: 10px Consolas, monospace;
     }
+
+    /* =========================================================
+       ABOUT
+    ========================================================== */
 
     .about {
       display: grid;
@@ -980,6 +1332,10 @@
       color: white;
     }
 
+    /* =========================================================
+       FOOTER
+    ========================================================== */
+
     footer {
       padding: 30px 6%;
       border-top: 1px solid rgba(255,255,255,.05);
@@ -992,709 +1348,12 @@
       color: var(--cyan);
     }
 
-    .customer-auth {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      margin-right: 5px;
-      direction: rtl;
-    }
-
-    .customer-login-btn {
-      position: relative;
-      height: 40px;
-      padding: 0 15px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      border: 1px solid rgba(54,230,255,.28);
-      border-radius: 10px;
-      color: #dffaff;
-      background:
-        linear-gradient(135deg, rgba(54,230,255,.10), rgba(57,124,255,.08));
-      cursor: pointer;
-      font-size: 11px;
-      font-weight: 900;
-      transition: .25s;
-      overflow: hidden;
-    }
-
-    .customer-login-btn::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 60%;
-      height: 100%;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255,255,255,.14),
-        transparent
-      );
-      transform: skewX(-20deg);
-      transition: .55s;
-    }
-
-    .customer-login-btn:hover {
-      transform: translateY(-2px);
-      color: white;
-      border-color: var(--cyan);
-      box-shadow:
-        0 10px 30px rgba(54,230,255,.10),
-        inset 0 0 18px rgba(54,230,255,.05);
-    }
-
-    .customer-login-btn:hover::before {
-      left: 140%;
-    }
-
-    .customer-login-icon {
-      width: 21px;
-      height: 21px;
-      display: grid;
-      place-items: center;
-      border-radius: 7px;
-      color: var(--cyan);
-      border: 1px solid rgba(54,230,255,.2);
-      background: rgba(54,230,255,.06);
-      font-size: 11px;
-    }
-
-    .customer-session {
-      display: none;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .customer-session.active {
-      display: flex;
-    }
-
-    .customer-profile {
-      height: 40px;
-      padding: 0 11px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid rgba(67,230,167,.20);
-      border-radius: 10px;
-      background: rgba(67,230,167,.045);
-    }
-
-    .customer-profile-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 12px var(--green);
-    }
-
-    .customer-profile span {
-      max-width: 125px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      color: #b9d2df;
-      font-size: 10px;
-      direction: ltr;
-    }
-
-    .customer-logout {
-      width: 38px;
-      height: 38px;
-      display: grid;
-      place-items: center;
-      border: 1px solid rgba(255,82,109,.17);
-      border-radius: 9px;
-      background: rgba(255,82,109,.035);
-      color: #ff7a8c;
-      cursor: pointer;
-      transition: .2s;
-    }
-
-    .customer-logout:hover {
-      border-color: rgba(255,82,109,.5);
-      background: rgba(255,82,109,.08);
-      transform: translateY(-2px);
-    }
-
-    .auth-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 25px;
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transition: opacity .3s ease, visibility .3s ease;
-      background:
-        radial-gradient(
-          circle at 50% 35%,
-          rgba(54,230,255,.07),
-          transparent 35%
-        ),
-        rgba(1,4,8,.84);
-      backdrop-filter: blur(16px);
-    }
-
-    .auth-overlay.open {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-    }
-
-    .auth-grid {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      opacity: .28;
-      background:
-        linear-gradient(rgba(54,230,255,.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(54,230,255,.025) 1px, transparent 1px);
-      background-size: 45px 45px;
-      mask-image: radial-gradient(circle, black, transparent 75%);
-    }
-
-    .auth-ring {
-      position: absolute;
-      width: min(700px, 90vw);
-      height: min(700px, 90vw);
-      border-radius: 50%;
-      border: 1px solid rgba(54,230,255,.055);
-      pointer-events: none;
-      animation: authSpin 28s linear infinite;
-    }
-
-    .auth-ring::before {
-      content: "";
-      position: absolute;
-      inset: 70px;
-      border-radius: 50%;
-      border: 1px dashed rgba(54,230,255,.065);
-    }
-
-    .auth-ring::after {
-      content: "";
-      position: absolute;
-      inset: 140px;
-      border-radius: 50%;
-      border: 1px solid rgba(57,124,255,.055);
-    }
-
-    @keyframes authSpin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .auth-modal {
-      position: relative;
-      width: min(470px, 100%);
-      max-height: calc(100vh - 40px);
-      overflow: auto;
-      border: 1px solid rgba(54,230,255,.20);
-      border-radius: 24px;
-      background:
-        linear-gradient(
-          145deg,
-          rgba(10,24,39,.97),
-          rgba(3,9,16,.98)
-        );
-      box-shadow:
-        0 40px 120px rgba(0,0,0,.65),
-        0 0 80px rgba(54,230,255,.055),
-        inset 0 1px 0 rgba(255,255,255,.045);
-      transform: translateY(18px) scale(.97);
-      transition: transform .35s cubic-bezier(.2,.8,.2,1);
-      scrollbar-width: thin;
-      scrollbar-color: rgba(54,230,255,.25) transparent;
-    }
-
-    .auth-overlay.open .auth-modal {
-      transform: translateY(0) scale(1);
-    }
-
-    .auth-modal::before {
-      content: "";
-      position: absolute;
-      left: 8%;
-      right: 8%;
-      top: 0;
-      height: 1px;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        var(--cyan),
-        transparent
-      );
-      box-shadow: 0 0 18px rgba(54,230,255,.5);
-    }
-
-    .auth-close {
-      position: absolute;
-      top: 15px;
-      left: 15px;
-      z-index: 5;
-      width: 34px;
-      height: 34px;
-      display: grid;
-      place-items: center;
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 9px;
-      color: #8ba0b4;
-      background: rgba(255,255,255,.025);
-      cursor: pointer;
-      transition: .2s;
-      font-size: 17px;
-    }
-
-    .auth-close:hover {
-      color: white;
-      border-color: rgba(54,230,255,.3);
-      background: rgba(54,230,255,.05);
-      transform: rotate(90deg);
-    }
-
-    .auth-header {
-      position: relative;
-      padding: 36px 35px 22px;
-      text-align: center;
-    }
-
-    .auth-logo {
-      position: relative;
-      width: 58px;
-      height: 58px;
-      margin: 0 auto 19px;
-      transform: rotate(45deg);
-      border: 1px solid var(--cyan);
-      box-shadow:
-        0 0 30px rgba(54,230,255,.15),
-        inset 0 0 20px rgba(54,230,255,.04);
-    }
-
-    .auth-logo::before {
-      content: "";
-      position: absolute;
-      inset: 10px;
-      border: 1px solid rgba(54,230,255,.55);
-    }
-
-    .auth-logo::after {
-      content: "";
-      position: absolute;
-      inset: 19px;
-      background: rgba(54,230,255,.15);
-      border: 1px solid var(--cyan);
-      box-shadow: 0 0 15px rgba(54,230,255,.25);
-    }
-
-    .auth-header h2 {
-      margin-bottom: 8px;
-      font-size: 25px;
-      letter-spacing: -.5px;
-    }
-
-    .auth-header h2 span {
-      color: var(--cyan);
-    }
-
-    .auth-header p {
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.8;
-    }
-
-    .auth-status-line {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      margin-top: 13px;
-      padding: 5px 9px;
-      border: 1px solid rgba(54,230,255,.10);
-      border-radius: 999px;
-      background: rgba(54,230,255,.025);
-      color: #658697;
-      font: 9px Consolas, monospace;
-      direction: ltr;
-    }
-
-    .auth-status-line i {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 9px var(--green);
-    }
-
-    .auth-body {
-      padding: 4px 35px 32px;
-    }
-
-    .auth-view {
-      display: none;
-      animation: authViewIn .3s ease both;
-    }
-
-    .auth-view.active {
-      display: block;
-    }
-
-    @keyframes authViewIn {
-      from {
-        opacity: 0;
-        transform: translateX(8px);
-      }
-      to {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    .auth-field {
-      position: relative;
-      margin-bottom: 13px;
-    }
-
-    .auth-field label {
-      display: block;
-      margin-bottom: 7px;
-      color: #a7bcc9;
-      font-size: 10px;
-      font-weight: 700;
-    }
-
-    .auth-input-wrap {
-      position: relative;
-    }
-
-    .auth-input-icon {
-      position: absolute;
-      right: 13px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #567386;
-      font: 12px Consolas, monospace;
-      pointer-events: none;
-      z-index: 2;
-    }
-
-    .auth-input {
-      width: 100%;
-      height: 48px;
-      padding: 0 40px 0 14px;
-      border: 1px solid rgba(54,230,255,.12);
-      outline: none;
-      border-radius: 11px;
-      color: #eaffff;
-      background:
-        linear-gradient(
-          135deg,
-          rgba(255,255,255,.025),
-          rgba(54,230,255,.018)
-        );
-      font-family: Tahoma, Arial, sans-serif;
-      font-size: 12px;
-      direction: ltr;
-      text-align: left;
-      transition: .2s;
-    }
-
-    .auth-input::placeholder {
-      color: #486071;
-    }
-
-    .auth-input:focus {
-      border-color: rgba(54,230,255,.55);
-      background: rgba(54,230,255,.035);
-      box-shadow:
-        0 0 0 3px rgba(54,230,255,.055),
-        0 0 25px rgba(54,230,255,.045);
-    }
-
-    .auth-password-toggle {
-      position: absolute;
-      left: 9px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      height: 30px;
-      display: grid;
-      place-items: center;
-      border: 0;
-      border-radius: 7px;
-      color: #5c7485;
-      background: transparent;
-      cursor: pointer;
-      transition: .2s;
-    }
-
-    .auth-password-toggle:hover {
-      color: var(--cyan);
-      background: rgba(54,230,255,.05);
-    }
-
-    .auth-message {
-      display: none;
-      align-items: flex-start;
-      gap: 9px;
-      margin: 12px 0;
-      padding: 10px 12px;
-      border-radius: 10px;
-      font-size: 10px;
-      line-height: 1.7;
-      text-align: right;
-    }
-
-    .auth-message.show {
-      display: flex;
-    }
-
-    .auth-message.error {
-      color: #ff9baa;
-      border: 1px solid rgba(255,82,109,.18);
-      background: rgba(255,82,109,.045);
-    }
-
-    .auth-message.success {
-      color: #9df2ce;
-      border: 1px solid rgba(67,230,167,.18);
-      background: rgba(67,230,167,.045);
-    }
-
-    .auth-message.info {
-      color: #9ddce8;
-      border: 1px solid rgba(54,230,255,.18);
-      background: rgba(54,230,255,.04);
-    }
-
-    .auth-message-icon {
-      flex: 0 0 19px;
-      height: 19px;
-      display: grid;
-      place-items: center;
-      border-radius: 6px;
-      border: 1px solid currentColor;
-      font: 9px Consolas, monospace;
-    }
-
-    .auth-submit {
-      position: relative;
-      width: 100%;
-      height: 49px;
-      margin-top: 6px;
-      border: 0;
-      border-radius: 11px;
-      color: #021018;
-      background: linear-gradient(135deg, var(--cyan), var(--blue));
-      box-shadow:
-        0 14px 35px rgba(57,124,255,.16),
-        0 0 25px rgba(54,230,255,.05);
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 900;
-      overflow: hidden;
-      transition: .22s;
-    }
-
-    .auth-submit::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 70px;
-      left: -100px;
-      transform: skewX(-20deg);
-      background: rgba(255,255,255,.2);
-      transition: .55s;
-    }
-
-    .auth-submit:hover {
-      transform: translateY(-2px);
-      box-shadow:
-        0 18px 45px rgba(57,124,255,.23),
-        0 0 35px rgba(54,230,255,.10);
-    }
-
-    .auth-submit:hover::before {
-      left: 110%;
-    }
-
-    .auth-submit.loading {
-      pointer-events: none;
-      opacity: .72;
-    }
-
-    .auth-submit.loading::after {
-      content: "";
-      position: absolute;
-      width: 16px;
-      height: 16px;
-      left: calc(50% - 8px);
-      top: calc(50% - 8px);
-      border: 2px solid rgba(2,16,24,.25);
-      border-top-color: #021018;
-      border-radius: 50%;
-      animation: buttonSpin .7s linear infinite;
-    }
-
-    .auth-submit.loading .auth-submit-text {
-      opacity: 0;
-    }
-
-    @keyframes buttonSpin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    .auth-links {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 15px;
-      gap: 10px;
-    }
-
-    .auth-link {
-      border: 0;
-      padding: 3px;
-      color: #6e8999;
-      background: transparent;
-      cursor: pointer;
-      font-size: 10px;
-      transition: .2s;
-    }
-
-    .auth-link:hover {
-      color: var(--cyan);
-    }
-
-    .auth-link.highlight {
-      color: #91dce7;
-    }
-
-    .auth-back {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 16px;
-      padding: 3px;
-      border: 0;
-      color: #6e8999;
-      background: transparent;
-      cursor: pointer;
-      font-size: 10px;
-    }
-
-    .auth-back:hover {
-      color: var(--cyan);
-    }
-
-    .auth-flow-title {
-      margin-bottom: 18px;
-    }
-
-    .auth-flow-title h3 {
-      margin-bottom: 7px;
-      font-size: 17px;
-    }
-
-    .auth-flow-title p {
-      color: var(--muted);
-      font-size: 10px;
-      line-height: 1.8;
-    }
-
-    .otp-box {
-      display: flex;
-      direction: ltr;
-      justify-content: center;
-      gap: 7px;
-      margin: 17px 0;
-    }
-
-    .otp-digit {
-      width: 47px;
-      height: 53px;
-      border: 1px solid rgba(54,230,255,.14);
-      outline: none;
-      border-radius: 10px;
-      background: rgba(54,230,255,.025);
-      color: var(--cyan);
-      text-align: center;
-      font: 900 20px Consolas, monospace;
-      transition: .2s;
-    }
-
-    .otp-digit:focus {
-      border-color: var(--cyan);
-      box-shadow:
-        0 0 0 3px rgba(54,230,255,.05),
-        0 0 20px rgba(54,230,255,.06);
-    }
-
-    .otp-email {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-      margin: 10px 0 15px;
-      color: #7090a1;
-      font-size: 10px;
-      direction: ltr;
-    }
-
-    .otp-email strong {
-      color: #b8dce5;
-      font-weight: 400;
-    }
-
-    .auth-security {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 17px;
-      color: #4e6878;
-      font: 8px Consolas, monospace;
-      direction: ltr;
-    }
-
-    .auth-security span {
-      color: var(--green);
-    }
-
-    .auth-mini-flow {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 7px;
-      margin-bottom: 16px;
-    }
-
-    .auth-mini-node {
-      padding: 8px 5px;
-      border: 1px solid rgba(54,230,255,.08);
-      border-radius: 8px;
-      background: rgba(54,230,255,.018);
-      text-align: center;
-      color: #587384;
-      font: 8px Consolas, monospace;
-      direction: ltr;
-    }
-
-    .auth-mini-node.active {
-      color: var(--cyan);
-      border-color: rgba(54,230,255,.18);
-      background: rgba(54,230,255,.035);
-    }
+    /* =========================================================
+       RESPONSIVE
+    ========================================================== */
 
     @media (max-width: 1050px) {
+
       nav a {
         padding: 8px;
       }
@@ -1718,21 +1377,25 @@
       .flow {
         grid-template-columns: 1fr 30px 1fr;
       }
-
-      .flow-node:nth-of-type(1),
-      .flow-node:nth-of-type(3),
-      .flow-node:nth-of-type(5) {
-        grid-column: span 1;
-      }
     }
 
     @media (max-width: 760px) {
+
       header {
         padding: 0 5%;
       }
 
       nav {
         display: none;
+      }
+
+      .header-actions {
+        gap: 6px;
+      }
+
+      .header-login {
+        padding: 0 11px;
+        min-height: 36px;
       }
 
       .mobile-menu {
@@ -1792,63 +1455,22 @@
         font-size: 14px;
       }
 
-      .customer-auth {
-        margin-right: auto;
-        margin-left: 10px;
-      }
-
-      .customer-login-btn {
-        width: 40px;
-        padding: 0;
-      }
-
-      .customer-login-btn .customer-login-text {
-        display: none;
-      }
-
-      .customer-profile {
-        max-width: 40px;
-        padding: 0;
-        justify-content: center;
-      }
-
-      .customer-profile span {
-        display: none;
-      }
-
-      .customer-logout {
-        width: 35px;
-        height: 35px;
-      }
-
-      .auth-overlay {
-        padding: 12px;
-      }
-
-      .auth-modal {
-        border-radius: 20px;
-        max-height: calc(100vh - 24px);
-      }
-
-      .auth-header {
-        padding: 30px 23px 17px;
-      }
-
-      .auth-body {
-        padding: 4px 23px 25px;
-      }
-
-      .otp-box {
-        gap: 5px;
-      }
-
-      .otp-digit {
-        width: 42px;
-        height: 49px;
+      .login-box {
+        padding: 26px 20px;
       }
     }
 
     @media (max-width: 500px) {
+
+      .brand-name {
+        font-size: 18px;
+      }
+
+      .header-login {
+        font-size: 10px;
+        padding: 0 9px;
+      }
+
       .features,
       .settings-grid,
       .stats {
@@ -1881,15 +1503,16 @@
         display: none;
       }
 
-      .otp-digit {
-        width: 39px;
-        height: 47px;
+      .login-box {
+        border-radius: 16px;
       }
     }
 
     @media (prefers-reduced-motion: reduce) {
+
       *,
-      *::before {
+      *::before,
+      *::after {
         animation-duration: .001ms !important;
         animation-iteration-count: 1 !important;
         scroll-behavior: auto !important;
@@ -1900,11 +1523,20 @@
 
 <body class="locked">
 
+  <!-- =========================================================
+       BACKGROUND
+  ========================================================== -->
+
   <div class="cyber-bg"></div>
   <div class="orb one"></div>
   <div class="orb two"></div>
   <div class="particles" id="particles"></div>
   <div class="scanlines"></div>
+
+
+  <!-- =========================================================
+       INTRO SCREEN
+  ========================================================== -->
 
   <section class="intro" id="intro">
 
@@ -1944,6 +1576,11 @@
 
   </section>
 
+
+  <!-- =========================================================
+       HEADER
+  ========================================================== -->
+
   <header>
 
     <a href="#home" class="brand">
@@ -1952,53 +1589,361 @@
     </a>
 
     <nav id="nav">
+
       <a href="#home">الرئيسية</a>
       <a href="#features">المميزات</a>
       <a href="#api">API</a>
       <a href="#integration">طريقة الربط</a>
       <a href="#settings">الإعدادات</a>
       <a href="#about">من نحن</a>
+
     </nav>
 
-    <div class="customer-auth">
+    <div class="header-actions">
 
       <button
         type="button"
-        class="customer-login-btn"
-        id="customerLoginButton"
-        onclick="openAuth()"
-      >
-        <span class="customer-login-icon">◉</span>
-        <span class="customer-login-text">تسجيل دخول العملاء</span>
+        class="header-login"
+        id="headerLoginBtn"
+        onclick="openLogin()">
+        <span>⇥</span>
+        تسجيل الدخول
       </button>
 
-      <div class="customer-session" id="customerSession">
+      <button
+        type="button"
+        class="mobile-menu"
+        onclick="toggleMenu()">
+        ☰
+      </button>
 
-        <div class="customer-profile">
-          <span class="customer-profile-dot"></span>
-          <span id="customerEmailDisplay">CLIENT</span>
+    </div>
+
+  </header>
+
+
+  <!-- =========================================================
+       LOGIN / AUTH MODAL
+  ========================================================== -->
+
+  <div
+    class="login-overlay"
+    id="loginOverlay"
+    aria-hidden="true">
+
+    <div
+      class="login-box"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="loginTitle">
+
+      <button
+        type="button"
+        class="login-close"
+        onclick="closeLogin()"
+        aria-label="إغلاق">
+        ×
+      </button>
+
+      <div class="login-logo"></div>
+
+      <div class="login-heading">
+
+        <h2 id="loginTitle">
+          تسجيل الدخول
+        </h2>
+
+        <p id="loginSubtitle">
+          أدخل بريدك الإلكتروني للمتابعة
+        </p>
+
+      </div>
+
+
+      <!-- MESSAGE -->
+
+      <div
+        id="authMessage"
+        class="auth-message">
+      </div>
+
+
+      <!-- =====================================================
+           STEP 1
+           EMAIL
+      ====================================================== -->
+
+      <div
+        class="auth-step active"
+        id="stepEmail">
+
+        <div class="field">
+
+          <label for="email">
+            البريد الإلكتروني
+          </label>
+
+          <input
+            id="email"
+            type="email"
+            autocomplete="email"
+            placeholder="name@example.com"
+            dir="ltr">
+
         </div>
 
         <button
           type="button"
-          class="customer-logout"
-          onclick="logoutCustomer()"
-          title="تسجيل الخروج"
-        >
-          ⎋
+          class="auth-btn"
+          id="checkEmailBtn"
+          onclick="checkEmail()">
+          متابعة
+        </button>
+
+        <div class="auth-note">
+          سيتم التحقق من الحساب ثم توجيهك إلى
+          تسجيل الدخول أو إنشاء الحساب.
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           STEP 2
+           LOGIN
+      ====================================================== -->
+
+      <div
+        class="auth-step"
+        id="stepLogin">
+
+        <div class="field">
+
+          <label for="loginEmail">
+            البريد الإلكتروني
+          </label>
+
+          <input
+            id="loginEmail"
+            type="email"
+            readonly
+            dir="ltr">
+
+        </div>
+
+        <div class="field">
+
+          <label for="loginPassword">
+            كلمة المرور
+          </label>
+
+          <input
+            id="loginPassword"
+            type="password"
+            autocomplete="current-password"
+            placeholder="••••••••"
+            dir="ltr">
+
+        </div>
+
+        <button
+          type="button"
+          class="auth-btn"
+          id="loginBtn"
+          onclick="loginUser()">
+          تسجيل الدخول
+        </button>
+
+        <button
+          type="button"
+          class="forgot-btn"
+          onclick="showForgotPassword()">
+          نسيت كلمة المرور؟
+        </button>
+
+        <button
+          type="button"
+          class="auth-secondary"
+          onclick="backToEmail()">
+          ← تغيير البريد الإلكتروني
+        </button>
+
+      </div>
+
+
+      <!-- =====================================================
+           STEP 3
+           REGISTER OTP
+      ====================================================== -->
+
+      <div
+        class="auth-step"
+        id="stepRegisterOtp">
+
+        <div class="field">
+
+          <label for="registerOtp">
+            رمز التحقق OTP
+          </label>
+
+          <input
+            id="registerOtp"
+            class="otp-input"
+            type="text"
+            inputmode="numeric"
+            maxlength="6"
+            autocomplete="one-time-code"
+            placeholder="000000"
+            dir="ltr">
+
+        </div>
+
+        <div class="field">
+
+          <label for="registerPassword">
+            كلمة المرور الجديدة
+          </label>
+
+          <input
+            id="registerPassword"
+            type="password"
+            autocomplete="new-password"
+            placeholder="••••••••"
+            dir="ltr">
+
+        </div>
+
+        <button
+          type="button"
+          class="auth-btn"
+          id="verifyRegisterBtn"
+          onclick="verifyRegistration()">
+          إنشاء الحساب
+        </button>
+
+        <button
+          type="button"
+          class="auth-secondary"
+          onclick="backToEmail()">
+          ← رجوع
+        </button>
+
+      </div>
+
+
+      <!-- =====================================================
+           STEP 4
+           FORGOT PASSWORD OTP
+      ====================================================== -->
+
+      <div
+        class="auth-step"
+        id="stepForgot">
+
+        <div class="field">
+
+          <label for="forgotEmail">
+            البريد الإلكتروني
+          </label>
+
+          <input
+            id="forgotEmail"
+            type="email"
+            readonly
+            dir="ltr">
+
+        </div>
+
+        <button
+          type="button"
+          class="auth-btn"
+          id="sendForgotOtpBtn"
+          onclick="sendForgotOtp()">
+          إرسال OTP
+        </button>
+
+        <button
+          type="button"
+          class="auth-secondary"
+          onclick="backToLogin()">
+          ← رجوع لتسجيل الدخول
+        </button>
+
+      </div>
+
+
+      <!-- =====================================================
+           STEP 5
+           RESET PASSWORD
+      ====================================================== -->
+
+      <div
+        class="auth-step"
+        id="stepReset">
+
+        <div class="field">
+
+          <label for="resetOtp">
+            رمز التحقق OTP
+          </label>
+
+          <input
+            id="resetOtp"
+            class="otp-input"
+            type="text"
+            inputmode="numeric"
+            maxlength="6"
+            autocomplete="one-time-code"
+            placeholder="000000"
+            dir="ltr">
+
+        </div>
+
+        <div class="field">
+
+          <label for="newPassword">
+            كلمة المرور الجديدة
+          </label>
+
+          <input
+            id="newPassword"
+            type="password"
+            autocomplete="new-password"
+            placeholder="••••••••"
+            dir="ltr">
+
+        </div>
+
+        <button
+          type="button"
+          class="auth-btn"
+          id="resetPasswordBtn"
+          onclick="resetPassword()">
+          تغيير كلمة المرور
+        </button>
+
+        <button
+          type="button"
+          class="auth-secondary"
+          onclick="backToLogin()">
+          ← رجوع
         </button>
 
       </div>
 
     </div>
 
-    <button class="mobile-menu" onclick="toggleMenu()">
-      ☰
-    </button>
+  </div>
 
-  </header>
+
+  <!-- =========================================================
+       MAIN
+  ========================================================== -->
 
   <main id="home">
+
+
+    <!-- DASHBOARD / HERO -->
 
     <section class="section dashboard">
 
@@ -2022,9 +1967,18 @@
         </p>
 
         <div class="dashboard-actions">
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            onclick="openLogin()">
+            تسجيل الدخول ←
+          </button>
+
           <a href="#features" class="btn">
             استكشف المميزات
           </a>
+
         </div>
 
         <div class="stats">
@@ -2053,11 +2007,14 @@
 
       </div>
 
+
       <div class="radar-card">
 
         <div class="radar">
+
           <div class="radar-ring"></div>
           <div class="radar-sweep"></div>
+
         </div>
 
         <div class="radar-label">
@@ -2068,6 +2025,9 @@
       </div>
 
     </section>
+
+
+    <!-- FEATURES -->
 
     <section id="features" class="section">
 
@@ -2089,95 +2049,155 @@
 
       </div>
 
+
       <div class="features">
 
         <article class="feature">
           <div class="feature-icon">◈</div>
           <h3>Rate Limiting</h3>
-          <p>تحديد عدد الطلبات المسموح بها لكل IP خلال نافذة زمنية وتقليل إساءة استخدام الموارد.</p>
+          <p>
+            تحديد عدد الطلبات المسموح بها لكل IP
+            خلال نافذة زمنية وتقليل إساءة استخدام
+            الموارد.
+          </p>
           <span class="tag">TRAFFIC_CONTROL</span>
         </article>
+
 
         <article class="feature">
           <div class="feature-icon">⚡</div>
           <h3>Burst Protection</h3>
-          <p>التعامل مع الارتفاعات المفاجئة والسريعة في الطلبات قبل انتقال الضغط إلى التطبيق الأصلي.</p>
+          <p>
+            التعامل مع الارتفاعات المفاجئة والسريعة
+            في الطلبات قبل انتقال الضغط إلى التطبيق
+            الأصلي.
+          </p>
           <span class="tag">BURST_DETECTION</span>
         </article>
+
 
         <article class="feature">
           <div class="feature-icon">L7</div>
           <h3>Layer 7 Protection</h3>
-          <p>فحص طلبات HTTP على مستوى التطبيق وتحليل المسارات والرؤوس والبيانات وفق قواعد الحماية.</p>
+          <p>
+            فحص طلبات HTTP على مستوى التطبيق
+            وتحليل المسارات والرؤوس والبيانات
+            وفق قواعد الحماية.
+          </p>
           <span class="tag">HTTP_INSPECTION</span>
         </article>
+
 
         <article class="feature">
           <div class="feature-icon">SQL</div>
           <h3>SQLi Detection</h3>
-          <p>كشف أنماط شائعة مرتبطة بمحاولات SQL Injection داخل الطلبات.</p>
+          <p>
+            كشف أنماط شائعة مرتبطة بمحاولات
+            SQL Injection داخل الطلبات.
+          </p>
           <span class="tag">ATTACK_DETECTION</span>
         </article>
+
 
         <article class="feature">
           <div class="feature-icon">X</div>
           <h3>XSS Detection</h3>
-          <p>فحص الأنماط المعروفة المرتبطة بمحاولات Cross-Site Scripting.</p>
+          <p>
+            فحص الأنماط المعروفة المرتبطة بمحاولات
+            Cross-Site Scripting.
+          </p>
           <span class="tag">WEB_SECURITY</span>
         </article>
+
 
         <article class="feature">
           <div class="feature-icon">R</div>
           <h3>Risk Scoring</h3>
-          <p>بناء درجة خطورة للمصادر والطلبات للمساعدة في اتخاذ قرار الحظر أو التقييد أو المراقبة.</p>
+          <p>
+            بناء درجة خطورة للمصادر والطلبات
+            للمساعدة في اتخاذ قرار الحظر أو
+            التقييد أو المراقبة.
+          </p>
           <span class="tag">RISK_ENGINE</span>
         </article>
+
 
         <article class="feature">
           <div class="feature-icon">H</div>
           <h3>Honeypot</h3>
-          <p>مسارات طُعم يمكن استخدامها لرصد المصادر التي تتفاعل مع نقاط لا يفترض أن يستخدمها المستخدم الطبيعي.</p>
+          <p>
+            مسارات طُعم يمكن استخدامها لرصد
+            المصادر التي تتفاعل مع نقاط لا يفترض
+            أن يستخدمها المستخدم الطبيعي.
+          </p>
           <span class="tag">THREAT_INTELLIGENCE</span>
         </article>
+
 
         <article class="feature">
           <div class="feature-icon">⊘</div>
           <h3>Blacklist</h3>
-          <p>التعامل مع المصادر التي تتجاوز سياسات الحماية وإبقاؤها ضمن قائمة الحظر حسب منطق النظام.</p>
+          <p>
+            التعامل مع المصادر التي تتجاوز سياسات
+            الحماية وإبقاؤها ضمن قائمة الحظر
+            حسب منطق النظام.
+          </p>
           <span class="tag">IP_CONTROL</span>
         </article>
+
 
         <article class="feature">
           <div class="feature-icon">↯</div>
           <h3>Concurrency Control</h3>
-          <p>التحكم في عدد الاتصالات المتزامنة لكل IP وعلى مستوى الخدمة لتقليل الضغط غير الطبيعي.</p>
+          <p>
+            التحكم في عدد الاتصالات المتزامنة
+            لكل IP وعلى مستوى الخدمة لتقليل
+            الضغط غير الطبيعي.
+          </p>
           <span class="tag">CONNECTION_LIMIT</span>
         </article>
+
 
         <article class="feature">
           <div class="feature-icon">◌</div>
           <h3>Live Alerts</h3>
-          <p>مراقبة الأحداث والتنبيهات بشكل مباشر من خلال قناة الأحداث الخاصة بالـWAF دون الحاجة لتحديث الصفحة.</p>
+          <p>
+            مراقبة الأحداث والتنبيهات بشكل مباشر
+            من خلال قناة الأحداث الخاصة بالـWAF
+            دون الحاجة لتحديث الصفحة.
+          </p>
           <span class="tag">REAL_TIME</span>
         </article>
+
 
         <article class="feature">
           <div class="feature-icon">▣</div>
           <h3>Security Headers</h3>
-          <p>تحسين طبقة HTTP الأمنية باستخدام إعدادات Security Headers المناسبة للسيرفر.</p>
+          <p>
+            تحسين طبقة HTTP الأمنية باستخدام
+            إعدادات Security Headers المناسبة
+            للسيرفر.
+          </p>
           <span class="tag">HTTP_SECURITY</span>
         </article>
+
 
         <article class="feature">
           <div class="feature-icon">↗</div>
           <h3>Reverse Proxy</h3>
-          <p>تمرير الطلبات الطبيعية إلى التطبيق الأصلي مع إبقاء التطبيق خلف طبقة Routix.</p>
+          <p>
+            تمرير الطلبات الطبيعية إلى التطبيق الأصلي
+            مع إبقاء التطبيق خلف طبقة Routix.
+          </p>
           <span class="tag">PROXY_LAYER</span>
         </article>
 
       </div>
 
     </section>
+
+
+    <!-- L7 FLOW -->
 
     <section id="api" class="section">
 
@@ -2199,44 +2219,58 @@
 
       </div>
 
+
       <div class="flow">
 
         <div class="flow-node">
           <b>CLIENT</b>
-          <span>المستخدم يرسل HTTP Request</span>
+          <span>
+            المستخدم يرسل HTTP Request
+          </span>
         </div>
 
         <div class="flow-arrow">→</div>
 
         <div class="flow-node">
           <b>ROUTIX</b>
-          <span>استقبال وفحص الطلب</span>
+          <span>
+            استقبال وفحص الطلب
+          </span>
         </div>
 
         <div class="flow-arrow">→</div>
 
         <div class="flow-node">
           <b>WAF ENGINE</b>
-          <span>Rate / L7 / Risk / Rules</span>
+          <span>
+            Rate / L7 / Risk / Rules
+          </span>
         </div>
 
         <div class="flow-arrow">→</div>
 
         <div class="flow-node">
           <b>DECISION</b>
-          <span>Allow / Block / Limit</span>
+          <span>
+            Allow / Block / Limit
+          </span>
         </div>
 
         <div class="flow-arrow">→</div>
 
         <div class="flow-node">
           <b>TARGET</b>
-          <span>تمرير الطلب الطبيعي للتطبيق</span>
+          <span>
+            تمرير الطلب الطبيعي للتطبيق
+          </span>
         </div>
 
       </div>
 
     </section>
+
+
+    <!-- API & INTEGRATION -->
 
     <section id="integration" class="section">
 
@@ -2258,6 +2292,7 @@
 
       </div>
 
+
       <div class="integration">
 
         <div class="steps">
@@ -2266,35 +2301,52 @@
             <b class="step-number">01</b>
             <div>
               <strong>أضف موقعك إلى Routix</strong>
-              <span>أنشئ إعداد الموقع من خلال النظام وحدد النطاق والتطبيق المرتبط به.</span>
+              <span>
+                أنشئ إعداد الموقع من خلال حسابك
+                وحدد النطاق والتطبيق المرتبط به.
+              </span>
             </div>
           </div>
+
 
           <div class="step">
             <b class="step-number">02</b>
             <div>
               <strong>التحقق من حالة الربط</strong>
-              <span>تحديد رابط موقع العميل في ملف البيئة، ثم توجيه الدومين إلى سيرفرك.</span>
+              <span>
+                تحديد رابط موقع العميل في ملف البيئة،
+                ثم توجيه الدومين إلى سيرفرك.
+              </span>
             </div>
           </div>
+
 
           <div class="step">
             <b class="step-number">03</b>
             <div>
               <strong>وجّه الدومين إلى Routix</strong>
-              <span>بعد إعداد الموقع، وجّه حركة المرور الخاصة بالدومين إلى نقطة الدخول الخاصة بـRoutix.</span>
+              <span>
+                بعد إعداد الموقع، وجّه حركة المرور الخاصة
+                بالدومين إلى نقطة الدخول الخاصة بـRoutix.
+              </span>
             </div>
           </div>
+
 
           <div class="step">
             <b class="step-number">04</b>
             <div>
               <strong>احتفظ بإعدادات السيرفر بشكل آمن</strong>
-              <span>مفاتيح النظام وبيانات الإدارة وإعدادات التطبيق الداخلي تبقى على السيرفر ولا تظهر في الواجهة العامة.</span>
+              <span>
+                مفاتيح النظام وبيانات الإدارة وإعدادات
+                التطبيق الداخلي تبقى على السيرفر ولا تظهر
+                في الواجهة العامة.
+              </span>
             </div>
           </div>
 
         </div>
+
 
         <div class="code-card">
 
@@ -2303,32 +2355,26 @@
             ROUTIX / SITE CONFIGURATION
           </div>
 
-          <pre># Routix Site Configuration
+<pre># Routix Site Configuration
 
 SITE_DOMAIN=your-domain.com
 
 SITE_TOKEN=YOUR_SITE_TOKEN
 
-يتم إنشاء القيم الحساسة
+# يتم إنشاء القيم الحساسة
+# وإدارتها من خلال السيرفر
 
-وإدارتها من خلال السيرفر
-
-لا تضع:
-
-WAF_API_KEY
-
-ADMIN_PASSWORD
-
-TARGET_URL الداخلي
-
-أو أي أسرار خاصة بالسيرفر
-
-داخل كود الواجهة العامة.</pre>
+# لا تضع:
+# WAF_API_KEY
+# ADMIN_PASSWORD
+# TARGET_URL الداخلي
+# أو أي أسرار خاصة بالسيرفر
+# داخل كود الواجهة العامة.</pre>
 
           <div class="warning">
             لأسباب أمنية، لا يتم عرض مفاتيح النظام أو بيانات
             الإدارة أو إعدادات البنية الداخلية في الصفحة العامة.
-            استخدم Token الموقع الذي يتم إنشاؤه من النظام
+            استخدم Token الموقع الذي يتم إنشاؤه من حسابك
             لربط موقعك بخدمة Routix.
           </div>
 
@@ -2337,6 +2383,9 @@ TARGET_URL الداخلي
       </div>
 
     </section>
+
+
+    <!-- SETTINGS -->
 
     <section id="settings" class="section">
 
@@ -2357,47 +2406,98 @@ TARGET_URL الداخلي
 
       </div>
 
+
       <div class="settings-grid">
 
         <article class="setting">
           <h3>Traffic Control</h3>
-          <p>التحكم في معدل الطلبات والحدود العامة وحدود الـBurst.</p>
-          <code>RATE LIMITING<br>BURST PROTECTION<br>GLOBAL TRAFFIC</code>
+          <p>
+            التحكم في معدل الطلبات والحدود العامة
+            وحدود الـBurst.
+          </p>
+          <code>
+            RATE LIMITING<br>
+            BURST PROTECTION<br>
+            GLOBAL TRAFFIC
+          </code>
         </article>
+
 
         <article class="setting">
           <h3>Risk Engine</h3>
-          <p>تقييم مستوى خطورة الطلبات والمصادر واتخاذ الإجراء المناسب وفق سياسة النظام.</p>
-          <code>RISK ENGINE<br>THREAT DETECTION<br>SECURITY RULES</code>
+          <p>
+            تقييم مستوى خطورة الطلبات والمصادر
+            واتخاذ الإجراء المناسب وفق سياسة النظام.
+          </p>
+          <code>
+            RISK ENGINE<br>
+            THREAT DETECTION<br>
+            SECURITY RULES
+          </code>
         </article>
+
 
         <article class="setting">
           <h3>Concurrency</h3>
-          <p>التحكم في عدد الاتصالات المتزامنة لكل مصدر وعلى مستوى الخدمة.</p>
-          <code>PER-IP LIMIT<br>GLOBAL LIMIT<br>CONNECTION CONTROL</code>
+          <p>
+            التحكم في عدد الاتصالات المتزامنة لكل
+            مصدر وعلى مستوى الخدمة.
+          </p>
+          <code>
+            PER-IP LIMIT<br>
+            GLOBAL LIMIT<br>
+            CONNECTION CONTROL
+          </code>
         </article>
+
 
         <article class="setting">
           <h3>Proxy</h3>
-          <p>إدارة الاتصال بين Routix والتطبيق الأصلي الموجود خلف طبقة الحماية.</p>
-          <code>REVERSE PROXY<br>UPSTREAM<br>CONNECTION ROUTING</code>
+          <p>
+            إدارة الاتصال بين Routix والتطبيق الأصلي
+            الموجود خلف طبقة الحماية.
+          </p>
+          <code>
+            REVERSE PROXY<br>
+            UPSTREAM<br>
+            CONNECTION ROUTING
+          </code>
         </article>
+
 
         <article class="setting">
           <h3>Request Limits</h3>
-          <p>التحكم في حدود ومهلات الطلبات والاتصال مع التطبيق الأصلي.</p>
-          <code>REQUEST LIMITS<br>TIMEOUT CONTROL<br>HEADER LIMITS</code>
+          <p>
+            التحكم في حدود ومهلات الطلبات والاتصال
+            مع التطبيق الأصلي.
+          </p>
+          <code>
+            REQUEST LIMITS<br>
+            TIMEOUT CONTROL<br>
+            HEADER LIMITS
+          </code>
         </article>
+
 
         <article class="setting">
           <h3>Security</h3>
-          <p>مفاتيح النظام وبيانات الإدارة والإعدادات الحساسة تتم إدارتها داخليًا على السيرفر.</p>
-          <code>SERVER SIDE ONLY<br>PRIVATE CONFIGURATION<br>SECRET STORAGE</code>
+          <p>
+            مفاتيح النظام وبيانات الإدارة والإعدادات
+            الحساسة تتم إدارتها داخليًا على السيرفر.
+          </p>
+          <code>
+            SERVER SIDE ONLY<br>
+            PRIVATE CONFIGURATION<br>
+            SECRET STORAGE
+          </code>
         </article>
 
       </div>
 
     </section>
+
+
+    <!-- ABOUT -->
 
     <section id="about" class="section">
 
@@ -2434,11 +2534,15 @@ TARGET_URL الداخلي
 
           </div>
 
-          <a href="#features" class="btn btn-primary">
-            استكشف Routix ←
-          </a>
+          <button
+            type="button"
+            class="btn btn-primary"
+            onclick="openLogin()">
+            ابدأ مع Routix ←
+          </button>
 
         </div>
+
 
         <div class="terminal">
 
@@ -2447,13 +2551,33 @@ TARGET_URL الداخلي
             routix start
           </div>
 
-          <div class="green">✓ WAF protection enabled</div>
-          <div class="green">✓ L7 inspection enabled</div>
-          <div class="green">✓ Rate limiting enabled</div>
-          <div class="green">✓ Risk engine enabled</div>
-          <div class="green">✓ Honeypot monitoring enabled</div>
-          <div class="green">✓ Blacklist engine enabled</div>
-          <div class="green">✓ Live admin events enabled</div>
+          <div class="green">
+            ✓ WAF protection enabled
+          </div>
+
+          <div class="green">
+            ✓ L7 inspection enabled
+          </div>
+
+          <div class="green">
+            ✓ Rate limiting enabled
+          </div>
+
+          <div class="green">
+            ✓ Risk engine enabled
+          </div>
+
+          <div class="green">
+            ✓ Honeypot monitoring enabled
+          </div>
+
+          <div class="green">
+            ✓ Blacklist engine enabled
+          </div>
+
+          <div class="green">
+            ✓ Live admin events enabled
+          </div>
 
           <div>
             <span class="cyan">→</span>
@@ -2473,568 +2597,24 @@ TARGET_URL الداخلي
 
   </main>
 
+
+  <!-- =========================================================
+       FOOTER
+  ========================================================== -->
+
   <footer>
     © 2026 <span>Routix</span> — Cloud WAF & Application Protection
   </footer>
 
-  <div class="auth-overlay" id="authOverlay">
-
-    <div class="auth-grid"></div>
-    <div class="auth-ring"></div>
-
-    <div class="auth-modal">
-
-      <button
-        type="button"
-        class="auth-close"
-        onclick="closeAuth()"
-        aria-label="إغلاق"
-      >
-        ×
-      </button>
-
-      <div class="auth-header">
-
-        <div class="auth-logo"></div>
-
-        <h2>
-          ROUTIX<span>.</span> CLIENT
-        </h2>
-
-        <p>
-          بوابة العملاء الآمنة للوصول إلى
-          خدمات وإعدادات منصتك.
-        </p>
-
-        <div class="auth-status-line">
-          <i></i>
-          SECURE CLIENT AUTHENTICATION
-        </div>
-
-      </div>
-
-      <div class="auth-body">
-
-        <div class="auth-view active" id="authLoginView">
-
-          <div class="auth-mini-flow">
-            <div class="auth-mini-node active">IDENTITY</div>
-            <div class="auth-mini-node">VERIFY</div>
-            <div class="auth-mini-node">SESSION</div>
-          </div>
-
-          <div class="auth-field">
-
-            <label for="loginEmail">
-              البريد الإلكتروني
-            </label>
-
-            <div class="auth-input-wrap">
-
-              <span class="auth-input-icon">@</span>
-
-              <input
-                id="loginEmail"
-                class="auth-input"
-                type="email"
-                autocomplete="email"
-                placeholder="client@example.com"
-                dir="ltr"
-              >
-
-            </div>
-
-          </div>
-
-          <div class="auth-field">
-
-            <label for="loginPassword">
-              كلمة المرور
-            </label>
-
-            <div class="auth-input-wrap">
-
-              <span class="auth-input-icon">●</span>
-
-              <input
-                id="loginPassword"
-                class="auth-input"
-                type="password"
-                autocomplete="current-password"
-                placeholder="••••••••"
-                dir="ltr"
-              >
-
-              <button
-                type="button"
-                class="auth-password-toggle"
-                onclick="togglePassword('loginPassword', this)"
-              >
-                ◉
-              </button>
-
-            </div>
-
-          </div>
-
-          <div class="auth-message" id="loginMessage">
-            <span class="auth-message-icon">!</span>
-            <span class="auth-message-text"></span>
-          </div>
-
-          <button
-            type="button"
-            class="auth-submit"
-            id="loginSubmit"
-            onclick="startCustomerAuth()"
-          >
-            <span class="auth-submit-text">
-              متابعة الدخول
-            </span>
-          </button>
-
-          <div class="auth-links">
-
-            <button
-              type="button"
-              class="auth-link"
-              onclick="showForgotPassword()"
-            >
-              نسيت كلمة المرور؟
-            </button>
-
-            <button
-              type="button"
-              class="auth-link highlight"
-              onclick="showRegisterDirect()"
-            >
-              إنشاء حساب
-            </button>
-
-          </div>
-
-          <div class="auth-security">
-            <span>●</span>
-            ROUTIX SECURITY LAYER • SESSION PROTECTED
-          </div>
-
-        </div>
-
-        <div class="auth-view" id="authRegisterOtpView">
-
-          <button
-            type="button"
-            class="auth-back"
-            onclick="showLoginView()"
-          >
-            → العودة
-          </button>
-
-          <div class="auth-flow-title">
-
-            <h3>
-              تحقق من بريدك
-            </h3>
-
-            <p>
-              تم إرسال رمز تحقق إلى البريد الإلكتروني.
-              أدخل الرمز لإكمال إنشاء حسابك.
-            </p>
-
-          </div>
-
-          <div class="otp-email">
-            <span>EMAIL:</span>
-            <strong id="registerOtpEmail"></strong>
-          </div>
-
-          <div class="otp-box">
-
-            <input class="otp-digit" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
-            <input class="otp-digit" maxlength="1" inputmode="numeric">
-            <input class="otp-digit" maxlength="1" inputmode="numeric">
-            <input class="otp-digit" maxlength="1" inputmode="numeric">
-            <input class="otp-digit" maxlength="1" inputmode="numeric">
-            <input class="otp-digit" maxlength="1" inputmode="numeric">
-
-          </div>
-
-          <div class="auth-message" id="registerOtpMessage">
-            <span class="auth-message-icon">!</span>
-            <span class="auth-message-text"></span>
-          </div>
-
-          <button
-            type="button"
-            class="auth-submit"
-            id="registerOtpSubmit"
-            onclick="verifyRegistrationOtp()"
-          >
-            <span class="auth-submit-text">
-              التحقق وإنشاء الحساب
-            </span>
-          </button>
-
-          <div class="auth-security">
-            <span>●</span>
-            OTP VERIFICATION • ROUTIX IDENTITY LAYER
-          </div>
-
-        </div>
-
-        <div class="auth-view" id="authRegisterPasswordView">
-
-          <button
-            type="button"
-            class="auth-back"
-            onclick="showLoginView()"
-          >
-            → العودة
-          </button>
-
-          <div class="auth-flow-title">
-
-            <h3>
-              إنشاء حساب العميل
-            </h3>
-
-            <p>
-              أكمل كلمة المرور الخاصة بالحساب الجديد.
-            </p>
-
-          </div>
-
-          <div class="auth-field">
-
-            <label for="registerEmail">
-              البريد الإلكتروني
-            </label>
-
-            <div class="auth-input-wrap">
-
-              <span class="auth-input-icon">@</span>
-
-              <input
-                id="registerEmail"
-                class="auth-input"
-                type="email"
-                autocomplete="email"
-                placeholder="client@example.com"
-                dir="ltr"
-              >
-
-            </div>
-
-          </div>
-
-          <div class="auth-field">
-
-            <label for="registerPassword">
-              كلمة المرور
-            </label>
-
-            <div class="auth-input-wrap">
-
-              <span class="auth-input-icon">●</span>
-
-              <input
-                id="registerPassword"
-                class="auth-input"
-                type="password"
-                autocomplete="new-password"
-                placeholder="••••••••"
-                dir="ltr"
-              >
-
-              <button
-                type="button"
-                class="auth-password-toggle"
-                onclick="togglePassword('registerPassword', this)"
-              >
-                ◉
-              </button>
-
-            </div>
-
-          </div>
-
-          <div class="auth-message" id="registerMessage">
-            <span class="auth-message-icon">!</span>
-            <span class="auth-message-text"></span>
-          </div>
-
-          <button
-            type="button"
-            class="auth-submit"
-            id="registerSubmit"
-            onclick="registerCustomer()"
-          >
-            <span class="auth-submit-text">
-              إرسال رمز التحقق
-            </span>
-          </button>
-
-        </div>
-
-        <div class="auth-view" id="authForgotView">
-
-          <button
-            type="button"
-            class="auth-back"
-            onclick="showLoginView()"
-          >
-            → العودة
-          </button>
-
-          <div class="auth-flow-title">
-
-            <h3>
-              استعادة الوصول
-            </h3>
-
-            <p>
-              أدخل البريد المرتبط بالحساب، وسيتم إرسال
-              رمز OTP لإعادة تعيين كلمة المرور.
-            </p>
-
-          </div>
-
-          <div class="auth-field">
-
-            <label for="forgotEmail">
-              البريد الإلكتروني
-            </label>
-
-            <div class="auth-input-wrap">
-
-              <span class="auth-input-icon">@</span>
-
-              <input
-                id="forgotEmail"
-                class="auth-input"
-                type="email"
-                autocomplete="email"
-                placeholder="client@example.com"
-                dir="ltr"
-              >
-
-            </div>
-
-          </div>
-
-          <div class="auth-message" id="forgotMessage">
-            <span class="auth-message-icon">!</span>
-            <span class="auth-message-text"></span>
-          </div>
-
-          <button
-            type="button"
-            class="auth-submit"
-            id="forgotSubmit"
-            onclick="sendForgotPasswordOtp()"
-          >
-            <span class="auth-submit-text">
-              إرسال رمز الاستعادة
-            </span>
-          </button>
-
-        </div>
-
-        <div class="auth-view" id="authResetView">
-
-          <button
-            type="button"
-            class="auth-back"
-            onclick="showForgotPassword()"
-          >
-            → العودة
-          </button>
-
-          <div class="auth-flow-title">
-
-            <h3>
-              تغيير كلمة المرور
-            </h3>
-
-            <p>
-              أدخل رمز OTP ثم كلمة المرور الجديدة.
-            </p>
-
-          </div>
-
-          <div class="otp-email">
-            <span>EMAIL:</span>
-            <strong id="resetOtpEmail"></strong>
-          </div>
-
-          <div class="otp-box">
-
-            <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric" autocomplete="one-time-code">
-            <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric">
-            <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric">
-            <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric">
-            <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric">
-            <input class="otp-digit reset-otp" maxlength="1" inputmode="numeric">
-
-          </div>
-
-          <div class="auth-field">
-
-            <label for="newPassword">
-              كلمة المرور الجديدة
-            </label>
-
-            <div class="auth-input-wrap">
-
-              <span class="auth-input-icon">●</span>
-
-              <input
-                id="newPassword"
-                class="auth-input"
-                type="password"
-                autocomplete="new-password"
-                placeholder="••••••••"
-                dir="ltr"
-              >
-
-              <button
-                type="button"
-                class="auth-password-toggle"
-                onclick="togglePassword('newPassword', this)"
-              >
-                ◉
-              </button>
-
-            </div>
-
-          </div>
-
-          <div class="auth-message" id="resetMessage">
-            <span class="auth-message-icon">!</span>
-            <span class="auth-message-text"></span>
-          </div>
-
-          <button
-            type="button"
-            class="auth-submit"
-            id="resetSubmit"
-            onclick="resetCustomerPassword()"
-          >
-            <span class="auth-submit-text">
-              تغيير كلمة المرور والدخول
-            </span>
-          </button>
-
-        </div>
-
-        <div class="auth-view" id="authDirectRegisterView">
-
-          <button
-            type="button"
-            class="auth-back"
-            onclick="showLoginView()"
-          >
-            → العودة لتسجيل الدخول
-          </button>
-
-          <div class="auth-flow-title">
-
-            <h3>
-              إنشاء حساب جديد
-            </h3>
-
-            <p>
-              أدخل البريد وكلمة المرور، وبعدها سيتم
-              إرسال OTP للتحقق من البريد.
-            </p>
-
-          </div>
-
-          <div class="auth-field">
-
-            <label for="directRegisterEmail">
-              البريد الإلكتروني
-            </label>
-
-            <div class="auth-input-wrap">
-
-              <span class="auth-input-icon">@</span>
-
-              <input
-                id="directRegisterEmail"
-                class="auth-input"
-                type="email"
-                autocomplete="email"
-                placeholder="client@example.com"
-                dir="ltr"
-              >
-
-            </div>
-
-          </div>
-
-          <div class="auth-field">
-
-            <label for="directRegisterPassword">
-              كلمة المرور
-            </label>
-
-            <div class="auth-input-wrap">
-
-              <span class="auth-input-icon">●</span>
-
-              <input
-                id="directRegisterPassword"
-                class="auth-input"
-                type="password"
-                autocomplete="new-password"
-                placeholder="••••••••"
-                dir="ltr"
-              >
-
-              <button
-                type="button"
-                class="auth-password-toggle"
-                onclick="togglePassword('directRegisterPassword', this)"
-              >
-                ◉
-              </button>
-
-            </div>
-
-          </div>
-
-          <div class="auth-message" id="directRegisterMessage">
-            <span class="auth-message-icon">!</span>
-            <span class="auth-message-text"></span>
-          </div>
-
-          <button
-            type="button"
-            class="auth-submit"
-            id="directRegisterSubmit"
-            onclick="directRegisterCustomer()"
-          >
-            <span class="auth-submit-text">
-              إنشاء الحساب وإرسال OTP
-            </span>
-          </button>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
 
   <script>
 
     /* =========================================================
-       ORIGINAL FUNCTIONS
-       ========================================================= */
+       INTRO
+    ========================================================== */
 
     function enterPlatform() {
+
       const intro = document.getElementById("intro");
 
       intro.classList.add("hidden");
@@ -3045,1009 +2625,426 @@ TARGET_URL الداخلي
       }, 750);
     }
 
+
+    /* =========================================================
+       MOBILE MENU
+    ========================================================== */
+
     function toggleMenu() {
+
       const nav = document.getElementById("nav");
+
       nav.classList.toggle("mobile-open");
     }
 
+
     document.querySelectorAll("#nav a").forEach(link => {
+
       link.addEventListener("click", () => {
-        document.getElementById("nav").classList.remove("mobile-open");
+
+        document
+          .getElementById("nav")
+          .classList
+          .remove("mobile-open");
+
       });
+
     });
 
-    const particles = document.getElementById("particles");
 
-    for (let i = 0; i < 32; i++) {
-      const p = document.createElement("span");
+    /* =========================================================
+       LOGIN MODAL
+    ========================================================== */
 
-      p.className = "particle";
+    const loginOverlay =
+      document.getElementById("loginOverlay");
 
-      p.style.left = Math.random() * 100 + "%";
-      p.style.top = (40 + Math.random() * 60) + "%";
-      p.style.animationDelay = (Math.random() * 8) + "s";
-      p.style.animationDuration = (5 + Math.random() * 7) + "s";
+    const authMessage =
+      document.getElementById("authMessage");
 
-      particles.appendChild(p);
+
+    function openLogin() {
+
+      loginOverlay.classList.add("active");
+      loginOverlay.setAttribute("aria-hidden", "false");
+
+      document.body.classList.add("modal-open");
+
+      clearAuthMessage();
+
+      showStep("stepEmail");
+
+      setTimeout(() => {
+
+        document
+          .getElementById("email")
+          .focus();
+
+      }, 100);
+
+    }
+
+
+    function closeLogin() {
+
+      loginOverlay.classList.remove("active");
+      loginOverlay.setAttribute("aria-hidden", "true");
+
+      document.body.classList.remove("modal-open");
+
+      clearAuthMessage();
+
+      resetAuthForm();
+
+    }
+
+
+    loginOverlay.addEventListener("click", event => {
+
+      if (event.target === loginOverlay) {
+        closeLogin();
+      }
+
+    });
+
+
+    function showStep(stepId) {
+
+      document
+        .querySelectorAll(".auth-step")
+        .forEach(step => {
+
+          step.classList.remove("active");
+
+        });
+
+
+      document
+        .getElementById(stepId)
+        .classList.add("active");
+
+
+      clearAuthMessage();
+
+
+      const titles = {
+
+        stepEmail: [
+          "تسجيل الدخول",
+          "أدخل بريدك الإلكتروني للمتابعة"
+        ],
+
+        stepLogin: [
+          "تسجيل الدخول",
+          "أدخل كلمة المرور الخاصة بحسابك"
+        ],
+
+        stepRegisterOtp: [
+          "إنشاء حساب",
+          "تم إرسال رمز التحقق إلى بريدك الإلكتروني"
+        ],
+
+        stepForgot: [
+          "نسيت كلمة المرور",
+          "سنرسل رمز تحقق إلى بريدك الإلكتروني"
+        ],
+
+        stepReset: [
+          "تغيير كلمة المرور",
+          "أدخل OTP وكلمة المرور الجديدة"
+        ]
+
+      };
+
+
+      const data = titles[stepId];
+
+      if (data) {
+
+        document
+          .getElementById("loginTitle")
+          .textContent = data[0];
+
+        document
+          .getElementById("loginSubtitle")
+          .textContent = data[1];
+
+      }
+
+    }
+
+
+    function clearAuthMessage() {
+
+      authMessage.className = "auth-message";
+      authMessage.textContent = "";
+
+    }
+
+
+    function showMessage(message, type = "info") {
+
+      authMessage.className =
+        "auth-message show " + type;
+
+      authMessage.textContent = message;
+
+    }
+
+
+    function setLoading(buttonId, loading) {
+
+      const button =
+        document.getElementById(buttonId);
+
+      if (!button) return;
+
+      button.disabled = loading;
+
+      if (loading) {
+
+        button.dataset.oldText =
+          button.textContent;
+
+        button.textContent =
+          "جاري المعالجة...";
+
+      } else {
+
+        button.textContent =
+          button.dataset.oldText ||
+          button.textContent;
+
+      }
+
     }
 
 
     /* =========================================================
-       ROUTIX CUSTOMER AUTHENTICATION
-       ========================================================= */
+       API HELPER
+    ========================================================== */
 
-    const authOverlay = document.getElementById("authOverlay");
+    async function apiRequest(url, data) {
 
-    let authEmail = "";
-    let authPassword = "";
+      const response = await fetch(url, {
 
-    const AUTH_API = "";
+        method: "POST",
 
-
-    function normalizeEmail(email) {
-      return String(email || "")
-        .trim()
-        .toLowerCase();
-    }
-
-
-    function isValidEmail(email) {
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    }
-
-
-    function getApiUrl(path) {
-      return AUTH_API + path;
-    }
-
-
-    /*
-      ==========================================================
-      API REQUEST
-      ==========================================================
-
-      مهم:
-      نرسل credentials: include حتى يتم حفظ Session/Cookie
-      الذي ينشئه السيرفر بعد تسجيل الدخول.
-    */
-
-    async function apiRequest(path, options = {}) {
-
-      const requestOptions = {
-        ...options,
-        credentials: "include",
         headers: {
-          ...(options.body !== undefined
-            ? { "Content-Type": "application/json" }
-            : {}),
-          ...(options.headers || {})
-        }
-      };
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
 
-      const response = await fetch(
-        getApiUrl(path),
-        requestOptions
-      );
+        credentials: "include",
 
-      let data = {};
+        body: JSON.stringify(data)
 
-      const contentType =
-        response.headers.get("content-type") || "";
+      });
 
-      if (contentType.includes("application/json")) {
 
-        try {
-          data = await response.json();
-        } catch (_) {
-          data = {};
-        }
+      let result = {};
 
-      } else {
+      try {
 
-        try {
-          const text = await response.text();
+        result = await response.json();
 
-          if (text) {
-            try {
-              data = JSON.parse(text);
-            } catch (_) {
-              data = {
-                message: text
-              };
-            }
-          }
+      } catch {
 
-        } catch (_) {
-          data = {};
-        }
+        result = {};
+
       }
+
 
       if (!response.ok) {
 
-        const message =
-          extractMessage(
-            data,
-            `تعذر تنفيذ العملية. HTTP ${response.status}`
-          );
-
-        const error = new Error(message);
-
-        error.status = response.status;
-        error.data = data;
-
-        throw error;
-      }
-
-      return data;
-    }
-
-
-    function extractMessage(data, fallback) {
-
-      if (!data) {
-        return fallback;
-      }
-
-      if (typeof data === "string") {
-        return data || fallback;
-      }
-
-      return (
-        data?.message ||
-        data?.error ||
-        data?.msg ||
-        data?.detail ||
-        data?.data?.message ||
-        data?.data?.error ||
-        fallback
-      );
-    }
-
-
-    /*
-      ==========================================================
-      FIX مهم جدًا:
-      تفسير نتيجة /api/check-email
-      ==========================================================
-
-      السيرفر ممكن يرجع:
-
-      { exists: true }
-
-      أو:
-
-      { exists: "true" }
-
-      أو:
-
-      { exists: 1 }
-
-      أو:
-
-      { found: true }
-
-      أو:
-
-      { userExists: true }
-
-      أو:
-
-      { accountExists: true }
-
-      أو:
-
-      { data: { exists: true } }
-
-      أو:
-
-      { data: { found: true } }
-
-      أو حتى:
-
-      { account: {...} }
-
-      أو:
-
-      { user: {...} }
-
-      لذلك لا نعتمد فقط على === true.
-    */
-
-    function parseBooleanValue(value) {
-
-      if (value === true) {
-        return true;
-      }
-
-      if (value === false) {
-        return false;
-      }
-
-      if (typeof value === "number") {
-
-        if (value === 1) {
-          return true;
-        }
-
-        if (value === 0) {
-          return false;
-        }
-      }
-
-      if (typeof value === "string") {
-
-        const normalized =
-          value
-            .trim()
-            .toLowerCase();
-
-        if (
-          normalized === "true" ||
-          normalized === "1" ||
-          normalized === "yes" ||
-          normalized === "found" ||
-          normalized === "exists" ||
-          normalized === "existing" ||
-          normalized === "registered" ||
-          normalized === "available"
-        ) {
-          return true;
-        }
-
-        if (
-          normalized === "false" ||
-          normalized === "0" ||
-          normalized === "no" ||
-          normalized === "not_found" ||
-          normalized === "not-found" ||
-          normalized === "missing" ||
-          normalized === "new" ||
-          normalized === "unregistered"
-        ) {
-          return false;
-        }
-      }
-
-      return null;
-    }
-
-
-    function getNestedValue(object, path) {
-
-      return path.reduce((current, key) => {
-
-        if (
-          current &&
-          Object.prototype.hasOwnProperty.call(current, key)
-        ) {
-          return current[key];
-        }
-
-        return undefined;
-
-      }, object);
-    }
-
-
-    function detectAccountExists(result) {
-
-      if (!result) {
-        return null;
-      }
-
-      /*
-        لو الرد عبارة عن Boolean مباشر.
-      */
-
-      const directBoolean =
-        parseBooleanValue(result);
-
-      if (directBoolean !== null) {
-        return directBoolean;
-      }
-
-
-      /*
-        الحقول الشائعة.
-      */
-
-      const existenceKeys = [
-        "exists",
-        "found",
-        "userExists",
-        "accountExists",
-        "emailExists",
-        "isExisting",
-        "registered",
-        "isRegistered",
-        "hasAccount",
-        "accountFound",
-        "userFound"
-      ];
-
-
-      /*
-        نفحص المستوى الأساسي أولًا.
-      */
-
-      for (const key of existenceKeys) {
-
-        if (
-          Object.prototype.hasOwnProperty.call(
-            result,
-            key
-          )
-        ) {
-
-          const parsed =
-            parseBooleanValue(result[key]);
-
-          if (parsed !== null) {
-            return parsed;
-          }
-        }
-      }
-
-
-      /*
-        نفحص data.
-      */
-
-      if (
-        result.data &&
-        typeof result.data === "object"
-      ) {
-
-        for (const key of existenceKeys) {
-
-          if (
-            Object.prototype.hasOwnProperty.call(
-              result.data,
-              key
-            )
-          ) {
-
-            const parsed =
-              parseBooleanValue(
-                result.data[key]
-              );
-
-            if (parsed !== null) {
-              return parsed;
-            }
-          }
-        }
-      }
-
-
-      /*
-        نفحص account / user.
-
-        إذا رجع السيرفر account أو user ككائن
-        فهذا يعني أن الحساب موجود.
-      */
-
-      if (
-        result.account &&
-        typeof result.account === "object"
-      ) {
-        return true;
-      }
-
-      if (
-        result.user &&
-        typeof result.user === "object"
-      ) {
-        return true;
-      }
-
-      if (
-        result.data?.account &&
-        typeof result.data.account === "object"
-      ) {
-        return true;
-      }
-
-      if (
-        result.data?.user &&
-        typeof result.data.user === "object"
-      ) {
-        return true;
-      }
-
-
-      /*
-        نفحص status.
-      */
-
-      const statusValues = [
-        result.status,
-        result.accountStatus,
-        result.data?.status,
-        result.data?.accountStatus
-      ];
-
-      for (const value of statusValues) {
-
-        if (value === undefined || value === null) {
-          continue;
-        }
-
-        const status =
-          String(value)
-            .trim()
-            .toLowerCase();
-
-        if (
-          status === "exists" ||
-          status === "found" ||
-          status === "registered" ||
-          status === "existing" ||
-          status === "active"
-        ) {
-          return true;
-        }
-
-        if (
-          status === "not_found" ||
-          status === "not-found" ||
-          status === "missing" ||
-          status === "new" ||
-          status === "unregistered"
-        ) {
-          return false;
-        }
-      }
-
-
-      /*
-        بعض الـAPIs ترجع:
-        count: 1
-        أو:
-        count: 0
-      */
-
-      const counts = [
-        result.count,
-        result.data?.count,
-        result.total,
-        result.data?.total
-      ];
-
-      for (const count of counts) {
-
-        if (typeof count === "number") {
-
-          if (count > 0) {
-            return true;
-          }
-
-          if (count === 0) {
-            return false;
-          }
-        }
-
-        if (
-          typeof count === "string" &&
-          /^\d+$/.test(count.trim())
-        ) {
-
-          const numericCount =
-            Number(count.trim());
-
-          if (numericCount > 0) {
-            return true;
-          }
-
-          if (numericCount === 0) {
-            return false;
-          }
-        }
-      }
-
-
-      /*
-        لم نستطع تحديد الحالة.
-      */
-
-      return null;
-    }
-
-
-    /*
-      ==========================================================
-      CHECK EMAIL
-      ==========================================================
-
-      نجرب POST أولًا.
-
-      إذا كان endpoint عندك مضبوط GET ويرجع 405/404،
-      نجرب GET تلقائيًا بدون تغيير بقية النظام.
-    */
-
-    async function checkCustomerEmail(email) {
-
-      try {
-
-        return await apiRequest(
-          "/api/check-email",
-          {
-            method: "POST",
-            body: JSON.stringify({
-              email
-            })
-          }
+        throw new Error(
+          result.message ||
+          "حدث خطأ في الاتصال بالسيرفر."
         );
 
-      } catch (error) {
-
-        /*
-          بعض السيرفرات تستخدم GET بدل POST.
-          لذلك نحاول GET فقط إذا كانت المشكلة
-          من طريقة الطلب.
-        */
-
-        if (
-          error.status === 404 ||
-          error.status === 405
-        ) {
-
-          const query =
-            encodeURIComponent(email);
-
-          return await apiRequest(
-            `/api/check-email?email=${query}`,
-            {
-              method: "GET"
-            }
-          );
-        }
-
-        throw error;
-      }
-    }
-
-
-    function showAuthMessage(id, message, type = "error") {
-
-      const box =
-        document.getElementById(id);
-
-      if (!box) return;
-
-      box.className =
-        "auth-message show " + type;
-
-      const text =
-        box.querySelector(
-          ".auth-message-text"
-        );
-
-      if (text) {
-        text.textContent = message;
-      }
-    }
-
-
-    function hideAuthMessage(id) {
-
-      const box =
-        document.getElementById(id);
-
-      if (!box) return;
-
-      box.className = "auth-message";
-
-      const text =
-        box.querySelector(
-          ".auth-message-text"
-        );
-
-      if (text) {
-        text.textContent = "";
-      }
-    }
-
-
-    function setButtonLoading(id, loading) {
-
-      const button =
-        document.getElementById(id);
-
-      if (!button) return;
-
-      button.classList.toggle(
-        "loading",
-        loading
-      );
-
-      button.disabled = loading;
-    }
-
-
-    function openAuth() {
-
-      authOverlay.classList.add("open");
-      document.body.classList.add("login-open");
-
-      showLoginView();
-
-      setTimeout(() => {
-
-        const email =
-          document.getElementById("loginEmail");
-
-        if (email) {
-          email.focus();
-        }
-
-      }, 250);
-    }
-
-
-    function closeAuth() {
-
-      authOverlay.classList.remove("open");
-      document.body.classList.remove("login-open");
-    }
-
-
-    function showView(id) {
-
-      document
-        .querySelectorAll(".auth-view")
-        .forEach(view => {
-          view.classList.remove("active");
-        });
-
-      const target =
-        document.getElementById(id);
-
-      if (target) {
-        target.classList.add("active");
       }
 
-      document
-        .querySelectorAll(".auth-message")
-        .forEach(message => {
-          message.className = "auth-message";
-        });
+
+      return result;
+
     }
 
 
-    function showLoginView() {
+    /* =========================================================
+       CHECK EMAIL
+       
+       POST /api/check-email
+       
+       Expected example:
+       {
+         exists: true
+       }
+       
+       or:
+       
+       {
+         exists: false
+       }
+    ========================================================== */
 
-      showView("authLoginView");
-
-      const loginEmail =
-        document.getElementById("loginEmail");
-
-      if (loginEmail && authEmail) {
-        loginEmail.value = authEmail;
-      }
-    }
-
-
-    function showForgotPassword() {
-
-      showView("authForgotView");
-
-      const forgotEmail =
-        document.getElementById("forgotEmail");
-
-      if (
-        forgotEmail &&
-        authEmail
-      ) {
-        forgotEmail.value = authEmail;
-      }
-
-      setTimeout(() => {
-
-        if (forgotEmail) {
-          forgotEmail.focus();
-        }
-
-      }, 100);
-    }
-
-
-    function showRegisterDirect() {
-
-      showView("authDirectRegisterView");
+    async function checkEmail() {
 
       const email =
-        document.getElementById(
-          "directRegisterEmail"
-        );
-
-      if (
-        email &&
-        authEmail
-      ) {
-        email.value = authEmail;
-      }
-
-      setTimeout(() => {
-
-        if (email) {
-          email.focus();
-        }
-
-      }, 100);
-    }
+        document
+          .getElementById("email")
+          .value
+          .trim()
+          .toLowerCase();
 
 
-    function togglePassword(
-      inputId,
-      button
-    ) {
+      if (!email) {
 
-      const input =
-        document.getElementById(inputId);
-
-      if (!input) return;
-
-      if (input.type === "password") {
-
-        input.type = "text";
-        button.textContent = "◌";
-
-      } else {
-
-        input.type = "password";
-        button.textContent = "◉";
-      }
-    }
-
-
-    /*
-      ==========================================================
-      LOGIN FLOW
-      ==========================================================
-
-      Email + Password
-             ↓
-      /api/check-email
-             ↓
-      موجود؟
-        ↓ نعم
-      /api/login
-             ↓
-      Session
-    */
-
-    async function startCustomerAuth() {
-
-      const emailInput =
-        document.getElementById("loginEmail");
-
-      const passwordInput =
-        document.getElementById("loginPassword");
-
-      const email =
-        normalizeEmail(
-          emailInput.value
-        );
-
-      const password =
-        String(
-          passwordInput.value || ""
-        );
-
-      hideAuthMessage("loginMessage");
-
-      if (!isValidEmail(email)) {
-
-        showAuthMessage(
-          "loginMessage",
-          "أدخل بريدًا إلكترونيًا صحيحًا.",
+        showMessage(
+          "أدخل البريد الإلكتروني أولاً.",
           "error"
         );
 
-        emailInput.focus();
         return;
+
       }
 
-      if (!password) {
 
-        showAuthMessage(
-          "loginMessage",
-          "أدخل كلمة المرور.",
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+
+        showMessage(
+          "صيغة البريد الإلكتروني غير صحيحة.",
           "error"
         );
 
-        passwordInput.focus();
         return;
+
       }
 
-      authEmail = email;
-      authPassword = password;
 
-      setButtonLoading(
-        "loginSubmit",
-        true
-      );
+      setLoading("checkEmailBtn", true);
+
 
       try {
-
-        /*
-          هنا الإصلاح الأساسي:
-          استخدام checkCustomerEmail + detectAccountExists
-          بدل الاعتماد على result.exists === true فقط.
-        */
 
         const result =
-          await checkCustomerEmail(email);
-
-        const accountExists =
-          detectAccountExists(result);
-
-
-        /*
-          الحساب موجود فعليًا.
-        */
-
-        if (accountExists === true) {
-
-          await loginExistingCustomer(
-            email,
-            password
+          await apiRequest(
+            "/api/check-email",
+            { email }
           );
 
-          return;
-        }
+
+        document
+          .getElementById("loginEmail")
+          .value = email;
+
+        document
+          .getElementById("forgotEmail")
+          .value = email;
 
 
         /*
-          الحساب غير موجود فعليًا.
+          يدعم:
+          exists
+          أو
+          accountExists
         */
 
-        if (accountExists === false) {
+        const exists =
+          result.exists === true ||
+          result.accountExists === true;
 
-          await beginRegistration(
-            email,
-            password
-          );
 
-          return;
+        if (exists) {
+
+          showStep("stepLogin");
+
+          setTimeout(() => {
+
+            document
+              .getElementById("loginPassword")
+              .focus();
+
+          }, 100);
+
+        } else {
+
+          /*
+            الحساب غير موجود:
+            إنشاء الحساب + إرسال OTP
+          */
+
+          await registerUser(email);
+
         }
-
-
-        /*
-          إذا لم نفهم الرد،
-          لا نرسل المستخدم مباشرة للتسجيل
-          حتى لا يحصل تعارض مع حساب موجود.
-        */
-
-        console.error(
-          "ROUTIX /api/check-email unexpected response:",
-          result
-        );
-
-        throw new Error(
-          "تعذر تحديد حالة الحساب من الخادم. تحقق من استجابة /api/check-email."
-        );
 
       } catch (error) {
 
-        console.error(
-          "ROUTIX CUSTOMER AUTH ERROR:",
-          error
-        );
-
-        showAuthMessage(
-          "loginMessage",
+        showMessage(
           error.message ||
-          "حدث خطأ أثناء الاتصال بالخادم.",
+          "تعذر التحقق من البريد الإلكتروني.",
           "error"
         );
 
       } finally {
 
-        setButtonLoading(
-          "loginSubmit",
-          false
-        );
+        setLoading("checkEmailBtn", false);
+
       }
+
     }
 
 
-    async function loginExistingCustomer(
-      email,
-      password
-    ) {
+    /* =========================================================
+       REGISTER
+       
+       POST /api/register
+       
+       email + password
+       
+       Server should create pending registration
+       and send OTP.
+    ========================================================== */
 
-      try {
+    async function registerUser(email) {
 
-        /*
-          الحساب موجود:
-          الآن فقط نتحقق من كلمة المرور.
-        */
+      /*
+        نطلب كلمة المرور قبل إرسال التسجيل.
+        نستخدم prompt هنا فقط كبداية بسيطة،
+        لكن الأفضل أن يكون لها حقل منفصل.
+      */
 
-        const result =
-          await apiRequest(
-            "/api/login",
-            {
-              method: "POST",
-              body: JSON.stringify({
-                email,
-                password
-              })
-            }
-          );
+      const password =
+        prompt("أنشئ كلمة مرور للحساب:");
 
+      if (!password) {
 
-        /*
-          لا نفترض أن السيرفر يجب أن يرجع
-          success:true بالضرورة.
-
-          إذا كان HTTP status = 2xx
-          ولم يرجع success:false صراحة،
-          نعتبر العملية ناجحة.
-        */
-
-        const success =
-          result?.success !== false &&
-          result?.authenticated !== false &&
-          result?.loggedIn !== false &&
-          result?.valid !== false;
-
-
-        if (!success) {
-
-          showAuthMessage(
-            "loginMessage",
-            extractMessage(
-              result,
-              "البريد أو كلمة المرور غير صحيحة."
-            ),
-            "error"
-          );
-
-          return;
-        }
-
-
-        updateCustomerSession(
-          result?.email ||
-          result?.user?.email ||
-          result?.data?.email ||
-          result?.data?.user?.email ||
-          email
+        showMessage(
+          "تم إلغاء إنشاء الحساب.",
+          "info"
         );
 
+        return;
 
-        showAuthMessage(
-          "loginMessage",
-          "تم تسجيل الدخول بنجاح.",
-          "success"
-        );
+      }
 
 
-        setTimeout(() => {
-          closeAuth();
-        }, 700);
+      if (password.length < 8) {
 
-      } catch (error) {
-
-        showAuthMessage(
-          "loginMessage",
-          error.message ||
-          "البريد أو كلمة المرور غير صحيحة. يمكنك استخدام «نسيت كلمة المرور؟».",
+        showMessage(
+          "كلمة المرور يجب أن تكون 8 أحرف على الأقل.",
           "error"
         );
+
+        return;
+
       }
-    }
 
 
-    async function beginRegistration(
-      email,
-      password
-    ) {
+      showMessage(
+        "جاري إنشاء طلب التسجيل وإرسال OTP...",
+        "info"
+      );
 
-      authEmail = email;
-      authPassword = password;
 
       try {
 
@@ -4055,78 +3052,123 @@ TARGET_URL الداخلي
           await apiRequest(
             "/api/register",
             {
-              method: "POST",
-              body: JSON.stringify({
-                email,
-                password
-              })
+              email,
+              password
             }
           );
 
 
-        document.getElementById(
-          "registerOtpEmail"
-        ).textContent = email;
+        /*
+          إذا السيرفر أرسل OTP بنجاح
+        */
 
-        clearOtpInputs(
-          "authRegisterOtpView"
-        );
+        if (
+          result.success === false &&
+          result.otpSent !== true
+        ) {
 
-        showView(
-          "authRegisterOtpView"
-        );
+          throw new Error(
+            result.message ||
+            "تعذر إنشاء الحساب."
+          );
 
-        showAuthMessage(
-          "registerOtpMessage",
-          extractMessage(
-            result,
-            "تم إرسال رمز التحقق إلى بريدك الإلكتروني."
-          ),
+        }
+
+
+        showStep("stepRegisterOtp");
+
+        showMessage(
+          result.message ||
+          "تم إرسال رمز التحقق إلى بريدك الإلكتروني.",
           "success"
         );
 
-        focusFirstOtp(
-          "authRegisterOtpView"
-        );
+        /*
+          نخزن كلمة المرور مؤقتاً في الصفحة
+          لإرسالها مع verify-otp.
+          
+          لا يتم تخزينها في localStorage.
+        */
+
+        window.__routixRegistration = {
+          email,
+          password
+        };
+
+
+        setTimeout(() => {
+
+          document
+            .getElementById("registerOtp")
+            .focus();
+
+        }, 100);
 
       } catch (error) {
 
-        showAuthMessage(
-          "loginMessage",
+        showMessage(
           error.message ||
-          "تعذر إنشاء طلب التسجيل.",
+          "تعذر إنشاء الحساب.",
           "error"
         );
+
       }
+
     }
 
 
-    async function verifyRegistrationOtp() {
+    /* =========================================================
+       VERIFY OTP / CREATE ACCOUNT
+       
+       POST /api/verify-otp
+       
+       email + otp + password
+    ========================================================== */
 
-      const otp =
-        getOtp(
-          "authRegisterOtpView"
+    async function verifyRegistration() {
+
+      const registration =
+        window.__routixRegistration;
+
+
+      if (!registration) {
+
+        showMessage(
+          "انتهت جلسة التسجيل، ابدأ من جديد.",
+          "error"
         );
 
-      hideAuthMessage(
-        "registerOtpMessage"
-      );
+        showStep("stepEmail");
 
-      if (!/^\d{6}$/.test(otp)) {
+        return;
 
-        showAuthMessage(
-          "registerOtpMessage",
-          "أدخل رمز OTP المكون من 6 أرقام.",
+      }
+
+
+      const otp =
+        document
+          .getElementById("registerOtp")
+          .value
+          .trim();
+
+
+      if (!otp) {
+
+        showMessage(
+          "أدخل رمز OTP.",
           "error"
         );
 
         return;
+
       }
 
-      setButtonLoading(
-        "registerOtpSubmit",
+
+      setLoading(
+        "verifyRegisterBtn",
         true
       );
+
 
       try {
 
@@ -4134,286 +3176,105 @@ TARGET_URL الداخلي
           await apiRequest(
             "/api/verify-otp",
             {
-              method: "POST",
-              body: JSON.stringify({
-                email: authEmail,
-                otp,
-                password: authPassword
-              })
+              email: registration.email,
+              otp: otp,
+              password: registration.password
             }
           );
 
 
-        const success =
-          result?.success !== false &&
-          result?.verified !== false &&
-          result?.valid !== false;
-
-
-        if (!success) {
+        if (result.success === false) {
 
           throw new Error(
-            extractMessage(
-              result,
-              "رمز التحقق غير صحيح أو منتهي."
-            )
+            result.message ||
+            "رمز OTP غير صحيح."
           );
+
         }
 
 
-        if (
-          result?.authenticated === true ||
-          result?.loggedIn === true ||
-          result?.session === true ||
-          result?.sessionCreated === true
-        ) {
+        /*
+          بعد نجاح إنشاء الحساب،
+          السيرفر المفترض ينشئ Session.
+        */
 
-          updateCustomerSession(
-            result?.email ||
-            result?.user?.email ||
-            result?.data?.email ||
-            authEmail
-          );
-
-          showAuthMessage(
-            "registerOtpMessage",
-            "تم إنشاء الحساب وتسجيل الدخول بنجاح.",
-            "success"
-          );
-
-          setTimeout(() => {
-            closeAuth();
-          }, 700);
-
-          return;
-        }
-
-
-        const loginResult =
-          await apiRequest(
-            "/api/login",
-            {
-              method: "POST",
-              body: JSON.stringify({
-                email: authEmail,
-                password: authPassword
-              })
-            }
-          );
-
-
-        if (
-          loginResult?.success === false ||
-          loginResult?.authenticated === false ||
-          loginResult?.loggedIn === false
-        ) {
-
-          throw new Error(
-            extractMessage(
-              loginResult,
-              "تم إنشاء الحساب ولكن تعذر إنشاء جلسة الدخول."
-            )
-          );
-        }
-
-
-        updateCustomerSession(
-          loginResult?.email ||
-          loginResult?.user?.email ||
-          loginResult?.data?.email ||
-          authEmail
-        );
-
-
-        showAuthMessage(
-          "registerOtpMessage",
+        showMessage(
+          result.message ||
           "تم إنشاء الحساب وتسجيل الدخول بنجاح.",
           "success"
         );
 
 
+        updateLoggedInUI();
+
+
         setTimeout(() => {
-          closeAuth();
-        }, 700);
+
+          closeLogin();
+
+        }, 900);
 
       } catch (error) {
 
-        showAuthMessage(
-          "registerOtpMessage",
+        showMessage(
           error.message ||
-          "تعذر التحقق من رمز OTP.",
+          "فشل التحقق من OTP.",
           "error"
         );
 
       } finally {
 
-        setButtonLoading(
-          "registerOtpSubmit",
+        setLoading(
+          "verifyRegisterBtn",
           false
         );
+
       }
+
     }
 
 
-    async function directRegisterCustomer() {
+    /* =========================================================
+       LOGIN
+       
+       POST /api/login
+       
+       email + password
+    ========================================================== */
 
-      const emailInput =
-        document.getElementById(
-          "directRegisterEmail"
-        );
-
-      const passwordInput =
-        document.getElementById(
-          "directRegisterPassword"
-        );
+    async function loginUser() {
 
       const email =
-        normalizeEmail(
-          emailInput.value
-        );
+        document
+          .getElementById("loginEmail")
+          .value
+          .trim()
+          .toLowerCase();
+
 
       const password =
-        String(
-          passwordInput.value || ""
-        );
+        document
+          .getElementById("loginPassword")
+          .value;
 
-      hideAuthMessage(
-        "directRegisterMessage"
-      );
-
-      if (!isValidEmail(email)) {
-
-        showAuthMessage(
-          "directRegisterMessage",
-          "أدخل بريدًا إلكترونيًا صحيحًا.",
-          "error"
-        );
-
-        return;
-      }
 
       if (!password) {
 
-        showAuthMessage(
-          "directRegisterMessage",
+        showMessage(
           "أدخل كلمة المرور.",
           "error"
         );
 
         return;
+
       }
 
-      authEmail = email;
-      authPassword = password;
 
-      setButtonLoading(
-        "directRegisterSubmit",
+      setLoading(
+        "loginBtn",
         true
       );
 
-      try {
-
-        const check =
-          await checkCustomerEmail(email);
-
-        const exists =
-          detectAccountExists(check);
-
-
-        /*
-          إذا كان الحساب موجودًا:
-          لا نحاول التسجيل.
-        */
-
-        if (exists === true) {
-
-          showAuthMessage(
-            "directRegisterMessage",
-            "هذا البريد مسجل بالفعل. استخدم تسجيل الدخول.",
-            "error"
-          );
-
-          return;
-        }
-
-
-        /*
-          إذا كان غير موجود:
-          نبدأ التسجيل.
-        */
-
-        if (exists === false) {
-
-          await beginRegistration(
-            email,
-            password
-          );
-
-          return;
-        }
-
-
-        console.error(
-          "ROUTIX unexpected /api/check-email response:",
-          check
-        );
-
-        throw new Error(
-          "تعذر تحديد حالة الحساب من الخادم."
-        );
-
-      } catch (error) {
-
-        showAuthMessage(
-          "directRegisterMessage",
-          error.message ||
-          "تعذر إنشاء الحساب.",
-          "error"
-        );
-
-      } finally {
-
-        setButtonLoading(
-          "directRegisterSubmit",
-          false
-        );
-      }
-    }
-
-
-    async function sendForgotPasswordOtp() {
-
-      const input =
-        document.getElementById(
-          "forgotEmail"
-        );
-
-      const email =
-        normalizeEmail(
-          input.value
-        );
-
-      hideAuthMessage(
-        "forgotMessage"
-      );
-
-      if (!isValidEmail(email)) {
-
-        showAuthMessage(
-          "forgotMessage",
-          "أدخل بريدًا إلكترونيًا صحيحًا.",
-          "error"
-        );
-
-        return;
-      }
-
-      authEmail = email;
-
-      setButtonLoading(
-        "forgotSubmit",
-        true
-      );
 
       try {
 
@@ -4421,107 +3282,257 @@ TARGET_URL الداخلي
           await apiRequest(
             "/api/login",
             {
-              method: "POST",
-              body: JSON.stringify({
-                email,
-                forgotPassword: true
-              })
+              email,
+              password
             }
           );
 
 
-        document.getElementById(
-          "resetOtpEmail"
-        ).textContent = email;
+        if (result.success === false) {
 
-        clearOtpInputs(
-          "authResetView"
-        );
+          throw new Error(
+            result.message ||
+            "البريد الإلكتروني أو كلمة المرور غير صحيحة."
+          );
 
-        document.getElementById(
-          "newPassword"
-        ).value = "";
+        }
 
-        showView(
-          "authResetView"
-        );
 
-        showAuthMessage(
-          "resetMessage",
-          extractMessage(
-            result,
-            "تم إرسال رمز OTP لإعادة تعيين كلمة المرور."
-          ),
+        /*
+          Session يتم إنشاؤها من السيرفر.
+          credentials: include موجودة في apiRequest.
+        */
+
+        showMessage(
+          result.message ||
+          "تم تسجيل الدخول بنجاح.",
           "success"
         );
 
-        focusFirstOtp(
-          "authResetView"
-        );
+
+        updateLoggedInUI();
+
+
+        setTimeout(() => {
+
+          closeLogin();
+
+        }, 900);
 
       } catch (error) {
 
-        showAuthMessage(
-          "forgotMessage",
+        showMessage(
           error.message ||
-          "تعذر إرسال رمز استعادة كلمة المرور.",
+          "تعذر تسجيل الدخول.",
           "error"
         );
 
       } finally {
 
-        setButtonLoading(
-          "forgotSubmit",
+        setLoading(
+          "loginBtn",
           false
         );
+
       }
+
     }
 
 
-    async function resetCustomerPassword() {
+    /* =========================================================
+       FORGOT PASSWORD
+       
+       /api/login
+       forgotPassword: true
+       
+       First request:
+       email + forgotPassword
+    ========================================================== */
 
-      const otp =
-        getOtp(
-          "authResetView"
-        );
+    function showForgotPassword() {
 
-      const newPassword =
-        String(
-          document.getElementById(
-            "newPassword"
-          ).value || ""
-        );
+      const email =
+        document
+          .getElementById("loginEmail")
+          .value
+          .trim()
+          .toLowerCase();
 
-      hideAuthMessage(
-        "resetMessage"
-      );
 
-      if (!/^\d{6}$/.test(otp)) {
+      document
+        .getElementById("forgotEmail")
+        .value = email;
 
-        showAuthMessage(
-          "resetMessage",
-          "أدخل رمز OTP المكون من 6 أرقام.",
+
+      showStep("stepForgot");
+
+    }
+
+
+    async function sendForgotOtp() {
+
+      const email =
+        document
+          .getElementById("forgotEmail")
+          .value
+          .trim()
+          .toLowerCase();
+
+
+      if (!email) {
+
+        showMessage(
+          "البريد الإلكتروني غير موجود.",
           "error"
         );
 
         return;
+
       }
+
+
+      setLoading(
+        "sendForgotOtpBtn",
+        true
+      );
+
+
+      try {
+
+        const result =
+          await apiRequest(
+            "/api/login",
+            {
+              email,
+              forgotPassword: true
+            }
+          );
+
+
+        if (result.success === false) {
+
+          throw new Error(
+            result.message ||
+            "تعذر إرسال OTP."
+          );
+
+        }
+
+
+        showStep("stepReset");
+
+        showMessage(
+          result.message ||
+          "تم إرسال OTP إلى بريدك الإلكتروني.",
+          "success"
+        );
+
+
+        setTimeout(() => {
+
+          document
+            .getElementById("resetOtp")
+            .focus();
+
+        }, 100);
+
+      } catch (error) {
+
+        showMessage(
+          error.message ||
+          "تعذر إرسال OTP.",
+          "error"
+        );
+
+      } finally {
+
+        setLoading(
+          "sendForgotOtpBtn",
+          false
+        );
+
+      }
+
+    }
+
+
+    /* =========================================================
+       RESET PASSWORD
+       
+       POST /api/login
+       
+       {
+         email,
+         forgotPassword: true,
+         otp,
+         newPassword
+       }
+    ========================================================== */
+
+    async function resetPassword() {
+
+      const email =
+        document
+          .getElementById("forgotEmail")
+          .value
+          .trim()
+          .toLowerCase();
+
+
+      const otp =
+        document
+          .getElementById("resetOtp")
+          .value
+          .trim();
+
+
+      const newPassword =
+        document
+          .getElementById("newPassword")
+          .value;
+
+
+      if (!otp) {
+
+        showMessage(
+          "أدخل رمز OTP.",
+          "error"
+        );
+
+        return;
+
+      }
+
 
       if (!newPassword) {
 
-        showAuthMessage(
-          "resetMessage",
+        showMessage(
           "أدخل كلمة المرور الجديدة.",
           "error"
         );
 
         return;
+
       }
 
-      setButtonLoading(
-        "resetSubmit",
+
+      if (newPassword.length < 8) {
+
+        showMessage(
+          "كلمة المرور يجب أن تكون 8 أحرف على الأقل.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      setLoading(
+        "resetPasswordBtn",
         true
       );
+
 
       try {
 
@@ -4529,347 +3540,171 @@ TARGET_URL الداخلي
           await apiRequest(
             "/api/login",
             {
-              method: "POST",
-              body: JSON.stringify({
-                email: authEmail,
-                forgotPassword: true,
-                otp,
-                newPassword
-              })
+              email,
+              forgotPassword: true,
+              otp,
+              newPassword
             }
           );
 
 
-        const success =
-          result?.success !== false &&
-          result?.authenticated !== false &&
-          result?.loggedIn !== false;
-
-
-        if (!success) {
+        if (result.success === false) {
 
           throw new Error(
-            extractMessage(
-              result,
-              "رمز OTP غير صحيح أو تعذر تغيير كلمة المرور."
-            )
+            result.message ||
+            "رمز OTP غير صحيح أو انتهت صلاحيته."
           );
+
         }
 
 
-        updateCustomerSession(
-          result?.email ||
-          result?.user?.email ||
-          result?.data?.email ||
-          authEmail
-        );
+        /*
+          السيرفر هنا يفترض أن:
+          1. يتحقق من email + OTP
+          2. يغير كلمة المرور
+          3. يحفظها بشكل آمن
+          4. ينشئ Session
+        */
 
-
-        showAuthMessage(
-          "resetMessage",
+        showMessage(
+          result.message ||
           "تم تغيير كلمة المرور وتسجيل الدخول بنجاح.",
           "success"
         );
 
 
+        updateLoggedInUI();
+
+
         setTimeout(() => {
-          closeAuth();
-        }, 800);
+
+          closeLogin();
+
+        }, 1000);
 
       } catch (error) {
 
-        showAuthMessage(
-          "resetMessage",
+        showMessage(
           error.message ||
-          "تعذر تغيير كلمة المرور.",
+          "فشلت عملية تغيير كلمة المرور.",
           "error"
         );
 
       } finally {
 
-        setButtonLoading(
-          "resetSubmit",
+        setLoading(
+          "resetPasswordBtn",
           false
         );
+
       }
+
     }
 
 
-    function updateCustomerSession(email) {
+    /* =========================================================
+       NAVIGATION BETWEEN AUTH STEPS
+    ========================================================== */
 
-      const loginButton =
-        document.getElementById(
-          "customerLoginButton"
-        );
+    function backToEmail() {
 
-      const session =
-        document.getElementById(
-          "customerSession"
-        );
+      clearAuthMessage();
 
-      const display =
-        document.getElementById(
-          "customerEmailDisplay"
-        );
+      showStep("stepEmail");
 
-      if (loginButton) {
-        loginButton.style.display = "none";
-      }
+      setTimeout(() => {
 
-      if (session) {
-        session.classList.add("active");
-      }
+        document
+          .getElementById("email")
+          .focus();
 
-      if (display) {
-        display.textContent =
-          email || "CLIENT";
-      }
+      }, 100);
 
-      authPassword = "";
     }
 
 
-    async function logoutCustomer() {
+    function backToLogin() {
 
-      const session =
-        document.getElementById(
-          "customerSession"
-        );
-
-      const loginButton =
-        document.getElementById(
-          "customerLoginButton"
-        );
+      const email =
+        document
+          .getElementById("forgotEmail")
+          .value
+          .trim();
 
 
-      /*
-        نحاول استخدام logout الموجود في السيرفر
-        فقط إذا كان endpoint موجودًا.
-
-        لا نكسر الواجهة إذا لم يكن endpoint موجودًا.
-      */
-
-      try {
-
-        await apiRequest(
-          "/api/logout",
-          {
-            method: "POST",
-            body: JSON.stringify({})
-          }
-        );
-
-      } catch (_) {
-        /*
-          لا نفشل logout في الواجهة
-          إذا لم يكن /api/logout موجودًا.
-        */
-      }
+      document
+        .getElementById("loginEmail")
+        .value = email;
 
 
-      if (session) {
-        session.classList.remove("active");
-      }
+      showStep("stepLogin");
 
-      if (loginButton) {
-        loginButton.style.display =
-          "inline-flex";
-      }
-
-      authEmail = "";
-      authPassword = "";
     }
 
 
-    function getOtp(viewId) {
+    /* =========================================================
+       RESET AUTH FORM
+    ========================================================== */
 
-      const view =
-        document.getElementById(viewId);
+    function resetAuthForm() {
 
-      if (!view) return "";
-
-      return Array.from(
-        view.querySelectorAll(
-          ".otp-digit"
+      document
+        .querySelectorAll(
+          ".login-box input:not([readonly])"
         )
-      )
-        .map(input => input.value)
-        .join("");
-    }
-
-
-    function clearOtpInputs(viewId) {
-
-      const view =
-        document.getElementById(viewId);
-
-      if (!view) return;
-
-      view
-        .querySelectorAll(".otp-digit")
         .forEach(input => {
+
           input.value = "";
+
         });
+
+
+      document
+        .getElementById("loginEmail")
+        .value = "";
+
+
+      document
+        .getElementById("forgotEmail")
+        .value = "";
+
+
+      window.__routixRegistration = null;
+
+
+      showStep("stepEmail");
+
     }
 
 
-    function focusFirstOtp(viewId) {
+    /* =========================================================
+       LOGGED-IN UI
+       
+       This only changes the button visually.
+       Actual session remains controlled by server.
+    ========================================================== */
 
-      const view =
-        document.getElementById(viewId);
+    function updateLoggedInUI() {
 
-      if (!view) return;
+      const button =
+        document.getElementById("headerLoginBtn");
 
-      const first =
-        view.querySelector(
-          ".otp-digit"
-        );
 
-      if (first) {
+      if (!button) return;
 
-        setTimeout(() => {
-          first.focus();
-        }, 100);
-      }
+
+      button.classList.add("logged-in");
+
+
+      button.innerHTML =
+        "<span>✓</span> تم تسجيل الدخول";
+
     }
 
 
-    /*
-      ==========================================================
-      OTP UX
-      ==========================================================
-    */
-
-    document
-      .querySelectorAll(".otp-digit")
-      .forEach(
-        (input, index, inputs) => {
-
-          input.addEventListener(
-            "input",
-            event => {
-
-              let value =
-                event.target.value
-                  .replace(/\D/g, "");
-
-              event.target.value =
-                value.slice(-1);
-
-              if (
-                event.target.value &&
-                inputs[index + 1]
-              ) {
-                inputs[index + 1].focus();
-              }
-            }
-          );
-
-
-          input.addEventListener(
-            "keydown",
-            event => {
-
-              if (
-                event.key === "Backspace" &&
-                !input.value &&
-                inputs[index - 1]
-              ) {
-                inputs[index - 1].focus();
-              }
-
-              if (
-                event.key === "ArrowLeft" &&
-                inputs[index - 1]
-              ) {
-                inputs[index - 1].focus();
-              }
-
-              if (
-                event.key === "ArrowRight" &&
-                inputs[index + 1]
-              ) {
-                inputs[index + 1].focus();
-              }
-            }
-          );
-
-
-          input.addEventListener(
-            "paste",
-            event => {
-
-              event.preventDefault();
-
-              const pasted =
-                (
-                  event.clipboardData ||
-                  window.clipboardData
-                )
-                  .getData("text")
-                  .replace(/\D/g, "")
-                  .slice(0, 6);
-
-              if (!pasted) return;
-
-              const parent =
-                input.closest(
-                  ".otp-box"
-                );
-
-              if (!parent) return;
-
-              const boxes =
-                Array.from(
-                  parent.querySelectorAll(
-                    ".otp-digit"
-                  )
-                );
-
-              pasted
-                .split("")
-                .forEach(
-                  (digit, i) => {
-
-                    if (boxes[i]) {
-                      boxes[i].value =
-                        digit;
-                    }
-
-                  }
-                );
-
-              const next =
-                boxes[
-                  Math.min(
-                    pasted.length,
-                    boxes.length
-                  ) - 1
-                ];
-
-              if (next) {
-                next.focus();
-              }
-            }
-          );
-        }
-      );
-
-
-    authOverlay.addEventListener(
-      "click",
-      event => {
-
-        if (
-          event.target ===
-          authOverlay
-        ) {
-          closeAuth();
-        }
-
-      }
-    );
-
+    /* =========================================================
+       ESCAPE
+    ========================================================== */
 
     document.addEventListener(
       "keydown",
@@ -4879,54 +3714,87 @@ TARGET_URL الداخلي
 
           document
             .getElementById("nav")
-            .classList.remove(
-              "mobile-open"
-            );
+            .classList
+            .remove("mobile-open");
+
 
           if (
-            authOverlay.classList.contains(
-              "open"
-            )
+            document
+              .getElementById("loginOverlay")
+              .classList
+              .contains("active")
           ) {
-            closeAuth();
+
+            closeLogin();
+
           }
+
         }
 
       }
     );
 
 
-    document
-      .getElementById("loginPassword")
-      .addEventListener(
-        "keydown",
-        event => {
-
-          if (event.key === "Enter") {
-            startCustomerAuth();
-          }
-
-        }
-      );
-
+    /* =========================================================
+       OTP INPUT
+       Allow numbers only
+    ========================================================== */
 
     document
-      .getElementById("loginEmail")
-      .addEventListener(
-        "keydown",
-        event => {
+      .querySelectorAll(".otp-input")
+      .forEach(input => {
 
-          if (event.key === "Enter") {
+        input.addEventListener(
+          "input",
+          () => {
 
-            document
-              .getElementById(
-                "loginPassword"
-              )
-              .focus();
+            input.value =
+              input.value
+                .replace(/\D/g, "")
+                .slice(0, 6);
+
           }
+        );
 
-        }
-      );
+      });
+
+
+    /* =========================================================
+       CYBER PARTICLES
+    ========================================================== */
+
+    const particles =
+      document.getElementById("particles");
+
+
+    for (let i = 0; i < 32; i++) {
+
+      const p =
+        document.createElement("span");
+
+
+      p.className = "particle";
+
+
+      p.style.left =
+        Math.random() * 100 + "%";
+
+
+      p.style.top =
+        (40 + Math.random() * 60) + "%";
+
+
+      p.style.animationDelay =
+        (Math.random() * 8) + "s";
+
+
+      p.style.animationDuration =
+        (5 + Math.random() * 7) + "s";
+
+
+      particles.appendChild(p);
+
+    }
 
   </script>
 
