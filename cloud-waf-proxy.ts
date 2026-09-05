@@ -10159,7 +10159,7 @@ if (typeof server !== 'undefined' && server) {
   server.requestTimeout = config.REQUEST_TIMEOUT_MS;
 }
 
-async function initializeWaf() {
+export async function initializeWaf() {
   await connectDatabase();
   db = await loadDb();
   return server;
@@ -10169,21 +10169,25 @@ function globalInitialized(g: any) {
   return g?.__waf_listening;
 }
 
-if (typeof global !== 'undefined' && !globalInitialized(global)) {
+if (
+  process.env.NODE_ENV !== 'test' &&
+  typeof global !== 'undefined' &&
+  !globalInitialized(global)
+) {
   (global as any).__waf_listening = true;
 
-  if (process.env.NODE_ENV !== 'test') {
-    initializeWaf()
-      .then((srv) => {
-        if (srv && !srv.listening) {
-          srv.listen(config.PORT, '0.0.0.0', () => {
-            console.log(`[Routix WAF] Server running on port ${config.PORT}`);
-          });
-        }
-      })
-      .catch((error) => {
-        console.error('[Routix WAF] Failed to start server:', error);
-        process.exit(1);
-      });
-  }
+  initializeWaf()
+    .then((srv) => {
+      if (srv && !srv.listening) {
+        srv.listen(config.PORT, '0.0.0.0', () => {
+          console.log(`[Routix WAF] Server running on port ${config.PORT}`);
+        });
+      }
+    })
+    .catch((error) => {
+      console.error('[Routix WAF] Failed to start server:', error);
+      process.exit(1);
+    });
 }
+
+export { app, server };
